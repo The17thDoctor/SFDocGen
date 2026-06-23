@@ -4,6 +4,8 @@ public interface IDocValue
 {
     string Name { get; set; }
     string Description { get; set; }
+
+    string ToLuaDoc();
 }
 
 public interface IDocElement : IDocValue

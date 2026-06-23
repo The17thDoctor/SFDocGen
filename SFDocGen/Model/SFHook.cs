@@ -45,4 +45,9 @@ public record SFHook : IDocElement, IHasRealm, IHasTypedParams, IReturnsValue
 
         return hook;
     }
+
+    public string ToLuaDoc()
+    {
+        throw new NotImplementedException();
+    }
 }

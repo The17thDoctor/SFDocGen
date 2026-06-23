@@ -26,6 +26,11 @@ public record SFTable : IDocElement, IHasRealm
 
         return table;
     }
+
+    public string ToLuaDoc()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public record SFTableField : IDocValue, IChildObject<SFTable>
@@ -46,5 +51,10 @@ public record SFTableField : IDocValue, IChildObject<SFTable>
             Parent = parent,
             Type = dto.Type
         };
+    }
+
+    public string ToLuaDoc()
+    {
+        throw new NotImplementedException();
     }
 }

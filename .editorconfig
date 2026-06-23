@@ -139,3 +139,4 @@ dotnet_style_prefer_conditional_expression_over_assignment = true:silent
 dotnet_style_prefer_conditional_expression_over_return = true:silent
 dotnet_style_namespace_match_folder = true:suggestion
 dotnet_diagnostic.CA1869.severity = silent
+dotnet_diagnostic.CA1873.severity = silent

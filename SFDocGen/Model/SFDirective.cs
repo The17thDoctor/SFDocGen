@@ -25,4 +25,9 @@ public record SFDirective : IDocElement, IHasTypedParams
 
         return directive;
     }
+
+    public string ToLuaDoc()
+    {
+        throw new NotImplementedException();
+    }
 }

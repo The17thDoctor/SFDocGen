@@ -31,6 +31,11 @@ public record SFClass : IDocElement, IHasRealm
 
         return cl;
     }
+
+    public string ToLuaDoc()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public record SFClassField : IDocValue, IChildObject<SFClass>
@@ -50,6 +55,11 @@ public record SFClassField : IDocValue, IChildObject<SFClass>
             Parent = parent,
             Type = dto.Type
         };
+    }
+
+    public string ToLuaDoc()
+    {
+        throw new NotImplementedException();
     }
 }
 
@@ -93,6 +103,11 @@ public record SFClassMethod : IDocElement, IHasTypedParams, IReturnsValue, IChil
 
         return method;
     }
+
+    public string ToLuaDoc()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public record SFClassOperator : IDocElement, IReturnsValue, IChildObject<SFClass>
@@ -130,5 +145,10 @@ public record SFClassOperator : IDocElement, IReturnsValue, IChildObject<SFClass
         }
 
         return op;
+    }
+
+    public string ToLuaDoc()
+    {
+        throw new NotImplementedException();
     }
 }

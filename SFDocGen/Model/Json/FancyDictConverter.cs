@@ -72,7 +72,6 @@ public class FancyDictConverter : JsonConverterFactory
                 }
 
                 string key = reader.GetString()!;
-                Console.WriteLine($"{new string('\t', reader.CurrentDepth)}Processing key: {key}");
                 reader.Read();
 
                 if (int.TryParse(key, out int index))
