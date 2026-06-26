@@ -1,7 +1,5 @@
 ﻿using SFDocGen.Model.Abstraction;
-using SFDocGen.Model.Dto;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model;
@@ -13,23 +11,6 @@ public record SFClass : DocElement, IHasRealm
     public List<SFClassField> Fields { get; set; } = [];
     public List<SFClassMethod> Methods { get; set; } = [];
     public List<SFClassOperator> Operators { get; set; } = [];
-
-    public static SFClass FromData(string name, SFClassDto dto)
-    {
-        SFClass cl = new()
-        {
-            Name = name,
-            Description = dto.Description,
-            Realm = DtoUtils.RealmFromBools(dto.Server, dto.Client),
-            SuperType = dto.SuperType
-        };
-
-        DtoUtils.PopulateList(dto.Field, cl.Fields, (name, fdto) => SFClassField.FromData(cl, name, fdto));
-        DtoUtils.PopulateList(dto.Methods, cl.Methods, (name, mdto) => SFClassMethod.FromData(cl, name, mdto));
-        DtoUtils.PopulateList(dto.Operators, cl.Operators, (name, odto) => SFClassOperator.FromData(cl, name, odto));
-
-        return cl;
-    }
 
     public override string ToLuaDoc()
     {
@@ -75,17 +56,6 @@ public record SFClassField : DocValue, IChildObject<SFClass>
     public SFClass Parent { get; init; } = default!;
     public string Type { get; set; } = "unknown";    
 
-    public static SFClassField FromData(SFClass parent, string name, SFClassFieldDto dto)
-    {
-        return new()
-        {
-            Name = name,
-            Description = dto.Desc,
-            Parent = parent,
-            Type = DtoUtils.SanitizeType(dto.Type)
-        };
-    }
-
     public override string ToLuaDoc()
     {
         StringBuilder sb = new();
@@ -107,29 +77,6 @@ public record SFClassMethod : DocElement, IHasTypedParams, IReturnsValue, IChild
     public SFClass Parent { get; init; } = default!;
     public List<SFParameter> Parameters { get; set; } = [];
     public List<SFReturnValue> ReturnValues { get; set; } = [];
-
-    public static SFClassMethod FromData(SFClass parent, string name, SFClassMethodDto dto)
-    {
-        SFClassMethod method = new()
-        {
-            Name = name,
-            Parent = parent,
-            Description = dto.Description,
-            ReturnValues = SFReturnValue.MergeData(DtoUtils.Demistify(dto.Ret), dto.ReturnTypes)
-        };
-
-
-        DtoUtils.PopulateList(dto.Param, method.Parameters, SFParameter.FromData, string.Empty);
-        foreach (SFParameter param in method.Parameters)
-        {
-            if (param.Name != null && dto.ParamTypes.TryGetValue(param.Name, out JsonElement value))
-            {
-                param.Types = DtoUtils.SanitizeTypes(DtoUtils.Demistify(value));
-            }
-        }
-
-        return method;
-    }
 
     public override string ToLuaDoc()
     {
@@ -176,30 +123,6 @@ public record SFClassOperator : DocElement, IReturnsValue, IChildObject<SFClass>
         "unm", "bnot", "len", "add", "sub", "mul", "div", "mod", "pow",
         "idiv", "band", "bor", "bxor", "shl", "shr", "concat", "call"
     ];
-
-    public static SFClassOperator FromData(SFClass parent, string name, SFClassOperatorDto dto)
-    {
-        SFClassOperator op = new()
-        {
-            Name = name,
-            Description = dto.Description,
-            Commutative = dto.Commutative,
-            LeftOperand = dto.Lhs,
-            RightOperand = dto.Rhs,
-            Parent = parent
-        };
-
-        foreach (var (First, Second) in DtoUtils.Demistify(dto.Ret).Zip(dto.ReturnTypes))
-        {
-            op.ReturnValues.Add(new()
-            {
-                Description = First,
-                Types = DtoUtils.Demistify(Second)
-            });
-        }
-
-        return op;
-    }
 
     protected void SingleOperand(StringBuilder sb)
     {

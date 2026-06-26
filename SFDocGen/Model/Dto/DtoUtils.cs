@@ -27,16 +27,12 @@ public class DtoUtils
         }
     }
 
-    public static Dictionary<string, T2> PopulateDict<T1, T2>(FancyDict<T1> srcDict, Func<string, T1, T2> constructor, T1? defaultValue = null) where T1 : class
+    public static void PopulateDict<T1, T2>(FancyDict<T1> srcDict, Dictionary<string, T2> dstDict, Func<string, T1, T2> constructor) where T1 : class
     {
-        Dictionary<string, T2> dstDict = [];
-
         foreach (var entry in srcDict.Data)
         {
             dstDict[entry.Key] = constructor(entry.Key, entry.Value);
         }
-
-        return dstDict;
     }
 
     public static List<string> Demistify(JsonElement mystified)

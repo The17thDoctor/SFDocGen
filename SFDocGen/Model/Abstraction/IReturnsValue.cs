@@ -21,13 +21,11 @@ public record SFReturnValue : DocValue
 
     public static SFReturnValue FromData(string name, string description)
     {
-        SFReturnValue returnValue = new()
+        return new()
         {
             Name = name,
             Description = description
         };
-
-        return returnValue;
     }
 
     public static List<SFReturnValue> MergeData(List<string> descs, List<JsonElement> typesList)
@@ -40,14 +38,19 @@ public record SFReturnValue : DocValue
 
             SFReturnValue rv = new()
             {
-                Description = desc ?? string.Empty,
-                Types = types.ValueKind != JsonValueKind.Undefined ? DtoUtils.Demistify(types) : []
+                Description = desc,
+                Types = types.ValueKind != JsonValueKind.Undefined ? DtoUtils.SanitizeTypes(DtoUtils.Demistify(types)) : []
             };
 
             list.Add(rv);
         }
 
         return list;
+    }
+
+    public static List<SFReturnValue> MergeData(JsonElement descs, List<JsonElement> typesList)
+    {
+        return MergeData(DtoUtils.Demistify(descs), typesList);
     }
 
     public override string ToLuaDoc()

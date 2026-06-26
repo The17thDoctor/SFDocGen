@@ -1,4 +1,5 @@
-﻿using SFDocGen.Model.Json;
+﻿using SFDocGen.Model.Abstraction;
+using SFDocGen.Model.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -14,6 +15,23 @@ public record SFLibraryDto
     public FancyDict<SFLibraryFunctionDto> Functions { get; set; } = new();
     public FancyDict<SFLibraryFieldDto> Fields { get; set; } = new();
     public FancyDict<SFLibraryTableDto> Tables { get; set; } = new();
+
+    public SFLibrary FromData(string name)
+    {
+        SFLibrary lib = new()
+        {
+            Name = name,
+            Description = Description,
+            DocName = DocName,
+            Realm = DtoUtils.RealmFromBools(Server, Client)
+        };
+
+        DtoUtils.PopulateList(Functions, lib.Functions, (name, fdto) => fdto.FromData(lib, name));
+        DtoUtils.PopulateList(Fields, lib.Fields, (name, fdto) => fdto.FromData(lib, name));
+        DtoUtils.PopulateList(Tables, lib.Tables, (name, tdto) => tdto.FromData(lib, name));
+
+        return lib;
+    }
 }
 
 public record SFLibraryFunctionDto
@@ -31,14 +49,49 @@ public record SFLibraryFunctionDto
     public FancyDict<string> Param { get; set; } = new();
 
     public Dictionary<string, JsonElement> ParamTypes { get; set; } = [];
+
+    public SFLibraryFunction FromData(SFLibrary parent, string name)
+    {
+        return new()
+        {
+            Parent = parent,
+            Name = name,
+            Description = Description,
+            Deprecated = Deprecated,
+            Usage = Usage,
+            Realm = DtoUtils.RealmFromBools(Server, Client),
+            Parameters = SFParameter.MergeData(Param, ParamTypes),
+            ReturnValues = SFReturnValue.MergeData(Ret, ReturnTypes)
+        };
+    }
 }
 
 public record SFLibraryFieldDto
 {
     public string? Description { get; set; }
+
+    public SFLibraryField FromData(SFLibrary parent, string name)
+    {
+        return new()
+        {
+            Parent = parent,
+            Name = name,
+            Description = Description
+        };
+    }
 }
 
 public record SFLibraryTableDto
 {
     public string? Description { get; set; }
+
+    public SFLibraryTable FromData(SFLibrary parent, string name)
+    {
+        return new()
+        {
+            Parent = parent,
+            Name = name,
+            Description = Description
+        };
+    }
 }

@@ -1,5 +1,4 @@
 ﻿using Model;
-using SFDocGen.Model;
 using SFDocGen.Model.Dto;
 using SFDocGen.Model.Json;
 using System.Text.Json;
@@ -16,12 +15,6 @@ public class ParserService
     public const string IMPROVED_DOCS_PATH = "Storage/docs-improved.json";
     public const string IMPROVED_DOCS_SCHEMA_PATH = "Storage/docs-improved-schema.json";
 
-    public const string LUADOC_PATH = "Storage/LuaDoc";
-    public const string HOOKS_PATH = "Storage/LuaDoc";
-    public const string LIBRARIES_PATH = "Storage/LuaDoc/Libraries";
-    public const string CLASSES_PATH = "Storage/LuaDoc/Classes";
-    public const string TABLES_PATH = "Storage/LuaDoc/Tables";
-
     public const string FILE_NOT_FOUND_MESSAGE = "Documentation JSON file not found!";
     public const string DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize the JSON content.";
 
@@ -29,9 +22,15 @@ public class ParserService
     private readonly JsonSerializerOptions _serializerOptions;
     private readonly JsonSerializerOptions _deserializerOptions;
 
-    public ParserService(ILogger<ParserService> logger)
+    private readonly LuaGenerator _luaGenerator;
+    private readonly CorrecterService _correcterService;
+
+    public ParserService(ILogger<ParserService> logger, LuaGenerator luaGenerator, CorrecterService correcterService)
     {
         _logger = logger;
+        _luaGenerator = luaGenerator;
+        _correcterService = correcterService;
+
         _deserializerOptions = new()
         {
             PropertyNameCaseInsensitive = true
@@ -77,11 +76,13 @@ public class ParserService
         }
 
         SFDocRoot doc = new();
-        DtoUtils.PopulateList(dto.Hooks, doc.Hooks, SFHook.FromData);
-        DtoUtils.PopulateList(dto.Libraries, doc.Libraries, SFLibrary.FromData);
-        DtoUtils.PopulateList(dto.Tables, doc.Tables, SFTable.FromData);
-        DtoUtils.PopulateList(dto.Classes, doc.Classes, SFClass.FromData);
-        DtoUtils.PopulateList(dto.Directives, doc.Directives, SFDirective.FromData);
+        DtoUtils.PopulateDict(dto.Hooks, doc.Hooks, (name, dto) => dto.FromData(name));
+        DtoUtils.PopulateDict(dto.Libraries, doc.Libraries, (name, dto) => dto.FromData(name));
+        DtoUtils.PopulateDict(dto.Tables, doc.Tables, (name, dto) => dto.FromData(name));
+        DtoUtils.PopulateDict(dto.Classes, doc.Classes, (name, dto) => dto.FromData(name));
+        DtoUtils.PopulateDict(dto.Directives, doc.Directives, (name, dto) => dto.FromData(name));
+
+        _correcterService.ApplyCorrection(doc);
 
         Documentation = doc;
         using FileStream stream = File.OpenWrite(IMPROVED_DOCS_PATH);
@@ -94,88 +95,9 @@ public class ParserService
         schema.WriteTo(writer, _serializerOptions);
         _logger.LogInformation("Schema updated.");
 
-        GenerateLuaDoc();
+        _luaGenerator.GenerateLuaDoc(doc);
 
         return new(true, string.Empty);
-    }
-
-    public void GenerateLuaDoc()
-    {
-        _logger.LogInformation("Generating lua documentation...");
-        if (Documentation == null)
-        {
-            _logger.LogWarning("Documentation model not found!");
-            return;
-        }
-
-        if (Directory.Exists(LUADOC_PATH)) Directory.Delete(LUADOC_PATH, recursive: true);
-
-        Directory.CreateDirectory(LUADOC_PATH);
-        Directory.CreateDirectory(HOOKS_PATH);
-        Directory.CreateDirectory(LIBRARIES_PATH);
-        Directory.CreateDirectory(CLASSES_PATH);
-        Directory.CreateDirectory(TABLES_PATH);
-
-        string hookPath = Path.Combine(HOOKS_PATH, "Hooks.lua");
-        using (FileStream hookStream = File.OpenWrite(hookPath))
-        {
-            using StreamWriter hookWriter = new(hookStream);
-            hookWriter.WriteLine("---@meta Hooks");
-            AddDiagnostic(hookWriter, "keyword", "assign-type-mismatch");
-            hookWriter.WriteLine();
-
-            foreach (var hook in Documentation.Hooks)
-            {
-                hookWriter.WriteLine(hook.ToLuaDoc());
-            }
-
-            hookWriter.WriteLine("---@overload fun(hookName: string, name: string, callback?: function)");
-            hookWriter.Write("hook = nil");
-        }
-
-        foreach (var library in Documentation.Libraries)
-        {
-            string path = Path.Combine(LIBRARIES_PATH, library.Name + ".lua");
-            using FileStream stream = File.OpenWrite(path);
-            using StreamWriter writer = new(stream);
-
-            writer.WriteLine($"---@meta {library.Name}");
-            AddDiagnostic(writer, "keyword");
-            writer.WriteLine();
-
-            writer.Write(library.ToLuaDoc());
-        }
-
-        foreach (var luaClass in Documentation.Classes)
-        {
-            string path = Path.Combine(CLASSES_PATH, luaClass.Name + ".lua");
-            using FileStream stream = File.OpenWrite(path);
-            using StreamWriter writer = new(stream);
-
-            writer.WriteLine($"---@meta {luaClass.Name}");
-            AddDiagnostic(writer, "keyword");
-            writer.WriteLine();
-
-            writer.Write(luaClass.ToLuaDoc());
-        }
-
-        foreach (var table in Documentation.Tables)
-        {
-            string path = Path.Combine(TABLES_PATH, table.Name + ".lua");
-            using FileStream stream = File.OpenWrite(path);
-            using StreamWriter writer = new(stream);
-
-            writer.WriteLine($"---@meta {table.Name}");
-            AddDiagnostic(writer, "keyword");
-            writer.WriteLine();
-
-            writer.Write(table.ToLuaDoc());
-        }
-    }
-
-    protected void AddDiagnostic(TextWriter writer, params string[] names)
-    {
-        writer.WriteLine($"---@diagnostic disable: {string.Join(", ", names)}");
     }
 }
 

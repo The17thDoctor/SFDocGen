@@ -1,4 +1,5 @@
-﻿using SFDocGen.Model.Json;
+﻿using SFDocGen.Model.Abstraction;
+using SFDocGen.Model.Json;
 using System.Text.Json;
 
 namespace SFDocGen.Model.Dto;
@@ -16,4 +17,18 @@ public record SFHookDto
 
     public FancyDict<string> Param { get; set; } = new();
     public Dictionary<string, JsonElement> ParamTypes { get; set; } = [];
+
+    public SFHook FromData(string name)
+    {
+        return new()
+        {
+            Name = name,
+            Description = Description,
+            Deprecated = Deprecated,
+            Usage = Usage,
+            Realm = DtoUtils.RealmFromBools(Server, Client),
+            Parameters = SFParameter.MergeData(Param, ParamTypes),
+            ReturnValues = SFReturnValue.MergeData(DtoUtils.Demistify(Ret), ReturnTypes)
+        };
+    }
 }

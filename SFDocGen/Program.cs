@@ -15,7 +15,11 @@ public class Program
         builder.Services.AddOpenApi();
 
         builder.Services.AddHostedService<FetchService>();
+
         builder.Services.AddSingleton<ParserService>();
+        builder.Services.AddSingleton<LuaGenerator>();
+        builder.Services.AddSingleton<CorrecterService>();
+
         builder.Services.AddHttpClient();
 
         var app = builder.Build();
