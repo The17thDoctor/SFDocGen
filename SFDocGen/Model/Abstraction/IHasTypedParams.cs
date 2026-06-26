@@ -7,7 +7,7 @@ public interface IHasTypedParams
     List<SFParameter> Parameters { get; set; }
 }
 
-public record SFParameter : IDocValue
+public record SFParameter : DocValue
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -16,7 +16,7 @@ public record SFParameter : IDocValue
     public string ConcatTypes()
     {
         if (Types.Count == 0) return "unknown";
-        return string.Join(", ", Types);
+        return string.Join("|", Types);
     }
 
     public static SFParameter FromData(string name, string description)

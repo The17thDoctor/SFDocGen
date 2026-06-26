@@ -3,12 +3,8 @@ using SFDocGen.Model.Dto;
 
 namespace SFDocGen.Model;
 
-public record SFDirective : IDocElement, IHasTypedParams
+public record SFDirective : DocElement, IHasTypedParams
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string? Deprecated { get; set; }
-    public string? Usage { get; set; }
     public List<SFParameter> Parameters { get; set; } = [];
 
     public static SFDirective FromData(string name, SFDirectiveDto dto)
@@ -26,7 +22,7 @@ public record SFDirective : IDocElement, IHasTypedParams
         return directive;
     }
 
-    public string ToLuaDoc()
+    public override string ToLuaDoc()
     {
         throw new NotImplementedException();
     }

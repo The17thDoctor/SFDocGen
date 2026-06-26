@@ -49,4 +49,19 @@ public class DtoUtils
         }
         else throw new InvalidCastException();
     }
+
+    public static string SanitizeType(string type)
+    {
+        type = type.Replace("...", string.Empty);
+        type = type.Replace("Any", "any");
+
+        if (type == "0") { type = "..."; }
+
+        return type;
+    }
+
+    public static List<string> SanitizeTypes(List<string> types)
+    {
+        return [.. types.Select(t => SanitizeType(t))];
+    }
 }

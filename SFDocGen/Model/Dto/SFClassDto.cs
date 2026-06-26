@@ -1,5 +1,6 @@
 ﻿using SFDocGen.Model.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model.Dto;
 
@@ -36,6 +37,8 @@ public record SFClassMethodDto
     public string Description { get; set; } = string.Empty;
     public JsonElement Ret { get; set; } = default!;
     public List<JsonElement> ReturnTypes { get; set; } = [];
+
+    [JsonConverter(typeof(FancyDictAltConverter))]
     public FancyDict<string> Param { get; set; } = new();
     public Dictionary<string, JsonElement> ParamTypes { get; set; } = [];
 }

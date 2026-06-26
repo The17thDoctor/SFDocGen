@@ -4,12 +4,8 @@ using System.Text.Json;
 
 namespace SFDocGen.Model;
 
-public record SFHook : IDocElement, IHasRealm, IHasTypedParams, IReturnsValue
+public record SFHook : DocElement, IHasRealm, IHasTypedParams, IReturnsValue
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string? Deprecated { get; set; }
-    public string? Usage { get; set; }
     public Realm Realm { get; set; }
     public List<SFParameter> Parameters { get; set; } = [];
     public List<SFReturnValue> ReturnValues { get; set; } = [];
@@ -46,7 +42,7 @@ public record SFHook : IDocElement, IHasRealm, IHasTypedParams, IReturnsValue
         return hook;
     }
 
-    public string ToLuaDoc()
+    public override string ToLuaDoc()
     {
         throw new NotImplementedException();
     }

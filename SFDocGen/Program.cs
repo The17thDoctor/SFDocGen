@@ -15,7 +15,7 @@ public class Program
         builder.Services.AddOpenApi();
 
         builder.Services.AddHostedService<FetchService>();
-        builder.Services.AddSingleton<DocParserService>();
+        builder.Services.AddSingleton<ParserService>();
         builder.Services.AddHttpClient();
 
         var app = builder.Build();

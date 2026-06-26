@@ -1,6 +1,6 @@
 ﻿namespace SFDocGen.Services;
 
-public class FetchService(IConfiguration configuration, IHttpClientFactory factory, ILogger<FetchService> logger, DocParserService parserService) : BackgroundService
+public class FetchService(IConfiguration configuration, IHttpClientFactory factory, ILogger<FetchService> logger, ParserService parserService) : BackgroundService
 {
     protected TimeSpan Delay { get; set; } = TimeSpan.FromMinutes(configuration.GetValue<uint>("FetchDelay"));
     protected HttpClient Client { get; } = factory.CreateClient();
@@ -54,7 +54,7 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
 
     protected async Task SaveFileAsync(HttpContent content, CancellationToken token)
     {
-        using Stream fileStream = File.OpenWrite(DocParserService.DOCS_PATH);
+        using Stream fileStream = File.OpenWrite(ParserService.DOCS_PATH);
         content.CopyTo(fileStream, null, token);
         logger.LogInformation("Documentation saved.");
     }

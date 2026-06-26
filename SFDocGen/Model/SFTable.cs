@@ -1,15 +1,12 @@
 ﻿using SFDocGen.Model.Abstraction;
 using SFDocGen.Model.Dto;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model;
 
-public record SFTable : IDocElement, IHasRealm
+public record SFTable : DocElement, IHasRealm
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string? Deprecated { get; set; }
-    public string? Usage { get; set; }
     public Realm Realm { get; set; }
     public List<SFTableField> Fields { get; set; } = [];
 
@@ -27,16 +24,27 @@ public record SFTable : IDocElement, IHasRealm
         return table;
     }
 
-    public string ToLuaDoc()
+    public override string ToLuaDoc()
     {
-        throw new NotImplementedException();
+        StringBuilder sb = new();
+
+        sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
+        sb.AppendLine($"---@class {Name}");
+
+        if (Fields.Count > 0)
+        {
+            sb.AppendJoin("\n", Fields.Select(f => f.ToLuaDoc()));
+            sb.AppendLine();
+        }
+
+        sb.Append($"{Name} = {{}}");
+
+        return sb.ToString();
     }
 }
 
-public record SFTableField : IDocValue, IChildObject<SFTable>
+public record SFTableField : DocValue, IChildObject<SFTable>
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
 
     [JsonIgnore]
@@ -53,8 +61,17 @@ public record SFTableField : IDocValue, IChildObject<SFTable>
         };
     }
 
-    public string ToLuaDoc()
+    public override string ToLuaDoc()
     {
-        throw new NotImplementedException();
+        StringBuilder sb = new();
+        sb.Append($"---@field {Name} {Type}");
+
+        if (Description != string.Empty)
+        {
+            sb.Append(' ');
+            sb.Append(Description.Replace("\n", "\n---"));
+        }
+
+        return sb.ToString();
     }
 }
