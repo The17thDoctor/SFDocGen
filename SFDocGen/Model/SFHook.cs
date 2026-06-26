@@ -1,5 +1,6 @@
 ﻿using SFDocGen.Model.Abstraction;
 using SFDocGen.Model.Dto;
+using System.Text;
 using System.Text.Json;
 
 namespace SFDocGen.Model;
@@ -18,7 +19,8 @@ public record SFHook : DocElement, IHasRealm, IHasTypedParams, IReturnsValue
             Description = dto.Description,
             Deprecated = dto.Deprecated,
             Usage = dto.Usage,
-            Realm = DtoUtils.RealmFromBools(dto.Server, dto.Client)
+            Realm = DtoUtils.RealmFromBools(dto.Server, dto.Client),
+            ReturnValues = SFReturnValue.MergeData(DtoUtils.Demistify(dto.Ret), dto.ReturnTypes)
         };
 
         DtoUtils.PopulateList(dto.Param, hook.Parameters, SFParameter.FromData, string.Empty);
@@ -26,17 +28,8 @@ public record SFHook : DocElement, IHasRealm, IHasTypedParams, IReturnsValue
         {
             if (dto.ParamTypes.TryGetValue(param.Name, out JsonElement types))
             {
-                param.Types = DtoUtils.Demistify(types);
+                param.Types = DtoUtils.SanitizeTypes(DtoUtils.Demistify(types));
             }
-        }
-
-        foreach (var (First, Second) in DtoUtils.Demistify(dto.Ret).Zip(dto.ReturnTypes))
-        {
-            hook.ReturnValues.Add(new()
-            {
-                Description = First,
-                Types = DtoUtils.Demistify(Second)
-            });
         }
 
         return hook;
@@ -44,6 +37,25 @@ public record SFHook : DocElement, IHasRealm, IHasTypedParams, IReturnsValue
 
     public override string ToLuaDoc()
     {
-        throw new NotImplementedException();
+        StringBuilder sb = new();
+        sb.Append($"---@overload fun(hookName: \"{Name}\", name: string, callback?: fun(");
+        sb.AppendJoin(", ", Parameters.Select(p => $"{p.Name}: {p.ConcatTypes()}"));
+        sb.Append(')');
+
+        if (ReturnValues.Count > 0)
+        {
+            sb.Append(": ");
+            sb.AppendJoin(", ", ReturnValues.Select(rv => rv.ConcatTypes()));
+        }
+
+        sb.Append(')');
+
+        if (Description != string.Empty)
+        {
+            sb.Append(' ');
+            sb.Append(Description.Replace("\n", "<br>"));
+        }
+
+        return sb.ToString();
     }
 }

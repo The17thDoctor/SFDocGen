@@ -116,6 +116,23 @@ public class ParserService
         Directory.CreateDirectory(CLASSES_PATH);
         Directory.CreateDirectory(TABLES_PATH);
 
+        string hookPath = Path.Combine(HOOKS_PATH, "Hooks.lua");
+        using (FileStream hookStream = File.OpenWrite(hookPath))
+        {
+            using StreamWriter hookWriter = new(hookStream);
+            hookWriter.WriteLine("---@meta Hooks");
+            AddDiagnostic(hookWriter, "keyword", "assign-type-mismatch");
+            hookWriter.WriteLine();
+
+            foreach (var hook in Documentation.Hooks)
+            {
+                hookWriter.WriteLine(hook.ToLuaDoc());
+            }
+
+            hookWriter.WriteLine("---@overload fun(hookName: string, name: string, callback?: function)");
+            hookWriter.Write("hook = nil");
+        }
+
         foreach (var library in Documentation.Libraries)
         {
             string path = Path.Combine(LIBRARIES_PATH, library.Name + ".lua");

@@ -17,7 +17,7 @@ public record SFLibrary : DocElement, IHasRealm
     public override string ToLuaDoc()
     {
         StringBuilder sb = new();
-        sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
+        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
         sb.Append($"{DocName ?? Name} = {{");
 
         if (Fields.Count > 0)
@@ -72,7 +72,7 @@ public record SFLibraryFunction: DocElement, IHasRealm, IHasTypedParams, IReturn
     {
         StringBuilder sb = new();
 
-        sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
+        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
 
         if (Usage != null)
         {
@@ -116,7 +116,7 @@ public record SFLibraryFunction: DocElement, IHasRealm, IHasTypedParams, IReturn
             // vararg params are represented like this in the docs.
             if (param.Name == "0") { param.Name = "..."; }
 
-            if (dto.ParamTypes.TryGetValue(param.Name, out JsonElement types))
+            if (dto.ParamTypes.TryGetValue(name, out JsonElement types))
             {
                 param.Types = DtoUtils.SanitizeTypes(DtoUtils.Demistify(types));
             }
@@ -145,7 +145,7 @@ public record SFLibraryField : DocValue, IChildObject<SFLibrary>
     public override string ToLuaDoc()
     {
         StringBuilder sb = new();
-        sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
+        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
         sb.AppendLine("---@type " + Type);
         sb.Append($"{Name} = {Value}");
         return sb.ToString();
@@ -170,7 +170,7 @@ public record SFLibraryTable : DocValue, IChildObject<SFLibrary>
     public override string ToLuaDoc()
     {
         StringBuilder sb = new();
-        sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
+        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
         sb.Append($"{Name} = {{}}");
         return sb.ToString();
     }

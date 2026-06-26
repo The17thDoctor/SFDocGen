@@ -35,7 +35,7 @@ public record SFClass : DocElement, IHasRealm
     {
         StringBuilder sb = new();
 
-        sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
+        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
         sb.Append($"---@class {Name}");
         if (SuperType != null)
         {
@@ -91,7 +91,7 @@ public record SFClassField : DocValue, IChildObject<SFClass>
         StringBuilder sb = new();
         sb.Append($"---@field {Name} {Type}");
         
-        if (Description != string.Empty)
+        if (Description != null)
         {
             sb.Append(' ');
             sb.Append(Description.Replace("\n", "\n---"));
@@ -122,7 +122,7 @@ public record SFClassMethod : DocElement, IHasTypedParams, IReturnsValue, IChild
         DtoUtils.PopulateList(dto.Param, method.Parameters, SFParameter.FromData, string.Empty);
         foreach (SFParameter param in method.Parameters)
         {
-            if (dto.ParamTypes.TryGetValue(param.Name, out JsonElement value))
+            if (param.Name != null && dto.ParamTypes.TryGetValue(param.Name, out JsonElement value))
             {
                 param.Types = DtoUtils.SanitizeTypes(DtoUtils.Demistify(value));
             }
@@ -134,7 +134,7 @@ public record SFClassMethod : DocElement, IHasTypedParams, IReturnsValue, IChild
     public override string ToLuaDoc()
     {
         StringBuilder sb = new();
-        sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
+        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
 
         if (Deprecated != null)
         {
@@ -170,7 +170,7 @@ public record SFClassOperator : DocElement, IReturnsValue, IChildObject<SFClass>
     public string? RightOperand { get; set; }
     public bool Commutative { get; set; }
 
-    public bool IsSupported => Supported.Contains(Name.Split("_")[0]);
+    public bool IsSupported => Supported.Contains(Name?.Split("_")[0] ?? string.Empty);
 
     public static readonly HashSet<string> Supported = [
         "unm", "bnot", "len", "add", "sub", "mul", "div", "mod", "pow",
@@ -213,7 +213,7 @@ public record SFClassOperator : DocElement, IReturnsValue, IChildObject<SFClass>
 
     public override string ToLuaDoc()
     {
-        string opName = Name.Split('_')[0];
+        string opName = Name?.Split('_')[0] ?? string.Empty;
 
         if (!Supported.Contains(opName))
         {

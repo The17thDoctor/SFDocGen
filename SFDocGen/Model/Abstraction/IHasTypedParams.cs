@@ -9,8 +9,6 @@ public interface IHasTypedParams
 
 public record SFParameter : DocValue
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
     public List<string> Types { get; set; } = [];
 
     public string ConcatTypes()
@@ -28,11 +26,11 @@ public record SFParameter : DocValue
         };
     }
 
-    public string ToLuaDoc()
+    public override string ToLuaDoc()
     {
         StringBuilder sb = new();
         sb.Append($"---@param {Name} {ConcatTypes()} ");
-        sb.Append(Description.Replace("\n", "<br>\n---"));
+        if (Description != null) sb.Append(Description.Replace("\n", "<br>\n---"));
         return sb.ToString();
     }
 }

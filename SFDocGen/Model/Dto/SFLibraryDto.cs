@@ -6,7 +6,7 @@ namespace SFDocGen.Model.Dto;
 
 public record SFLibraryDto
 {
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
     public bool Server { get; set; } = default;
     public bool Client { get; set; } = default;
     public string? DocName { get; set; }
@@ -18,7 +18,7 @@ public record SFLibraryDto
 
 public record SFLibraryFunctionDto
 {
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
     public string? Deprecated { get; set; }
     public string? Usage { get; set; }
     public bool Server { get; set; }
@@ -35,10 +35,10 @@ public record SFLibraryFunctionDto
 
 public record SFLibraryFieldDto
 {
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 }
 
 public record SFLibraryTableDto
 {
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 }

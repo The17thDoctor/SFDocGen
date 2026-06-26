@@ -11,8 +11,6 @@ public interface IReturnsValue
 
 public record SFReturnValue : DocValue
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
     public List<string> Types { get; set; } = [];
 
     public string ConcatTypes()
@@ -52,13 +50,13 @@ public record SFReturnValue : DocValue
         return list;
     }
 
-    public string ToLuaDoc()
+    public override string ToLuaDoc()
     {
         StringBuilder sb = new();
         sb.Append($"---@return {ConcatTypes()}");
 
-        if (Name != string.Empty) { sb.Append($" {Name}"); }
-        if (Description != string.Empty) { sb.Append(" '" + Description.Replace("\n", "<br>").Replace("'", "\\'") + "'"); }
+        if (Name != null) { sb.Append($" {Name}"); }
+        if (Description != null) { sb.Append(" '" + Description.Replace("\n", "<br>").Replace("'", "\\'") + "'"); }
         return sb.ToString();
     }
 }
