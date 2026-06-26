@@ -26,9 +26,9 @@ public record SFLibraryDto
             Realm = DtoUtils.RealmFromBools(Server, Client)
         };
 
-        DtoUtils.PopulateList(Functions, lib.Functions, (name, fdto) => fdto.FromData(lib, name));
-        DtoUtils.PopulateList(Fields, lib.Fields, (name, fdto) => fdto.FromData(lib, name));
-        DtoUtils.PopulateList(Tables, lib.Tables, (name, tdto) => tdto.FromData(lib, name));
+        DtoUtils.PopulateDict(Functions, lib.Functions, (name, fdto) => fdto.FromData(lib, name));
+        DtoUtils.PopulateDict(Fields, lib.Fields, (name, fdto) => fdto.FromData(lib, name));
+        DtoUtils.PopulateDict(Tables, lib.Tables, (name, tdto) => tdto.FromData(lib, name));
 
         return lib;
     }

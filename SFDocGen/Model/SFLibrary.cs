@@ -4,13 +4,13 @@ using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model;
 
-public record SFLibrary : DocElement, IHasRealm
+public record SFLibrary : SFDocElement, IHasRealm
 {
     public string? DocName { get; set; }
     public Realm Realm { get; set; } = Realm.Shared;
-    public List<SFLibraryFunction> Functions { get; set; } = [];
-    public List<SFLibraryField> Fields { get; set; } = [];
-    public List<SFLibraryTable> Tables { get; set; } = [];
+    public Dictionary<string, SFLibraryFunction> Functions { get; set; } = [];
+    public Dictionary<string, SFLibraryField> Fields { get; set; } = [];
+    public Dictionary<string, SFLibraryTable> Tables { get; set; } = [];
 
     public override string ToLuaDoc()
     {
@@ -21,7 +21,7 @@ public record SFLibrary : DocElement, IHasRealm
         if (Fields.Count > 0)
         {
             sb.AppendLine();
-            sb.AppendJoin(",\n\n", Fields.Select(f => "\t" + f.ToLuaDoc().Replace("\n", "\n\t")));
+            sb.AppendJoin(",\n\n", Fields.Values.OrderBy(f => f.Name).Select(f => "\t" + f.ToLuaDoc().Replace("\n", "\n\t")));
             if (Tables.Count > 0) sb.Append(',');
             sb.AppendLine();
         }
@@ -29,23 +29,24 @@ public record SFLibrary : DocElement, IHasRealm
         if (Tables.Count > 0)
         {
             sb.AppendLine();
-            sb.AppendJoin(",\n\n", Tables.Select(t => "\t" + t.ToLuaDoc().Replace("\n", "\n\t")));
+            sb.AppendJoin(",\n\n", Tables.Values.OrderBy(t => t.Name).Select(t => "\t" + t.ToLuaDoc().Replace("\n", "\n\t")));
             sb.AppendLine();
         }
 
         sb.AppendLine("}\n");
-        sb.AppendJoin("\n\n", Functions.Select(f => f.ToLuaDoc()));
+        sb.AppendJoin("\n\n", Functions.Values.OrderBy(f => f.Name).Select(f => f.ToLuaDoc()));
 
         return sb.ToString();
     }
 }
 
 
-public record SFLibraryFunction: DocElement, IHasRealm, IHasTypedParams, IReturnsValue, IChildObject<SFLibrary>
+public record SFLibraryFunction: SFDocElement, IHasRealm, IHasTypedParams, IReturnsValue, ICanBeGeneric, IChildObject<SFLibrary>
 {
     [JsonIgnore]
     public SFLibrary Parent { get; init; } = default!;
     public Realm Realm { get; set; } = Realm.Shared;
+    public List<string> GenericTypes { get; set; } = [];
     public List<SFParameter> Parameters { get; set; } = [];
     public List<SFReturnValue> ReturnValues { get; set; } = [];
 
@@ -65,13 +66,28 @@ public record SFLibraryFunction: DocElement, IHasRealm, IHasTypedParams, IReturn
 
         if (Deprecated != null)
         {
-            sb.AppendLine("---@deprecated" + Deprecated.Replace("\n", "<br>\n---"));
+            sb.AppendLine("---@deprecated " + Deprecated.Replace("\n", "<br>\n---"));
         }
 
-        sb.AppendJoin("\n", Parameters.Select(p => p.ToLuaDoc()));
-        sb.Append(Parameters.Count > 0 ? "\n" : string.Empty);
-        sb.AppendJoin("\n", ReturnValues.Select(rv => rv.ToLuaDoc()));
-        sb.Append(ReturnValues.Count > 0 ? "\n" : string.Empty);
+        if (GenericTypes.Count > 0)
+        {
+            sb.Append("---@generic ");
+            sb.AppendJoin(", ", GenericTypes);
+            sb.AppendLine();
+        }
+
+        if (Parameters.Count > 0)
+        {
+            sb.AppendJoin("\n", Parameters.Select(p => p.ToLuaDoc()));
+            sb.AppendLine();
+        }
+
+        if (ReturnValues.Count > 0)
+        {
+            sb.AppendJoin("\n", ReturnValues.Select(rv => rv.ToLuaDoc()));
+            sb.AppendLine();
+        }
+        
         sb.Append($"function {Parent.DocName ?? Parent.Name}.{Name}(");
         sb.AppendJoin(", ", Parameters.Select(p => p.Name));
         sb.AppendLine(") end");
@@ -80,7 +96,7 @@ public record SFLibraryFunction: DocElement, IHasRealm, IHasTypedParams, IReturn
     }
 }
 
-public record SFLibraryField : DocValue, IChildObject<SFLibrary>
+public record SFLibraryField : SFDocValue, IChildObject<SFLibrary>
 {
     [JsonIgnore]
     public SFLibrary Parent { get; init; } = default!;
@@ -96,7 +112,7 @@ public record SFLibraryField : DocValue, IChildObject<SFLibrary>
         return sb.ToString();
     }}
 
-public record SFLibraryTable : DocValue, IChildObject<SFLibrary>
+public record SFLibraryTable : SFDocValue, IChildObject<SFLibrary>
 {
     [JsonIgnore]
     public SFLibrary Parent { get; init; } = default!;

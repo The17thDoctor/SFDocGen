@@ -4,7 +4,11 @@ using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model;
 
-public record SFClass : DocElement, IHasRealm
+/// <summary>
+/// Represents a Starfall documentation class (table with methods, operators, fields)
+/// <br/>Example: Entity, Vector
+/// </summary>
+public record SFClass : SFDocElement, IHasRealm
 {
     public string? SuperType { get; set; }
     public Realm Realm { get; set; }
@@ -50,7 +54,10 @@ public record SFClass : DocElement, IHasRealm
     }
 }
 
-public record SFClassField : DocValue, IChildObject<SFClass>
+/// <summary>
+/// Represents a field of a lua class.
+/// </summary>
+public record SFClassField : SFDocValue, IChildObject<SFClass>
 {
     [JsonIgnore]
     public SFClass Parent { get; init; } = default!;
@@ -71,10 +78,14 @@ public record SFClassField : DocValue, IChildObject<SFClass>
     }
 }
 
-public record SFClassMethod : DocElement, IHasTypedParams, IReturnsValue, IChildObject<SFClass>
+/// <summary>
+/// Represents a method of a lua class.
+/// </summary>
+public record SFClassMethod : SFDocElement, IHasTypedParams, IReturnsValue, ICanBeGeneric, IChildObject<SFClass>
 {
     [JsonIgnore]
     public SFClass Parent { get; init; } = default!;
+    public List<string> GenericTypes { get; set; } = [];
     public List<SFParameter> Parameters { get; set; } = [];
     public List<SFReturnValue> ReturnValues { get; set; } = [];
 
@@ -86,6 +97,13 @@ public record SFClassMethod : DocElement, IHasTypedParams, IReturnsValue, IChild
         if (Deprecated != null)
         {
             sb.AppendLine("---@deprecated" + Deprecated.Replace("\n", "<br>\n---"));
+        }
+
+        if (GenericTypes.Count > 0)
+        {
+            sb.Append("---@generic ");
+            sb.AppendJoin(", ", GenericTypes);
+            sb.AppendLine();
         }
 
         if (Parameters.Count > 0)
@@ -108,7 +126,10 @@ public record SFClassMethod : DocElement, IHasTypedParams, IReturnsValue, IChild
     }
 }
 
-public record SFClassOperator : DocElement, IReturnsValue, IChildObject<SFClass>
+/// <summary>
+/// Represents an operator of a lua class.
+/// </summary>
+public record SFClassOperator : SFDocElement, IReturnsValue, IChildObject<SFClass>
 {
     [JsonIgnore]
     public SFClass Parent { get; init; } = default!;

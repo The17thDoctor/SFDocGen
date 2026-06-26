@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model;
 
-public record SFTable : DocElement, IHasRealm
+public record SFTable : SFDocElement, IHasRealm
 {
     public Realm Realm { get; set; }
     public List<SFTableField> Fields { get; set; } = [];
@@ -28,7 +28,7 @@ public record SFTable : DocElement, IHasRealm
     }
 }
 
-public record SFTableField : DocValue, IChildObject<SFTable>
+public record SFTableField : SFDocValue, IChildObject<SFTable>
 {
     public string Type { get; set; } = string.Empty;
 

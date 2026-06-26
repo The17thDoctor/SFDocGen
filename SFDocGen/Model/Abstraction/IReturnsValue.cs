@@ -4,12 +4,16 @@ using System.Text.Json;
 
 namespace SFDocGen.Model.Abstraction;
 
+/// <summary>
+/// Indicates that the documentation element returns a value
+/// <br/>Example: Functions, Methods
+/// </summary>
 public interface IReturnsValue
 {
     List<SFReturnValue> ReturnValues { get; set; }
 }
 
-public record SFReturnValue : DocValue
+public record SFReturnValue : SFDocValue
 {
     public List<string> Types { get; set; } = [];
 

@@ -2,7 +2,11 @@
 
 namespace SFDocGen.Model;
 
-public record SFDirective : DocElement, IHasTypedParams
+/// <summary>
+/// Represents a Starfall pre-processor directive.
+/// <br/>Example: --@shared
+/// </summary>
+public record SFDirective : SFDocElement, IHasTypedParams
 {
     public List<SFParameter> Parameters { get; set; } = [];
 

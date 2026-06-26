@@ -3,7 +3,11 @@ using System.Text;
 
 namespace SFDocGen.Model;
 
-public record SFHook : DocElement, IHasRealm, IHasTypedParams, IReturnsValue
+/// <summary>
+/// Represents a starfall hook.
+/// <br/>Example: render, net, think
+/// </summary>
+public record SFHook : SFDocElement, IHasRealm, IHasTypedParams, IReturnsValue
 {
     public Realm Realm { get; set; }
     public List<SFParameter> Parameters { get; set; } = [];
