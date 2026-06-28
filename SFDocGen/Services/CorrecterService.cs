@@ -11,7 +11,7 @@ public class CorrecterService(ILogger<CorrecterService> logger)
 
     public void ApplyCorrection(SFDocRoot documentation)
     {
-        string json = File.ReadAllText(CORRECTIONS_PATH);
+        string json = File.Exists(CORRECTIONS_PATH) ? File.ReadAllText(CORRECTIONS_PATH) : "{}";
         SFDocRoot? corrections = JsonSerializer.Deserialize<SFDocRoot>(json);
 
         if (corrections == null)

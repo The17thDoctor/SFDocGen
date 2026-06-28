@@ -10,8 +10,9 @@ namespace SFDocGen.Services;
 public class ParserService
 {
     public SFDocRoot? Documentation { get; private set; }
+    public JsonSerializerOptions SerializerOptions { get; private set; }
 
-    public const string DOCS_PATH = "Storage/docs.json";
+    public const string ORIGINAL_DOCS_PATH = "Storage/docs.json";
     public const string IMPROVED_DOCS_PATH = "Storage/docs-improved.json";
     public const string IMPROVED_DOCS_SCHEMA_PATH = "Storage/docs-improved-schema.json";
 
@@ -19,7 +20,6 @@ public class ParserService
     public const string DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize the JSON content.";
 
     private readonly ILogger<ParserService> _logger;
-    private readonly JsonSerializerOptions _serializerOptions;
     private readonly JsonSerializerOptions _deserializerOptions;
 
     private readonly LuaGenerator _luaGenerator;
@@ -38,25 +38,25 @@ public class ParserService
 
         _deserializerOptions.Converters.Add(new FancyDictConverter());
 
-        _serializerOptions  = new JsonSerializerOptions()
+        SerializerOptions  = new JsonSerializerOptions()
         {
             WriteIndented = true
         };
 
-        _serializerOptions.Converters.Add(new RealmConverter());
+        SerializerOptions.Converters.Add(new RealmConverter());
     }
 
     public ModelUpdateResult UpdateModel()
     {
         _logger.LogInformation("Updating model from JSON file...");
 
-        if (!File.Exists(DOCS_PATH))
+        if (!File.Exists(ORIGINAL_DOCS_PATH))
         {
             _logger.LogError(FILE_NOT_FOUND_MESSAGE);
             return new(false, FILE_NOT_FOUND_MESSAGE);
         }
 
-        string jsonContent = File.ReadAllText(DOCS_PATH);
+        string jsonContent = File.ReadAllText(ORIGINAL_DOCS_PATH);
 
 
         SFDocDto? dto = null;
@@ -86,13 +86,13 @@ public class ParserService
 
         Documentation = doc;
         using FileStream stream = File.OpenWrite(IMPROVED_DOCS_PATH);
-        JsonSerializer.Serialize(stream, doc, _serializerOptions);
+        JsonSerializer.Serialize(stream, doc, SerializerOptions);
         _logger.LogInformation("Model updated.");
 
         using FileStream schemaStream = File.OpenWrite(IMPROVED_DOCS_SCHEMA_PATH);
         using Utf8JsonWriter writer = new(schemaStream, new() { Indented = true });
-        JsonNode schema = _serializerOptions.GetJsonSchemaAsNode(typeof(SFDocRoot));
-        schema.WriteTo(writer, _serializerOptions);
+        JsonNode schema = SerializerOptions.GetJsonSchemaAsNode(typeof(SFDocRoot));
+        schema.WriteTo(writer, SerializerOptions);
         _logger.LogInformation("Schema updated.");
 
         _luaGenerator.GenerateLuaDoc(doc);

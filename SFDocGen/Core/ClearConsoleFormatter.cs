@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Console;
 
-namespace SFDocGen;
+namespace SFDocGen.Core;
 
 public class ClearConsoleFormatter() : ConsoleFormatter(nameof(ClearConsoleFormatter))
 {

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Console;
+using SFDocGen.Core;
 using SFDocGen.Services;
 
 namespace SFDocGen;

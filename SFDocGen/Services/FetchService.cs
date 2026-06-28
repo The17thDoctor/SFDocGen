@@ -54,7 +54,7 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
 
     protected async Task SaveFileAsync(HttpContent content, CancellationToken token)
     {
-        using Stream fileStream = File.OpenWrite(ParserService.DOCS_PATH);
+        using Stream fileStream = File.OpenWrite(ParserService.ORIGINAL_DOCS_PATH);
         content.CopyTo(fileStream, null, token);
         logger.LogInformation("Documentation saved.");
     }
