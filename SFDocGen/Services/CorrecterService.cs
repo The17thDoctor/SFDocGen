@@ -44,7 +44,7 @@ public class CorrecterService(ILogger<CorrecterService> logger)
     }
 }
 
-public static class CorrecterExtensions
+file static class CorrecterExtensions
 {
     public static void ApplyCorrection(this SFHook hook, SFHook correction)
     {

@@ -1,9 +1,11 @@
 ﻿using Model;
+using System.Text;
 
 namespace SFDocGen.Services;
 
 public class LuaGenerator(ILogger<LuaGenerator> logger)
 {
+    public const string MINDOC_PATH = "Storage/starfall-docs.min.lua";
     public const string LUADOC_PATH = "Storage/LuaDoc";
     public const string HOOKS_PATH = "Storage/LuaDoc";
     public const string LIBRARIES_PATH = "Storage/LuaDoc/Libraries";
@@ -27,65 +29,91 @@ public class LuaGenerator(ILogger<LuaGenerator> logger)
         Directory.CreateDirectory(CLASSES_PATH);
         Directory.CreateDirectory(TABLES_PATH);
 
+        using FileStream minStream = File.OpenWrite(MINDOC_PATH);
+        using TextWriter minWriter = new StreamWriter(minStream);
+
+        minWriter.WriteLine("---@meta Starfall");
+        AddDiagnostic(minWriter, "keyword", "assign-type-mismatch");
+
         string hookPath = Path.Combine(HOOKS_PATH, "Hooks.lua");
-        using (FileStream hookStream = File.OpenWrite(hookPath))
+        using (StreamWriter hookWriter = new(File.OpenWrite(hookPath)))
         {
-            using StreamWriter hookWriter = new(hookStream);
             hookWriter.WriteLine("---@meta Hooks");
             AddDiagnostic(hookWriter, "keyword", "assign-type-mismatch");
-            hookWriter.WriteLine();
+
+            MultiWrite("\n", hookWriter, minWriter);
 
             foreach (var hook in documentation.Hooks.Values.OrderBy(h => h.Name))
             {
-                hookWriter.WriteLine(hook.ToLuaDoc());
+                MultiWrite(hook.ToLuaDoc(), hookWriter, minWriter);
+                MultiWrite("\n", hookWriter, minWriter);
             }
 
-            hookWriter.WriteLine("---@overload fun(hookName: string, name: string, callback?: function)");
-            hookWriter.Write("hook = nil");
+            MultiWrite("---@overload fun(hookName: string, name: string, callback?: function)", hookWriter, minWriter);
+            MultiWriteLine(null, hookWriter, minWriter);
+            MultiWrite("hook = nil", hookWriter, minWriter);
+            minWriter.WriteLine();
         }
+
 
         foreach (var library in documentation.Libraries.Values.OrderBy(l => l.Name))
         {
             string path = Path.Combine(LIBRARIES_PATH, library.Name + ".lua");
-            using FileStream stream = File.OpenWrite(path);
-            using StreamWriter writer = new(stream);
+            using StreamWriter libWriter = new(File.OpenWrite(path));
 
-            writer.WriteLine($"---@meta {library.Name}");
-            AddDiagnostic(writer, "keyword");
-            writer.WriteLine();
+            libWriter.WriteLine($"---@meta {library.Name}");
+            AddDiagnostic(libWriter, "keyword");
 
-            writer.Write(library.ToLuaDoc());
+            MultiWriteLine(null, libWriter, minWriter);
+            MultiWrite(library.ToLuaDoc(), libWriter, minWriter);
+            minWriter.WriteLine();
         }
 
         foreach (var luaClass in documentation.Classes.Values.OrderBy(c => c.Name))
         {
             string path = Path.Combine(CLASSES_PATH, luaClass.Name + ".lua");
-            using FileStream stream = File.OpenWrite(path);
-            using StreamWriter writer = new(stream);
+            using StreamWriter classWriter = new(File.OpenWrite(path));
 
-            writer.WriteLine($"---@meta {luaClass.Name}");
-            AddDiagnostic(writer, "keyword");
-            writer.WriteLine();
+            classWriter.WriteLine($"---@meta {luaClass.Name}");
+            AddDiagnostic(classWriter, "keyword");
 
-            writer.Write(luaClass.ToLuaDoc());
+            MultiWriteLine(null, classWriter, minWriter);
+            MultiWrite(luaClass.ToLuaDoc(), classWriter, minWriter);
+            minWriter.WriteLine();
         }
 
         foreach (var table in documentation.Tables.Values.OrderBy(t => t.Name))
         {
             string path = Path.Combine(TABLES_PATH, table.Name + ".lua");
-            using FileStream stream = File.OpenWrite(path);
-            using StreamWriter writer = new(stream);
+            using StreamWriter tableWriter = new(File.OpenWrite(path));
 
-            writer.WriteLine($"---@meta {table.Name}");
-            AddDiagnostic(writer, "keyword");
-            writer.WriteLine();
+            tableWriter.WriteLine($"---@meta {table.Name}");
+            AddDiagnostic(tableWriter, "keyword");
 
-            writer.Write(table.ToLuaDoc());
+            MultiWriteLine(null, tableWriter, minWriter);
+            MultiWrite(table.ToLuaDoc(), tableWriter, minWriter);
+            minWriter.WriteLine();
         }
     }
 
     protected void AddDiagnostic(TextWriter writer, params string[] names)
     {
         writer.WriteLine($"---@diagnostic disable: {string.Join(", ", names)}");
+    }
+
+    protected void MultiWrite(string? value, params TextWriter[] writers)
+    {
+        foreach (var writer in writers)
+        {
+            writer.Write(value);
+        }
+    }
+
+    protected void MultiWriteLine(string? value, params TextWriter[] writers)
+    {
+        foreach (var writer in writers)
+        {
+            writer.WriteLine(value);
+        }
     }
 }

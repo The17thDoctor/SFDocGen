@@ -2,13 +2,13 @@
 
 public class FetchService(IConfiguration configuration, IHttpClientFactory factory, ILogger<FetchService> logger, ParserService parserService) : BackgroundService
 {
-    protected TimeSpan Delay { get; set; } = TimeSpan.FromMinutes(configuration.GetValue<uint>("FetchDelay"));
-    protected HttpClient Client { get; } = factory.CreateClient();
+    protected TimeSpan FetchDelay { get; set; } = TimeSpan.FromMinutes(configuration.GetValue<uint>("FetchDelay"));
+    protected HttpClient FetchClient { get; } = factory.CreateClient();
 
     public override Task StartAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation($"Starting periodic documentation fetch.");
-        logger.LogInformation("Fetching delay: {Delay} minute(s).", Delay.Minutes);
+        logger.LogInformation("Fetching delay: {Delay} minute(s).", FetchDelay.Minutes);
         return base.StartAsync(cancellationToken);
     }
 
@@ -36,7 +36,7 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
             logger.LogInformation("Fetching {URI}", docUri.ToString());
             try
             {
-                using HttpResponseMessage response = await Client.GetAsync(docUri, stoppingToken);
+                using HttpResponseMessage response = await FetchClient.GetAsync(docUri, stoppingToken);
                 response.EnsureSuccessStatusCode();
 
                 await SaveFileAsync(response.Content, stoppingToken);
@@ -48,7 +48,7 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
                 logger.LogError("Failed to fetch documentation: {Message}", ex.Message);
             }
 
-            await Task.Delay(Delay, stoppingToken);
+            await Task.Delay(FetchDelay, stoppingToken);
         }
     }
 

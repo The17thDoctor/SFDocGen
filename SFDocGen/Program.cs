@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Console;
 using SFDocGen.Services;
 
 namespace SFDocGen;
@@ -10,6 +11,13 @@ public class Program
 
         // Create docs storage directory
         Directory.CreateDirectory("Storage");
+
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsoleFormatter<ClearConsoleFormatter, ConsoleFormatterOptions>();
+        builder.Logging.AddConsole(options =>
+        {
+            options.FormatterName = nameof(ClearConsoleFormatter);
+        });
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
