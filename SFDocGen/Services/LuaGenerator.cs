@@ -1,4 +1,6 @@
-﻿using SFDocGen.Core;
+﻿using Model;
+using SFDocGen.Core;
+using SFDocGen.Model;
 using LuaFolders = SFDocGen.Core.StorageManager.Folders.LuaDoc;
 
 namespace SFDocGen.Services;
@@ -31,11 +33,8 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
         minWriter.WriteLine("---@meta Starfall");
         AddDiagnostic(minWriter, "keyword", "assign-type-mismatch");
 
-        string hookPath = Path.Combine(LuaFolders.Hooks, "Hooks.lua");
-        using (StreamWriter hookWriter = new(File.OpenWrite(hookPath)))
-        {
-            WriteHook(documentation, minWriter, hookWriter);
-        }
+        WriteHooks(documentation, minWriter);
+        WriteDirectives(documentation, minWriter);
 
         foreach (var library in documentation.Libraries.Values.OrderBy(l => l.Name))
         {
@@ -55,7 +54,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
         logger.LogInformation("Lua documentation generated.");
     }
 
-    private void WriteTable(TextWriter minWriter, Model.SFTable table)
+    private void WriteTable(TextWriter minWriter, SFTable table)
     {
         string path = Path.Combine(LuaFolders.Tables, table.Name + ".lua");
         using StreamWriter tableWriter = new(File.OpenWrite(path));
@@ -68,7 +67,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
         minWriter.WriteLine();
     }
 
-    private void WriteClass(TextWriter minWriter, Model.SFClass luaClass)
+    private void WriteClass(TextWriter minWriter, SFClass luaClass)
     {
         string path = Path.Combine(LuaFolders.Classes, luaClass.Name + ".lua");
         using StreamWriter classWriter = new(File.OpenWrite(path));
@@ -81,7 +80,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
         minWriter.WriteLine();
     }
 
-    private void WriteLibrary(TextWriter minWriter, Model.SFLibrary library)
+    private void WriteLibrary(TextWriter minWriter, SFLibrary library)
     {
         string path = Path.Combine(LuaFolders.Libraries, library.Name + ".lua");
         using StreamWriter libWriter = new(File.OpenWrite(path));
@@ -94,8 +93,28 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
         minWriter.WriteLine();
     }
 
-    private void WriteHook(global::Model.SFDocRoot documentation, TextWriter minWriter, StreamWriter hookWriter)
+    private void WriteDirectives(SFDocRoot documentation, TextWriter minWriter)
     {
+        string directivesPath = Path.Combine(LuaFolders.Directives, "directives.lua");
+        using StreamWriter directivesWriter = new(File.OpenWrite(directivesPath));
+
+        directivesWriter.WriteLine("---@meta Directives");
+        MultiWrite("\n", directivesWriter, minWriter);
+
+        foreach (var directive in documentation.Directives.Values.OrderBy(d => d.Name))
+        {
+            MultiWriteLine(directive.ToLuaDoc(), directivesWriter, minWriter);
+            MultiWrite("\n", directivesWriter, minWriter);
+        }
+
+        minWriter.WriteLine();
+    }
+
+    private void WriteHooks(SFDocRoot documentation, TextWriter minWriter)
+    {
+        string hookPath = Path.Combine(LuaFolders.Hooks, "hooks.lua");
+        using StreamWriter hookWriter = new(File.OpenWrite(hookPath));
+
         hookWriter.WriteLine("---@meta Hooks");
         AddDiagnostic(hookWriter, "keyword", "assign-type-mismatch");
 
@@ -103,8 +122,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
 
         foreach (var hook in documentation.Hooks.Values.OrderBy(h => h.Name))
         {
-            MultiWrite(hook.ToLuaDoc(), hookWriter, minWriter);
-            MultiWrite("\n", hookWriter, minWriter);
+            MultiWriteLine(hook.ToLuaDoc(), hookWriter, minWriter);
         }
 
         MultiWrite("---@overload fun(hookName: string, name: string, callback?: function)", hookWriter, minWriter);

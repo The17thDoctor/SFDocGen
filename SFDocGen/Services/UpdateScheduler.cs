@@ -11,7 +11,7 @@ public class UpdateScheduler(IConfiguration configuration, ILogger<UpdateSchedul
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation($"Starting periodic documentation fetch.");
+        logger.LogInformation("Starting periodic documentation fetch.");
         logger.LogInformation("Fetching delay: {Delay}.", FetchDelay);
         await base.StartAsync(cancellationToken);
     }

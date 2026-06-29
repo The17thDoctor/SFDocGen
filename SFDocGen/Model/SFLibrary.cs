@@ -59,7 +59,8 @@ public record SFLibraryFunction: SFDocElement, IHasRealm, IHasTypedParams, IRetu
         if (Usage != null)
         {
             sb.AppendLine("---");
-            sb.AppendLine("---Usage:\n---```lua");
+            sb.AppendLine("---Usage:");
+            sb.AppendLine("---```lua");
             sb.AppendLine("---" + Usage.Replace("\n", "\n---"));
             sb.AppendLine("---```");
         }
