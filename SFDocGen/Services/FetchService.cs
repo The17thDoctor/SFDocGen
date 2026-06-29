@@ -2,7 +2,7 @@
 
 namespace SFDocGen.Services;
 
-public class FetchService(IConfiguration configuration, IHttpClientFactory factory, ILogger<FetchService> logger)
+public class FetchService(IConfiguration configuration, IHttpClientFactory factory, ILogger<FetchService> logger, StorageManager storage)
 {
     protected HttpClient FetchClient { get; } = factory.CreateClient();
 
@@ -33,7 +33,7 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
 
     protected void SaveFile(HttpContent content)
     {
-        using Stream fileStream = File.OpenWrite(StorageManager.Files.OriginalDoc);
+        using Stream fileStream = File.OpenWrite(storage.Files.OriginalDoc);
         content.CopyTo(fileStream, null, CancellationToken.None);
         logger.LogInformation("Documentation saved.");
     }

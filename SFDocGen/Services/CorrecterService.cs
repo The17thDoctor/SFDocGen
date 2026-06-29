@@ -1,17 +1,16 @@
 ﻿using Model;
+using SFDocGen.Core;
 using SFDocGen.Model;
 using SFDocGen.Model.Abstraction;
 using System.Text.Json;
 
 namespace SFDocGen.Services;
 
-public class CorrecterService(ILogger<CorrecterService> logger)
+public class CorrecterService(ILogger<CorrecterService> logger, StorageManager storage)
 {
-    public const string CORRECTIONS_PATH = "Storage/docs-corrections.json";
-
     public void ApplyCorrection(SFDocRoot documentation)
     {
-        string json = File.Exists(CORRECTIONS_PATH) ? File.ReadAllText(CORRECTIONS_PATH) : "{}";
+        string json = File.Exists(storage.Files.CorrectionsFile) ? File.ReadAllText(storage.Files.CorrectionsFile) : "{}";
         SFDocRoot? corrections = JsonSerializer.Deserialize<SFDocRoot>(json);
 
         if (corrections == null)

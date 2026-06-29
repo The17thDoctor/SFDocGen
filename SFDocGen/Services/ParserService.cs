@@ -46,14 +46,14 @@ public class ParserService
     {
         _logger.LogInformation("Updating model from JSON file...");
 
-        if (!File.Exists(StorageManager.Files.OriginalDoc))
+        if (!File.Exists(_storage.Files.OriginalDoc))
         {
             _logger.LogError(FILE_NOT_FOUND_MESSAGE);
             return new(false, FILE_NOT_FOUND_MESSAGE);
         }
 
         // Convert JSON => DTO
-        string jsonContent = File.ReadAllText(StorageManager.Files.OriginalDoc);
+        string jsonContent = File.ReadAllText(_storage.Files.OriginalDoc);
         SFDocDto? dto = null;
 
         try
@@ -83,11 +83,11 @@ public class ParserService
         _storage.Documentation = doc;
 
         // Write Starfall Documentation & Schema to file.
-        using FileStream stream = File.OpenWrite(StorageManager.Files.ImprovedDoc);
+        using FileStream stream = File.OpenWrite(_storage.Files.ImprovedDoc);
         JsonSerializer.Serialize(stream, doc, SerializerOptions);
         _logger.LogInformation("Model updated.");
 
-        using FileStream schemaStream = File.OpenWrite(StorageManager.Files.ImprovedDocSchema);
+        using FileStream schemaStream = File.OpenWrite(_storage.Files.ImprovedDocSchema);
         using Utf8JsonWriter writer = new(schemaStream, new() { Indented = true });
         JsonNode schema = SerializerOptions.GetJsonSchemaAsNode(typeof(SFDocRoot));
         schema.WriteTo(writer, SerializerOptions);

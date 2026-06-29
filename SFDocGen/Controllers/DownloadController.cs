@@ -8,20 +8,20 @@ namespace SFDocGen.Controllers;
 
 [ApiController]
 [Route("api/download")]
-public class DownloadController : Controller
+public class DownloadController(StorageManager storage) : Controller
 {
     [HttpGet("lua/full")]
     [Produces(MediaTypeNames.Application.Zip)]
     [EndpointSummary("Returns the full, uncompressed Starfall documentation.")]
     public ActionResult FullDocumentation()
     {
-        if (!Directory.Exists(StorageManager.Folders.LuaDoc.Root))
+        if (!Directory.Exists(storage.Folders.LuaDoc.Root))
         {
             return NotFound();
         }
 
         MemoryStream stream = new();
-        ZipFile.CreateFromDirectory(StorageManager.Folders.LuaDoc.Root, stream);
+        ZipFile.CreateFromDirectory(storage.Folders.LuaDoc.Root, stream);
 
         stream.Position = 0;
 
@@ -33,12 +33,12 @@ public class DownloadController : Controller
     [EndpointSummary("Returns the minified Starfall documentation.")]
     public ActionResult MinifiedDocumentation()
     {
-        if (!System.IO.File.Exists(StorageManager.Files.MinifiedLuaDocs))
+        if (!System.IO.File.Exists(storage.Files.MinifiedLuaDocs))
         {
             return NotFound();
         }
 
-        FileStream file = System.IO.File.OpenRead(StorageManager.Files.MinifiedLuaDocs);
+        FileStream file = System.IO.File.OpenRead(storage.Files.MinifiedLuaDocs);
         return File(file, "text/x-lua");
     }
 
@@ -47,12 +47,12 @@ public class DownloadController : Controller
     [EndpointSummary("Returns the documentation as a JSON file.")]
     public ActionResult JsonDocumentation()
     {
-        if (!System.IO.File.Exists(StorageManager.Files.ImprovedDoc))
+        if (!System.IO.File.Exists(storage.Files.ImprovedDoc))
         {
             return NotFound();
         }
 
-        FileStream file = System.IO.File.OpenRead(StorageManager.Files.ImprovedDoc);
+        FileStream file = System.IO.File.OpenRead(storage.Files.ImprovedDoc);
         return File(file, MediaTypeNames.Application.Json);
     }
 
@@ -61,12 +61,12 @@ public class DownloadController : Controller
     [EndpointSummary("Returns the documentation's JSON schema.")]
     public ActionResult JsonSchema()
     {
-        if (!System.IO.File.Exists(StorageManager.Files.ImprovedDocSchema))
+        if (!System.IO.File.Exists(storage.Files.ImprovedDocSchema))
         {
             return NotFound();
         }
 
-        FileStream file = System.IO.File.OpenRead(StorageManager.Files.ImprovedDocSchema);
+        FileStream file = System.IO.File.OpenRead(storage.Files.ImprovedDocSchema);
         return File(file, MediaTypeNames.Application.Json);
     }
 }

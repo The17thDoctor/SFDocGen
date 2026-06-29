@@ -1,7 +1,6 @@
 ﻿using Model;
 using SFDocGen.Core;
 using SFDocGen.Model;
-using LuaFolders = SFDocGen.Core.StorageManager.Folders.LuaDoc;
 
 namespace SFDocGen.Services;
 
@@ -10,24 +9,26 @@ namespace SFDocGen.Services;
 /// </summary>
 public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
 {
+    private readonly StorageManager.StorageFolders.LuaDocFolders _luaFolders = storage.Folders.LuaDoc;
+
     public void GenerateLuaDoc()
     {
         logger.LogInformation("Generating lua documentation...");
 
-        if (Directory.Exists(LuaFolders.Root))
+        if (Directory.Exists(_luaFolders.Root))
         {
-            Directory.Delete(LuaFolders.Root, recursive: true);
+            Directory.Delete(_luaFolders.Root, recursive: true);
         }
 
-        Directory.CreateDirectory(LuaFolders.Root);
-        Directory.CreateDirectory(LuaFolders.Classes);
-        Directory.CreateDirectory(LuaFolders.Directives);
-        Directory.CreateDirectory(LuaFolders.Hooks);
-        Directory.CreateDirectory(LuaFolders.Libraries);
-        Directory.CreateDirectory(LuaFolders.Tables);
+        Directory.CreateDirectory(_luaFolders.Root);
+        Directory.CreateDirectory(_luaFolders.Classes);
+        Directory.CreateDirectory(_luaFolders.Directives);
+        Directory.CreateDirectory(_luaFolders.Hooks);
+        Directory.CreateDirectory(_luaFolders.Libraries);
+        Directory.CreateDirectory(_luaFolders.Tables);
 
         var documentation = storage.Documentation;
-        using FileStream minStream = File.OpenWrite(StorageManager.Files.MinifiedLuaDocs);
+        using FileStream minStream = File.OpenWrite(storage.Files.MinifiedLuaDocs);
         using TextWriter minWriter = new StreamWriter(minStream);
 
         minWriter.WriteLine("---@meta Starfall");
@@ -56,7 +57,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
 
     private void WriteTable(TextWriter minWriter, SFTable table)
     {
-        string path = Path.Combine(LuaFolders.Tables, table.Name + ".lua");
+        string path = Path.Combine(_luaFolders.Tables, table.Name + ".lua");
         using StreamWriter tableWriter = new(File.OpenWrite(path));
 
         tableWriter.WriteLine($"---@meta {table.Name}");
@@ -69,7 +70,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
 
     private void WriteClass(TextWriter minWriter, SFClass luaClass)
     {
-        string path = Path.Combine(LuaFolders.Classes, luaClass.Name + ".lua");
+        string path = Path.Combine(_luaFolders.Classes, luaClass.Name + ".lua");
         using StreamWriter classWriter = new(File.OpenWrite(path));
 
         classWriter.WriteLine($"---@meta {luaClass.Name}");
@@ -82,7 +83,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
 
     private void WriteLibrary(TextWriter minWriter, SFLibrary library)
     {
-        string path = Path.Combine(LuaFolders.Libraries, library.Name + ".lua");
+        string path = Path.Combine(_luaFolders.Libraries, library.Name + ".lua");
         using StreamWriter libWriter = new(File.OpenWrite(path));
 
         libWriter.WriteLine($"---@meta {library.Name}");
@@ -95,7 +96,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
 
     private void WriteDirectives(SFDocRoot documentation, TextWriter minWriter)
     {
-        string directivesPath = Path.Combine(LuaFolders.Directives, "directives.lua");
+        string directivesPath = Path.Combine(_luaFolders.Directives, "directives.lua");
         using StreamWriter directivesWriter = new(File.OpenWrite(directivesPath));
 
         directivesWriter.WriteLine("---@meta Directives");
@@ -112,7 +113,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
 
     private void WriteHooks(SFDocRoot documentation, TextWriter minWriter)
     {
-        string hookPath = Path.Combine(LuaFolders.Hooks, "hooks.lua");
+        string hookPath = Path.Combine(_luaFolders.Hooks, "hooks.lua");
         using StreamWriter hookWriter = new(File.OpenWrite(hookPath));
 
         hookWriter.WriteLine("---@meta Hooks");

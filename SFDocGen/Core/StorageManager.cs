@@ -9,32 +9,42 @@ public class StorageManager
 {
     public SFDocRoot Documentation { get; set; } = new();
 
-    public StorageManager()
+    public StorageFolders Folders { get; }
+    public StorageFiles Files { get; }
+
+    public StorageManager(IConfiguration configuration)
     {
+        string root = configuration.GetValue<string>("StorageFolder") ?? "Storage";
+
+        Folders = new StorageFolders(root);
+        Files = new StorageFiles(root);
+
         Directory.CreateDirectory(Folders.Root);
     }
 
-    public static class Folders
+    public class StorageFolders(string root)
     {
-        public static readonly string Root = "Storage";
+        public readonly string Root = root;
+        public LuaDocFolders LuaDoc { get; } = new(root);
 
-        public static class LuaDoc
+        public class LuaDocFolders(string root)
         {
-            public static readonly string Root = Path.Combine(Folders.Root, "Lua");
+            public readonly string Root = Path.Combine(root, "Lua");
 
-            public static readonly string Classes = Path.Combine(Root, "classes");
-            public static readonly string Directives = Path.Combine(Root);
-            public static readonly string Hooks = Path.Combine(Root);
-            public static readonly string Libraries = Path.Combine(Root, "libraries");
-            public static readonly string Tables = Path.Combine(Root, "tables");
+            public readonly string Classes = Path.Combine(root, "classes");
+            public readonly string Directives = Path.Combine(root);
+            public readonly string Hooks = Path.Combine(root);
+            public readonly string Libraries = Path.Combine(root, "libraries");
+            public readonly string Tables = Path.Combine(root, "tables");
         }
     }
 
-    public static class Files
+    public class StorageFiles(string root)
     {
-        public static readonly string OriginalDoc = Path.Combine(Folders.Root, "docs-original.json");
-        public static readonly string ImprovedDoc = Path.Combine(Folders.Root, "docs-improved.json");
-        public static readonly string ImprovedDocSchema = Path.Combine(Folders.Root, "docs-improved.schema.json");
-        public static readonly string MinifiedLuaDocs = Path.Combine(Folders.Root, "starfall.min.lua");
+        public readonly string OriginalDoc = Path.Combine(root, "docs-original.json");
+        public readonly string ImprovedDoc = Path.Combine(root, "docs-improved.json");
+        public readonly string ImprovedDocSchema = Path.Combine(root, "docs-improved.schema.json");
+        public readonly string CorrectionsFile = Path.Combine(root, "docs-corrections.json");
+        public readonly string MinifiedLuaDocs = Path.Combine(root, "starfall.min.lua");
     }
 }
