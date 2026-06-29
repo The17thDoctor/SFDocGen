@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Logging.Console;
 using SFDocGen.Core;
 using SFDocGen.Services;
@@ -32,9 +33,21 @@ public class Program
         builder.Services.AddSingleton<LuaGenerator>();
         builder.Services.AddSingleton<CorrecterService>();
 
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            options.KnownIPNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
+
         builder.Services.AddHttpClient();
 
         var app = builder.Build();
+        app.UseForwardedHeaders();
+        app.MapOpenApi();
+        app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
+        app.UseAuthorization();
+        app.MapControllers();
 
         using (var scope = app.Services.CreateScope())
         {
@@ -42,10 +55,6 @@ public class Program
             storage.CreateStorageFolder();
         }
 
-        app.MapOpenApi();
-        app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
-        app.UseAuthorization();
-        app.MapControllers();
         app.Run();
     }
 }
