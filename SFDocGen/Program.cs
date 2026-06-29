@@ -35,6 +35,13 @@ public class Program
         builder.Services.AddHttpClient();
 
         var app = builder.Build();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var storage = scope.ServiceProvider.GetRequiredService<StorageManager>();
+            storage.CreateStorageFolder();
+        }
+
         app.MapOpenApi();
         app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
         app.UseAuthorization();

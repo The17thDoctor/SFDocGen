@@ -18,7 +18,10 @@ public class StorageManager
 
         Folders = new StorageFolders(root);
         Files = new StorageFiles(root);
+    }
 
+    public void CreateStorageFolder()
+    {
         Directory.CreateDirectory(Folders.Root);
     }
 

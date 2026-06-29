@@ -8,7 +8,6 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
 
     public void Fetch()
     {
-        logger.LogInformation("Performing periodic fetch...");
         string? docUriString = configuration.GetValue<string>("FetchURI");
 
         if (docUriString is null)
