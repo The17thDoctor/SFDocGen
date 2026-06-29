@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SFDocGen.Core;
 using SFDocGen.Services;
 using System.IO.Compression;
 using System.Net.Mime;
@@ -14,13 +15,13 @@ public class DownloadController : Controller
     [EndpointSummary("Returns the full, uncompressed Starfall documentation.")]
     public ActionResult FullDocumentation()
     {
-        if (!Directory.Exists(LuaGenerator.LUADOC_PATH))
+        if (!Directory.Exists(StorageManager.Folders.LuaDoc.Root))
         {
             return NotFound();
         }
 
         MemoryStream stream = new();
-        ZipFile.CreateFromDirectory(LuaGenerator.LUADOC_PATH, stream);
+        ZipFile.CreateFromDirectory(StorageManager.Folders.LuaDoc.Root, stream);
 
         stream.Position = 0;
 
@@ -32,12 +33,12 @@ public class DownloadController : Controller
     [EndpointSummary("Returns the minified Starfall documentation.")]
     public ActionResult MinifiedDocumentation()
     {
-        if (!System.IO.File.Exists(LuaGenerator.MINDOC_PATH))
+        if (!System.IO.File.Exists(StorageManager.Files.MinifiedLuaDocs))
         {
             return NotFound();
         }
 
-        FileStream file = System.IO.File.OpenRead(LuaGenerator.MINDOC_PATH);
+        FileStream file = System.IO.File.OpenRead(StorageManager.Files.MinifiedLuaDocs);
         return File(file, "text/x-lua");
     }
 
@@ -46,12 +47,12 @@ public class DownloadController : Controller
     [EndpointSummary("Returns the documentation as a JSON file.")]
     public ActionResult JsonDocumentation()
     {
-        if (!System.IO.File.Exists(ParserService.IMPROVED_DOCS_PATH))
+        if (!System.IO.File.Exists(StorageManager.Files.ImprovedDoc))
         {
             return NotFound();
         }
 
-        FileStream file = System.IO.File.OpenRead(ParserService.IMPROVED_DOCS_PATH);
+        FileStream file = System.IO.File.OpenRead(StorageManager.Files.ImprovedDoc);
         return File(file, MediaTypeNames.Application.Json);
     }
 
@@ -60,12 +61,12 @@ public class DownloadController : Controller
     [EndpointSummary("Returns the documentation's JSON schema.")]
     public ActionResult JsonSchema()
     {
-        if (!System.IO.File.Exists(ParserService.IMPROVED_DOCS_SCHEMA_PATH))
+        if (!System.IO.File.Exists(StorageManager.Files.ImprovedDocSchema))
         {
             return NotFound();
         }
 
-        FileStream file = System.IO.File.OpenRead(ParserService.IMPROVED_DOCS_SCHEMA_PATH);
+        FileStream file = System.IO.File.OpenRead(StorageManager.Files.ImprovedDocSchema);
         return File(file, MediaTypeNames.Application.Json);
     }
 }

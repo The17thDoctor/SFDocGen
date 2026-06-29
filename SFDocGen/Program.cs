@@ -23,8 +23,10 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
 
-        builder.Services.AddHostedService<FetchService>();
+        builder.Services.AddHostedService<UpdateScheduler>();
 
+        builder.Services.AddSingleton<StorageManager>();
+        builder.Services.AddSingleton<FetchService>();
         builder.Services.AddSingleton<ParserService>();
         builder.Services.AddSingleton<LuaGenerator>();
         builder.Services.AddSingleton<CorrecterService>();

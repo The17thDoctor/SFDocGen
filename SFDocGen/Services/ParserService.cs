@@ -1,4 +1,5 @@
 ﻿using Model;
+using SFDocGen.Core;
 using SFDocGen.Model.Dto;
 using SFDocGen.Model.Json;
 using System.Text.Json;
@@ -9,12 +10,7 @@ namespace SFDocGen.Services;
 
 public class ParserService
 {
-    public SFDocRoot? Documentation { get; private set; }
     public JsonSerializerOptions SerializerOptions { get; private set; }
-
-    public const string ORIGINAL_DOCS_PATH = "Storage/docs.json";
-    public const string IMPROVED_DOCS_PATH = "Storage/docs-improved.json";
-    public const string IMPROVED_DOCS_SCHEMA_PATH = "Storage/docs-improved-schema.json";
 
     public const string FILE_NOT_FOUND_MESSAGE = "Documentation JSON file not found!";
     public const string DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize the JSON content.";
@@ -22,13 +18,13 @@ public class ParserService
     private readonly ILogger<ParserService> _logger;
     private readonly JsonSerializerOptions _deserializerOptions;
 
-    private readonly LuaGenerator _luaGenerator;
+    private readonly StorageManager _storage;
     private readonly CorrecterService _correcterService;
 
-    public ParserService(ILogger<ParserService> logger, LuaGenerator luaGenerator, CorrecterService correcterService)
+    public ParserService(ILogger<ParserService> logger, CorrecterService correcterService, StorageManager storage)
     {
         _logger = logger;
-        _luaGenerator = luaGenerator;
+        _storage = storage;
         _correcterService = correcterService;
 
         _deserializerOptions = new()
@@ -46,20 +42,20 @@ public class ParserService
         SerializerOptions.Converters.Add(new RealmConverter());
     }
 
-    public ModelUpdateResult UpdateModel()
+    public UpdateResult UpdateDocumentation()
     {
         _logger.LogInformation("Updating model from JSON file...");
 
-        if (!File.Exists(ORIGINAL_DOCS_PATH))
+        if (!File.Exists(StorageManager.Files.OriginalDoc))
         {
             _logger.LogError(FILE_NOT_FOUND_MESSAGE);
             return new(false, FILE_NOT_FOUND_MESSAGE);
         }
 
-        string jsonContent = File.ReadAllText(ORIGINAL_DOCS_PATH);
-
-
+        // Convert JSON => DTO
+        string jsonContent = File.ReadAllText(StorageManager.Files.OriginalDoc);
         SFDocDto? dto = null;
+
         try
         {
             dto = JsonSerializer.Deserialize<SFDocDto>(jsonContent, _deserializerOptions);
@@ -75,6 +71,7 @@ public class ParserService
             return new(false, DESERIALIZATION_FAILED_MESSAGE);
         }
 
+        // Convert DTO => Starfall Documentation
         SFDocRoot doc = new();
         DtoUtils.PopulateDict(dto.Hooks, doc.Hooks, (name, dto) => dto.FromData(name));
         DtoUtils.PopulateDict(dto.Libraries, doc.Libraries, (name, dto) => dto.FromData(name));
@@ -83,25 +80,24 @@ public class ParserService
         DtoUtils.PopulateDict(dto.Directives, doc.Directives, (name, dto) => dto.FromData(name));
 
         _correcterService.ApplyCorrection(doc);
+        _storage.Documentation = doc;
 
-        Documentation = doc;
-        using FileStream stream = File.OpenWrite(IMPROVED_DOCS_PATH);
+        // Write Starfall Documentation & Schema to file.
+        using FileStream stream = File.OpenWrite(StorageManager.Files.ImprovedDoc);
         JsonSerializer.Serialize(stream, doc, SerializerOptions);
         _logger.LogInformation("Model updated.");
 
-        using FileStream schemaStream = File.OpenWrite(IMPROVED_DOCS_SCHEMA_PATH);
+        using FileStream schemaStream = File.OpenWrite(StorageManager.Files.ImprovedDocSchema);
         using Utf8JsonWriter writer = new(schemaStream, new() { Indented = true });
         JsonNode schema = SerializerOptions.GetJsonSchemaAsNode(typeof(SFDocRoot));
         schema.WriteTo(writer, SerializerOptions);
         _logger.LogInformation("Schema updated.");
 
-        _luaGenerator.GenerateLuaDoc(doc);
-
         return new(true, string.Empty);
     }
 }
 
-public readonly struct ModelUpdateResult(bool success, string reason)
+public readonly struct UpdateResult(bool success, string reason)
 {
     public bool Success { get; } = success;
     public string Reason { get; } = reason;
