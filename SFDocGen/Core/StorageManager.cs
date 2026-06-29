@@ -9,6 +9,11 @@ public class StorageManager
 {
     public SFDocRoot Documentation { get; set; } = new();
 
+    public StorageManager()
+    {
+        Directory.CreateDirectory(Folders.Root);
+    }
+
     public static class Folders
     {
         public static readonly string Root = "Storage";

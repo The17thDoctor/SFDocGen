@@ -9,9 +9,10 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        // Create docs storage directory
-        Directory.CreateDirectory("Storage");
+        builder.Host.ConfigureHostOptions(options =>
+        {
+            options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+        });
 
         builder.Logging.ClearProviders();
         builder.Logging.AddConsoleFormatter<ClearConsoleFormatter, ConsoleFormatterOptions>();
