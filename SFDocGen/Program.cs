@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Console;
 using SFDocGen.Core;
 using SFDocGen.Services;
@@ -44,17 +45,16 @@ public class Program
 
         var app = builder.Build();
         app.UseForwardedHeaders();
+        app.UseStaticFiles();
         app.MapOpenApi();
-        app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/openapi/v1.json", "v1");
+            options.DocumentTitle = "SFDocGen API | Documentation";
+        });
         app.UseAuthorization();
         app.MapControllers();
-
-        using (var scope = app.Services.CreateScope())
-        {
-            var storage = scope.ServiceProvider.GetRequiredService<StorageManager>();
-            storage.CreateStorageFolder();
-        }
-
+        app.MapGet("/", () => Results.LocalRedirect("/index.html", permanent: true, preserveMethod: true));
         app.Run();
     }
 }
