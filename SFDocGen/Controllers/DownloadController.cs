@@ -25,7 +25,7 @@ public class DownloadController(StorageManager storage) : Controller
 
         stream.Position = 0;
 
-        return File(stream, MediaTypeNames.Application.Zip);
+        return File(stream, MediaTypeNames.Application.Zip, "starfall-full.zip");
     }
 
     [HttpGet("lua/min")]
@@ -39,7 +39,7 @@ public class DownloadController(StorageManager storage) : Controller
         }
 
         FileStream file = System.IO.File.OpenRead(storage.Files.MinifiedLuaDocs);
-        return File(file, "text/x-lua");
+        return File(file, "text/x-lua", Path.GetFileName(storage.Files.MinifiedLuaDocs));
     }
 
     [HttpGet("json/full")]
@@ -53,7 +53,7 @@ public class DownloadController(StorageManager storage) : Controller
         }
 
         FileStream file = System.IO.File.OpenRead(storage.Files.ImprovedDoc);
-        return File(file, MediaTypeNames.Application.Json);
+        return File(file, MediaTypeNames.Application.Json, Path.GetFileName(storage.Files.ImprovedDoc));
     }
 
     [HttpGet("json/schema")]
@@ -67,6 +67,6 @@ public class DownloadController(StorageManager storage) : Controller
         }
 
         FileStream file = System.IO.File.OpenRead(storage.Files.ImprovedDocSchema);
-        return File(file, MediaTypeNames.Application.Json);
+        return File(file, MediaTypeNames.Application.Json, Path.GetFileName(storage.Files.ImprovedDocSchema));
     }
 }
