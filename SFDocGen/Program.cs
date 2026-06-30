@@ -54,7 +54,15 @@ public class Program
         });
         app.UseAuthorization();
         app.MapControllers();
+
         app.MapGet("/", () => Results.LocalRedirect("/index.html", permanent: true, preserveMethod: true));
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var storage = scope.ServiceProvider.GetRequiredService<StorageManager>();
+            storage.CreateStorageFolder();
+        }
+
         app.Run();
     }
 }

@@ -34,11 +34,11 @@ public class StorageManager
         {
             public readonly string Root = Path.Combine(root, "Lua");
 
-            public readonly string Classes = Path.Combine(root, "classes");
-            public readonly string Directives = Path.Combine(root);
-            public readonly string Hooks = Path.Combine(root);
-            public readonly string Libraries = Path.Combine(root, "libraries");
-            public readonly string Tables = Path.Combine(root, "tables");
+            public readonly string Classes = Path.Combine(root, "Lua", "classes");
+            public readonly string Directives = Path.Combine(root, "Lua");
+            public readonly string Hooks = Path.Combine(root, "Lua");
+            public readonly string Libraries = Path.Combine(root, "Lua", "libraries");
+            public readonly string Tables = Path.Combine(root, "Lua", "tables");
         }
     }
 
