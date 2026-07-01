@@ -22,17 +22,9 @@ public class UpdateScheduler(IConfiguration configuration, ILogger<UpdateSchedul
         {
             logger.LogInformation("Performing scheduled update.");
 
-            try
-            {
-                _fetchService.Fetch();
-                _parserService.UpdateDocumentation();
-                _luaGenerator.GenerateLuaDoc();
-            }
-            catch (Exception ex)
-            {
-                logger.LogCritical(ex, "Error during documentation processing.");
-                throw;
-            }
+            _fetchService.Fetch();
+            _parserService.UpdateDocumentation();
+            _luaGenerator.GenerateLuaDoc();
 
             await Task.Delay(FetchDelay, stoppingToken);
         }

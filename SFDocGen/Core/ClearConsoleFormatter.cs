@@ -36,6 +36,17 @@ public class ClearConsoleFormatter() : ConsoleFormatter(nameof(ClearConsoleForma
 
         // Message
         textWriter.WriteLine(logEntry.State?.ToString());
+
+        // Exception
+        if (logEntry.Exception != null)
+        {
+            foreach (var line in logEntry.Exception.ToString().Split('\n'))
+            {
+                textWriter.Write(new string(' ', _padLength));
+                textWriter.Write(" | ");
+                textWriter.WriteLine(line);
+            }
+        }
     }
 
     private static void WriteANSI(TextWriter textWriter, string sequence)
