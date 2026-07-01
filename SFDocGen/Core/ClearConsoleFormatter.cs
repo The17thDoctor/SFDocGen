@@ -42,7 +42,7 @@ public class ClearConsoleFormatter() : ConsoleFormatter(nameof(ClearConsoleForma
         {
             foreach (var line in logEntry.Exception.ToString().Split('\n'))
             {
-                textWriter.Write(new string(' ', _padLength));
+                textWriter.Write(new string(' ', _padLength + 24));
                 textWriter.Write(" | ");
                 textWriter.WriteLine(line);
             }
