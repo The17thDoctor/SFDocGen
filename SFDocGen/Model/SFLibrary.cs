@@ -41,14 +41,10 @@ public record SFLibrary : SFDocElement, IHasRealm
 }
 
 
-public record SFLibraryFunction: SFDocElement, IHasRealm, IHasTypedParams, IReturnsValue, ICanBeGeneric, IChildObject<SFLibrary>
+public record SFLibraryFunction: SFFunction, IChildObject<SFLibrary>
 {
     [JsonIgnore]
     public SFLibrary Parent { get; init; } = default!;
-    public Realm Realm { get; set; } = Realm.Shared;
-    public List<string> GenericTypes { get; set; } = [];
-    public List<SFParameter> Parameters { get; set; } = [];
-    public List<SFReturnValue> ReturnValues { get; set; } = [];
 
     public override string ToLuaDoc()
     {
@@ -88,7 +84,13 @@ public record SFLibraryFunction: SFDocElement, IHasRealm, IHasTypedParams, IRetu
             sb.AppendJoin("\n", ReturnValues.Select(rv => rv.ToLuaDoc()));
             sb.AppendLine();
         }
-        
+
+        if (Overloads.Count > 0)
+        {
+            sb.AppendJoin("\n", Overloads.Select(o => o.ToLuaDoc()));
+            sb.AppendLine();
+        }
+
         sb.Append($"function {Parent.DocName ?? Parent.Name}.{Name}(");
         sb.AppendJoin(", ", Parameters.Select(p => p.Name));
         sb.AppendLine(") end");

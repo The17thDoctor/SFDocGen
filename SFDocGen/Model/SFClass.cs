@@ -81,13 +81,10 @@ public record SFClassField : SFDocValue, IChildObject<SFClass>
 /// <summary>
 /// Represents a method of a lua class.
 /// </summary>
-public record SFClassMethod : SFDocElement, IHasTypedParams, IReturnsValue, ICanBeGeneric, IChildObject<SFClass>
+public record SFClassMethod : SFFunction, IChildObject<SFClass>
 {
     [JsonIgnore]
     public SFClass Parent { get; init; } = default!;
-    public List<string> GenericTypes { get; set; } = [];
-    public List<SFParameter> Parameters { get; set; } = [];
-    public List<SFReturnValue> ReturnValues { get; set; } = [];
 
     public override string ToLuaDoc()
     {
@@ -117,7 +114,13 @@ public record SFClassMethod : SFDocElement, IHasTypedParams, IReturnsValue, ICan
             sb.AppendJoin("\n", ReturnValues.Select(rv => rv.ToLuaDoc()));
             sb.AppendLine();
         }
-   
+
+        if (Overloads.Count > 0)
+        {
+            sb.AppendJoin("\n", Overloads.Select(o => o.ToLuaDoc()));
+            sb.AppendLine();
+        }
+
         sb.Append($"function {Parent.Name}:{Name}(");
         sb.AppendJoin(", ", Parameters.Select(p => p.Name));
         sb.AppendLine(") end");

@@ -92,13 +92,15 @@ file static class CorrecterExtensions
         }
     }
 
-    public static void ApplyCorrection(this SFLibraryFunction function, SFLibraryFunction correction)
+    public static void ApplyCorrection(this SFFunction function, SFFunction correction)
     {
         function.ApplyCorrection((SFDocElement)correction);
         function.ApplyCorrection((IHasRealm)correction);
         function.ApplyCorrection((IHasTypedParams)correction);
         function.ApplyCorrection((IReturnsValue)correction);
         function.ApplyCorrection((ICanBeGeneric)correction);
+
+        function.Overloads = correction.Overloads;
     }
 
     public static void ApplyCorrection(this SFDirective directive, SFDirective correction)
