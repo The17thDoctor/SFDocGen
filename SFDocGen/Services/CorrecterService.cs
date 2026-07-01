@@ -173,7 +173,7 @@ file static class CorrecterExtensions
                 }
                 else if (ret == null)
                 {
-                    returns.ReturnValues[i] = corr!;
+                    returns.ReturnValues.Insert(i, corr!);
                 }
             }
         }
