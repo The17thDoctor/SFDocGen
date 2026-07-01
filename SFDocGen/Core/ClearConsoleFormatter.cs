@@ -23,7 +23,7 @@ public class ClearConsoleFormatter() : ConsoleFormatter(nameof(ClearConsoleForma
     public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider? scopeProvider, TextWriter textWriter)
     {
         // Timestamp
-        textWriter.Write($"[{DateTime.Now:HH:mm:ss.fff}] ");
+        textWriter.Write($"[{DateTime.Now:yyyy/MM/dd}] [{DateTime.Now:HH:mm:ss}] ");
 
         // Log Level (with color)
         WriteANSI(textWriter, ColorPalette[logEntry.LogLevel]);

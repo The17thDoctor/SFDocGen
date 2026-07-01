@@ -40,7 +40,7 @@ public class DocsController(IServiceProvider provider, StorageManager storage) :
         TimeSpan elapsedSinceLastFetch = (DateTime.Now - LastFetch);
         if (elapsedSinceLastFetch < MinFetchDelay)
         {
-            int seconds = (MinFetchDelay - elapsedSinceLastFetch).Seconds;
+            long seconds = (long)(MinFetchDelay - elapsedSinceLastFetch).TotalSeconds;
 
             Response.Headers.RetryAfter = seconds.ToString();
             return StatusCode(StatusCodes.Status429TooManyRequests, $"Please retry in {seconds} second(s).");
