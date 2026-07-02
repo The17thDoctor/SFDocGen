@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Console;
 using SFDocGen.Core;
 using SFDocGen.Services;
