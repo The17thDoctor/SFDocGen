@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Logging.Console;
+using SFDocGen.Components;
 using SFDocGen.Core;
 using SFDocGen.Services;
 
@@ -9,6 +10,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        /* ------- BUILDER ------- */
         var builder = WebApplication.CreateBuilder(args);
         builder.Host.ConfigureHostOptions(options =>
         {
@@ -23,16 +25,21 @@ public class Program
         });
 
         builder.Services.AddControllers();
+        builder.Services.AddHttpClient();
         builder.Services.AddOpenApi();
 
-        builder.Services.AddHostedService<UpdateScheduler>();
+        // Razor
+        builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
+        // API & Lua Generation
         builder.Services.AddSingleton<StorageManager>();
         builder.Services.AddSingleton<FetchService>();
         builder.Services.AddSingleton<ParserService>();
         builder.Services.AddSingleton<LuaGenerator>();
         builder.Services.AddSingleton<CorrecterService>();
+        builder.Services.AddHostedService<UpdateScheduler>();
 
+        // Proxy support
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
@@ -40,10 +47,21 @@ public class Program
             options.KnownProxies.Clear();
         });
 
-        builder.Services.AddHttpClient();
 
+        /* ------- APPLICATION ------- */
         var app = builder.Build();
+
+        // Initialize Storage
+        using (var scope = app.Services.CreateScope())
+        {
+            var storage = scope.ServiceProvider.GetRequiredService<StorageManager>();
+            storage.CreateStorageFolder();
+        }
+
+        // Proxy
         app.UseForwardedHeaders();
+
+        // API & Swagger
         app.UseStaticFiles();
         app.MapOpenApi();
         app.UseSwaggerUI(options =>
@@ -54,14 +72,11 @@ public class Program
         app.UseAuthorization();
         app.MapControllers();
 
-        app.MapGet("/", () => Results.LocalRedirect("/index.html", permanent: true, preserveMethod: true));
+        // Razor
+        app.UseAntiforgery();
+        app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
-        using (var scope = app.Services.CreateScope())
-        {
-            var storage = scope.ServiceProvider.GetRequiredService<StorageManager>();
-            storage.CreateStorageFolder();
-        }
-
+        // Run
         app.Run();
     }
 }
