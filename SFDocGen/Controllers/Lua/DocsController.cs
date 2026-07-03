@@ -2,7 +2,10 @@
 using Model;
 using SFDocGen.Controllers.Abstraction;
 using SFDocGen.Core;
+using SFDocGen.Model;
+using SFDocGen.Model.Abstraction;
 using SFDocGen.Services;
+using System.Collections;
 using System.Net.Mime;
 
 namespace SFDocGen.Controllers.Lua;
@@ -25,6 +28,19 @@ public class DocsController(IServiceProvider provider, StorageManager storage) :
     public ActionResult<SFDocRoot> GetDocumentation()
     {
         return Json(Documentation, SerializerOptions);
+    }
+
+    [Tags("Documentation")]
+    [HttpGet("search")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [EndpointSummary("Returns a list of elements that may match the given term")]
+    public ActionResult<IEnumerable<SearchResult>> Search([FromQuery] string term)
+    {
+        List<SearchResult> results = [];
+        RecursiveSearch(ref results, Storage.Documentation, term.ToLower());
+        results.Sort();
+
+        return Json(results, SerializerOptions);
     }
 
     [Tags("Documentation")]
@@ -54,5 +70,28 @@ public class DocsController(IServiceProvider provider, StorageManager storage) :
         _luaGenerator.GenerateLuaDoc();
 
         return Ok();
+    }
+
+    private static void RecursiveSearch(ref List<SearchResult> results, object item, string searchTerm)
+    {
+        Type objType = item.GetType();
+        foreach (var property in objType.GetProperties())
+        {
+            if (!property.PropertyType.IsGenericType || property.PropertyType.GetGenericTypeDefinition() != typeof(Dictionary<,>)) continue;
+            if (!property.PropertyType.GenericTypeArguments[1].IsAssignableTo(typeof(SFDocValue))) continue;
+
+            IDictionary a = (IDictionary)property.GetMethod?.Invoke(item, null)!;
+            foreach (DictionaryEntry entry in a)
+            {
+                SFDocValue value = (SFDocValue)entry.Value!;
+                RecursiveSearch(ref results, value, searchTerm);
+                SearchResult result = new(value);
+
+                if (result.Name.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    results.Add(result);
+                }
+            }
+        }
     }
 }
