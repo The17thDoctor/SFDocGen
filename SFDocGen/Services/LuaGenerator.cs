@@ -38,6 +38,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage, 
         minWriter.WriteLine("---@meta Starfall");
         AddDiagnostic(minWriter, "keyword", "assign-type-mismatch");
 
+        WriteAliases(documentation, minWriter);
         WriteHooks(documentation, minWriter);
         WriteDirectives(documentation, minWriter);
 
@@ -150,6 +151,24 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage, 
         MultiWrite("---@overload fun(hookName: string, name: string, callback?: function)", hookWriter, minWriter);
         MultiWriteLine(null, hookWriter, minWriter);
         MultiWrite("hook = nil", hookWriter, minWriter);
+        minWriter.WriteLine();
+    }
+
+    private void WriteAliases(SFDocRoot documentation, TextWriter minWriter)
+    {
+        string aliasPath = Path.Combine(_luaFolders.Aliases, "aliases.lua");
+        using StreamWriter aliasWriter = new(File.OpenWrite(aliasPath));
+
+        aliasWriter.WriteLine("---@meta Aliases");
+
+        MultiWrite("\n", aliasWriter, minWriter);
+
+        foreach (var alias in documentation.Aliases.Values.OrderBy(h => h.Name))
+        {
+            MultiWriteLine(alias.ToLuaDoc(), aliasWriter, minWriter);
+            MultiWrite("\n", aliasWriter, minWriter);
+        }
+
         minWriter.WriteLine();
     }
 

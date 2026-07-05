@@ -82,7 +82,7 @@ public record SFLibrary : SFDocElement, IHasRealm
 public record SFLibraryFunction: SFFunction, IChildObject<SFLibrary>
 {
     [JsonIgnore]
-    public SFLibrary Parent { get; init; } = default!;
+    public SFLibrary Parent { get; set; } = default!;
 
     public override string ToLuaDoc()
     {
@@ -140,7 +140,7 @@ public record SFLibraryFunction: SFFunction, IChildObject<SFLibrary>
 public record SFLibraryField : SFDocValue, IChildObject<SFLibrary>
 {
     [JsonIgnore]
-    public SFLibrary Parent { get; init; } = default!;
+    public SFLibrary Parent { get; set; } = default!;
     public string Type { get; set; } = "unknown";
     public string Value { get; set; } = "nil";
 
@@ -156,7 +156,7 @@ public record SFLibraryField : SFDocValue, IChildObject<SFLibrary>
 public record SFLibraryTable : SFDocValue, IChildObject<SFLibrary>
 {
     [JsonIgnore]
-    public SFLibrary Parent { get; init; } = default!;
+    public SFLibrary Parent { get; set; } = default!;
 
     public override string ToLuaDoc()
     {

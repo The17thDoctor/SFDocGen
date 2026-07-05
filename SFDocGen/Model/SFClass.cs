@@ -60,7 +60,7 @@ public record SFClass : SFDocElement, IHasRealm
 public record SFClassField : SFDocValue, IChildObject<SFClass>
 {
     [JsonIgnore]
-    public SFClass Parent { get; init; } = default!;
+    public SFClass Parent { get; set; } = default!;
     public string? Type { get; set; }
 
     public override string ToLuaDoc()
@@ -84,7 +84,7 @@ public record SFClassField : SFDocValue, IChildObject<SFClass>
 public record SFClassMethod : SFFunction, IChildObject<SFClass>
 {
     [JsonIgnore]
-    public SFClass Parent { get; init; } = default!;
+    public SFClass Parent { get; set; } = default!;
 
     public override string ToLuaDoc()
     {
@@ -135,7 +135,7 @@ public record SFClassMethod : SFFunction, IChildObject<SFClass>
 public record SFClassOperator : SFDocElement, IReturnsValue, IChildObject<SFClass>
 {
     [JsonIgnore]
-    public SFClass Parent { get; init; } = default!;
+    public SFClass Parent { get; set; } = default!;
     public List<SFReturnValue> ReturnValues { get; set; } = [];
     public string LeftOperand { get; set; } = string.Empty;
     public string? RightOperand { get; set; }

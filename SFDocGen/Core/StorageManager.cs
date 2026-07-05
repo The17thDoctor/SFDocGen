@@ -37,6 +37,7 @@ public class StorageManager
         {
             public readonly string Root = Path.Combine(root, "Lua");
 
+            public readonly string Aliases = Path.Combine(root, "Lua");
             public readonly string Classes = Path.Combine(root, "Lua", "classes");
             public readonly string Dependencies = Path.Combine(root, "Lua", "dependencies");
             public readonly string Directives = Path.Combine(root, "Lua");

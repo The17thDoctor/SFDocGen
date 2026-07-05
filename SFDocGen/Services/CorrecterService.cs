@@ -2,7 +2,6 @@
 using SFDocGen.Core;
 using SFDocGen.Model;
 using SFDocGen.Model.Abstraction;
-using System.Text.Json;
 
 namespace SFDocGen.Services;
 
@@ -11,9 +10,11 @@ public class CorrecterService(ConfigManager configs)
     public void ApplyCorrection(SFDocRoot documentation)
     {
         SFDocRoot corrections = configs.GetCorrections();
+        CorrecterExtensions.ApplyDict(documentation.Aliases, corrections.Aliases, CorrecterExtensions.ApplyCorrection);
         CorrecterExtensions.ApplyDict(documentation.Hooks, corrections.Hooks, CorrecterExtensions.ApplyCorrection);
         CorrecterExtensions.ApplyDict(documentation.Libraries, corrections.Libraries, CorrecterExtensions.ApplyCorrection);
         CorrecterExtensions.ApplyDict(documentation.Classes, corrections.Classes, CorrecterExtensions.ApplyCorrection);
+        CorrecterExtensions.ApplyDict(documentation.Tables, corrections.Tables, CorrecterExtensions.ApplyCorrection);
     }
 }
 
@@ -25,6 +26,12 @@ file static class CorrecterExtensions
         hook.ApplyCorrection((IHasRealm)correction);
         hook.ApplyCorrection((IHasTypedParams)correction);
         hook.ApplyCorrection((IReturnsValue)correction);
+    }
+
+    public static void ApplyCorrection(this SFTypeAlias alias, SFTypeAlias correction)
+    {
+        alias.ApplyCorrection((SFDocValue)correction);
+        alias.Types = correction.Types;
     }
 
     public static void ApplyCorrection(this SFLibrary library, SFLibrary correction)
@@ -45,6 +52,20 @@ file static class CorrecterExtensions
         ApplyDict(cl.Methods, correction.Methods, ApplyCorrection);
         ApplyDict(cl.Fields, correction.Fields, ApplyCorrection);
         ApplyDict(cl.Operators, correction.Operators, ApplyCorrection);
+    }
+
+    public static void ApplyCorrection(this SFTable table, SFTable correction)
+    {
+        table.ApplyCorrection((SFDocElement)correction);
+        table.ApplyCorrection((IHasRealm)correction);
+
+        ApplyDict(table.Fields, correction.Fields, ApplyCorrection);
+    }
+
+    public static void ApplyCorrection(this SFTableField field, SFTableField correction)
+    {
+        field.Type ??= correction.Type;
+        field.DefaultValue ??= correction.DefaultValue;
     }
 
     public static void ApplyCorrection(this SFClassField field, SFClassField correction)
