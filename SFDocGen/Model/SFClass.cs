@@ -12,9 +12,9 @@ public record SFClass : SFDocElement, IHasRealm
 {
     public string? SuperType { get; set; }
     public Realm Realm { get; set; }
-    public List<SFClassField> Fields { get; set; } = [];
-    public List<SFClassMethod> Methods { get; set; } = [];
-    public List<SFClassOperator> Operators { get; set; } = [];
+    public Dictionary<string, SFClassField> Fields { get; set; } = [];
+    public Dictionary<string, SFClassMethod> Methods { get; set; } = [];
+    public Dictionary<string, SFClassOperator> Operators { get; set; } = [];
 
     public override string ToLuaDoc()
     {
@@ -29,15 +29,15 @@ public record SFClass : SFDocElement, IHasRealm
 
         sb.AppendLine();
 
-        if (Operators.Any(o => o.IsSupported))
+        if (Operators.Values.Any(o => o.IsSupported))
         {
-            sb.AppendJoin("\n", Operators.Where(o => o.IsSupported).Select(o => o.ToLuaDoc()));
+            sb.AppendJoin("\n", Operators.Values.Where(o => o.IsSupported).Select(o => o.ToLuaDoc()));
             sb.AppendLine();
         }
 
         if (Fields.Count > 0)
         {
-            sb.AppendJoin("\n", Fields.Select(f => f.ToLuaDoc()));
+            sb.AppendJoin("\n", Fields.Values.Select(f => f.ToLuaDoc()));
             sb.AppendLine();
         }
 
@@ -47,7 +47,7 @@ public record SFClass : SFDocElement, IHasRealm
         if (Methods.Count > 0)
         {
             sb.AppendLine();
-            sb.AppendJoin("\n\n", Methods.Select(m => m.ToLuaDoc()));
+            sb.AppendJoin("\n\n", Methods.Values.Select(m => m.ToLuaDoc()));
         }
 
         return sb.ToString();
@@ -61,12 +61,12 @@ public record SFClassField : SFDocValue, IChildObject<SFClass>
 {
     [JsonIgnore]
     public SFClass Parent { get; init; } = default!;
-    public string Type { get; set; } = "unknown";    
+    public string? Type { get; set; }
 
     public override string ToLuaDoc()
     {
         StringBuilder sb = new();
-        sb.Append($"---@field {Name} {Type}");
+        sb.Append($"---@field {Name} {Type ?? "unknown"}");
         
         if (Description != null)
         {

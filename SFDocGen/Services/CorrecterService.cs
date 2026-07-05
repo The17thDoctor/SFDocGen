@@ -92,6 +92,60 @@ file static class CorrecterExtensions
         }
     }
 
+    public static void ApplyCorrection(this SFClass cl, SFClass correction)
+    {
+        cl.ApplyCorrection((SFDocElement)correction);
+        cl.ApplyCorrection((IHasRealm)correction);
+
+        foreach (var entry in correction.Methods)
+        {
+            if (!cl.Methods.TryGetValue(entry.Key, out var method))
+            {
+                cl.Methods.Add(entry.Key, entry.Value);
+                continue;
+            }
+
+            method.ApplyCorrection(entry.Value);
+        }
+
+        foreach (var entry in correction.Fields)
+        {
+            if (!cl.Fields.TryGetValue(entry.Key, out var field))
+            {
+                cl.Fields.Add(entry.Key, entry.Value);
+                continue;
+            }
+
+            field.ApplyCorrection(entry.Value);
+        }
+
+        foreach (var entry in correction.Operators)
+        {
+            if (!cl.Operators.TryGetValue(entry.Key, out var op))
+            {
+                cl.Operators.Add(entry.Key, entry.Value);
+                continue;
+            }
+
+            op.ApplyCorrection(entry.Value);
+        }
+    }
+
+    public static void ApplyCorrection(this SFClassField field, SFClassField correction)
+    {
+        field.ApplyCorrection((SFDocValue)correction);
+        field.Type ??= correction.Type;
+    }
+
+    public static void ApplyCorrection(this SFClassOperator op, SFClassOperator correction)
+    {
+        op.ApplyCorrection((SFDocElement)correction);
+        op.ApplyCorrection((IReturnsValue)correction);
+
+        op.LeftOperand = correction.LeftOperand != string.Empty ? correction.LeftOperand : op.LeftOperand;
+        op.RightOperand ??= correction.RightOperand;
+    }
+
     public static void ApplyCorrection(this SFFunction function, SFFunction correction)
     {
         function.ApplyCorrection((SFDocElement)correction);
