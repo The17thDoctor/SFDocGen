@@ -21,8 +21,6 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
         }
 
         // Delete previous files to avoid conflicts.
-        File.Delete(storage.Files.ImprovedDoc);
-        File.Delete(storage.Files.ImprovedDocSchema);
         File.Delete(storage.Files.MinifiedLuaDocs);
 
         Directory.CreateDirectory(_luaFolders.Root);

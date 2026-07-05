@@ -82,6 +82,10 @@ public class ParserService
         _correcterService.ApplyCorrection(doc);
         _storage.Documentation = doc;
 
+        // Delete old files to avoid issues
+        File.Delete(_storage.Files.ImprovedDoc);
+        File.Delete(_storage.Files.ImprovedDocSchema);
+
         // Write Starfall Documentation & Schema to file.
         using FileStream stream = File.OpenWrite(_storage.Files.ImprovedDoc);
         JsonSerializer.Serialize(stream, doc, SerializerOptions);
