@@ -39,7 +39,7 @@ public record SFTableField : SFDocValue, IChildObject<SFTable>
     public override string ToLuaDoc()
     {
         StringBuilder sb = new();
-        sb.Append($"---@field {Name} {Type}");
+        sb.Append($"---@type {Type}");
 
         if (Description != null)
         {
