@@ -27,12 +27,6 @@ public class StorageManager
         Directory.CreateDirectory(Folders.Root);
     }
 
-    public List<Dependency> ReadDependencies()
-    {
-        if (!File.Exists(Files.DependenciesManifest)) return [];
-        return JsonSerializer.Deserialize<List<Dependency>>(File.ReadAllText(Files.DependenciesManifest)) ?? [];
-    }
-
     public class StorageFolders(string root)
     {
         public readonly string Root = root;
@@ -57,8 +51,6 @@ public class StorageManager
         public readonly string OriginalDoc = Path.Combine(root, "docs-original.json");
         public readonly string ImprovedDoc = Path.Combine(root, "docs-improved.json");
         public readonly string ImprovedDocSchema = Path.Combine(root, "docs-improved.schema.json");
-        public readonly string CorrectionsFile = Path.Combine(root, "docs-corrections.json");
         public readonly string MinifiedLuaDocs = Path.Combine(root, "starfall.min.lua");
-        public readonly string DependenciesManifest = Path.Combine(root, "dependencies.json");
     }
 }

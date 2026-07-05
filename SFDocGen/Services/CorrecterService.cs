@@ -6,19 +6,11 @@ using System.Text.Json;
 
 namespace SFDocGen.Services;
 
-public class CorrecterService(ILogger<CorrecterService> logger, StorageManager storage)
+public class CorrecterService(ConfigManager configs)
 {
     public void ApplyCorrection(SFDocRoot documentation)
     {
-        string json = File.Exists(storage.Files.CorrectionsFile) ? File.ReadAllText(storage.Files.CorrectionsFile) : "{}";
-        SFDocRoot? corrections = JsonSerializer.Deserialize<SFDocRoot>(json);
-
-        if (corrections == null)
-        {
-            logger.LogWarning("Corrections file not found.");
-            return;
-        }
-
+        SFDocRoot corrections = configs.GetCorrections();
         CorrecterExtensions.ApplyDict(documentation.Hooks, corrections.Hooks, CorrecterExtensions.ApplyCorrection);
         CorrecterExtensions.ApplyDict(documentation.Libraries, corrections.Libraries, CorrecterExtensions.ApplyCorrection);
         CorrecterExtensions.ApplyDict(documentation.Classes, corrections.Classes, CorrecterExtensions.ApplyCorrection);

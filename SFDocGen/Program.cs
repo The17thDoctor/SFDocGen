@@ -28,6 +28,8 @@ public class Program
         builder.Services.AddHostedService<UpdateScheduler>();
 
         builder.Services.AddSingleton<StorageManager>();
+        builder.Services.AddSingleton<ConfigManager>();
+
         builder.Services.AddSingleton<FetchService>();
         builder.Services.AddSingleton<ParserService>();
         builder.Services.AddSingleton<LuaGenerator>();

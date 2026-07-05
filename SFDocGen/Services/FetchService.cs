@@ -1,9 +1,8 @@
 ﻿using SFDocGen.Core;
-using SFDocGen.Model;
 
 namespace SFDocGen.Services;
 
-public class FetchService(IConfiguration configuration, IHttpClientFactory factory, ILogger<FetchService> logger, StorageManager storage)
+public class FetchService(IConfiguration configuration, IHttpClientFactory factory, ILogger<FetchService> logger, StorageManager storage, ConfigManager configs)
 {
     protected HttpClient FetchClient { get; } = factory.CreateClient();
 
@@ -22,12 +21,10 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
         FetchFile(docUri, storage.Files.OriginalDoc);
 
         // Fetch Dependencies
-        if (!File.Exists(storage.Files.DependenciesManifest)) return;
-
         if (Directory.Exists(storage.Folders.DependenciesFolder)) Directory.Delete(storage.Folders.DependenciesFolder, true);
         Directory.CreateDirectory(storage.Folders.DependenciesFolder);
 
-        Parallel.ForEach(storage.ReadDependencies(), dep =>
+        Parallel.ForEach(configs.GetDependencies(), dep =>
         {
             FetchFile(dep.Uri, Path.Combine(storage.Folders.DependenciesFolder, dep.Name));
         });

@@ -7,7 +7,7 @@ namespace SFDocGen.Services;
 /// <summary>
 /// Generates the LuaLS formatted documentation from the current data.
 /// </summary>
-public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
+public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage, ConfigManager configs)
 {
     private readonly StorageManager.StorageFolders.LuaDocFolders _luaFolders = storage.Folders.LuaDoc;
 
@@ -56,7 +56,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
             WriteTable(minWriter, table);
         }
 
-        foreach (Dependency dep in storage.ReadDependencies())
+        foreach (Dependency dep in configs.GetDependencies())
         {
             string srcPath = Path.Combine(storage.Folders.DependenciesFolder, dep.Name);
             string dstPath = Path.Combine(storage.Folders.LuaDoc.Dependencies, dep.Name);
