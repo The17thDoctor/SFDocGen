@@ -7,5 +7,5 @@
 /// <typeparam name="TParent">The type of the parent object.</typeparam>
 public interface IChildObject<TParent>
 {
-    TParent Parent { get; }
+    TParent Parent { get; set; }
 }

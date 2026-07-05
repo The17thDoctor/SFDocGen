@@ -14,6 +14,9 @@ public record SFLibrary : SFDocElement, IHasRealm
 
     public override string ToLuaDoc()
     {
+        // Special case for the builtin library.
+        if (Name == "builtin") return ToLuaDocBuiltin();
+
         StringBuilder sb = new();
         if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
         sb.Append($"{DocName ?? Name} = {{");
@@ -33,8 +36,43 @@ public record SFLibrary : SFDocElement, IHasRealm
             sb.AppendLine();
         }
 
-        sb.AppendLine("}\n");
-        sb.AppendJoin("\n\n", Functions.Values.OrderBy(f => f.Name).Select(f => f.ToLuaDoc()));
+        sb.Append('}');
+
+        if (Functions.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendJoin("\n\n", Functions.Values.OrderBy(f => f.Name).Select(f => f.ToLuaDoc()));
+        }
+
+        return sb.ToString();
+    }
+
+    protected string ToLuaDocBuiltin()
+    {
+        StringBuilder sb = new();
+        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
+        sb.AppendLine($"{DocName ?? Name} = {{}}");
+
+        if (Fields.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendJoin("\n\n", Fields.Values.OrderBy(f => f.Name).Select(f => f.ToLuaDoc()));
+            sb.AppendLine();
+        }
+
+        if (Tables.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendJoin("\n\n", Tables.Values.OrderBy(t => t.Name).Select(t => t.ToLuaDoc()));
+            sb.AppendLine();
+        }
+        
+        if (Functions.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendJoin("\n\n", Functions.Values.OrderBy(f => f.Name).Select(f => f.ToLuaDoc().Replace("_G.", "")));
+        }
 
         return sb.ToString();
     }
@@ -44,7 +82,7 @@ public record SFLibrary : SFDocElement, IHasRealm
 public record SFLibraryFunction: SFFunction, IChildObject<SFLibrary>
 {
     [JsonIgnore]
-    public SFLibrary Parent { get; init; } = default!;
+    public SFLibrary Parent { get; set; } = default!;
 
     public override string ToLuaDoc()
     {
@@ -102,7 +140,7 @@ public record SFLibraryFunction: SFFunction, IChildObject<SFLibrary>
 public record SFLibraryField : SFDocValue, IChildObject<SFLibrary>
 {
     [JsonIgnore]
-    public SFLibrary Parent { get; init; } = default!;
+    public SFLibrary Parent { get; set; } = default!;
     public string Type { get; set; } = "unknown";
     public string Value { get; set; } = "nil";
 
@@ -118,7 +156,7 @@ public record SFLibraryField : SFDocValue, IChildObject<SFLibrary>
 public record SFLibraryTable : SFDocValue, IChildObject<SFLibrary>
 {
     [JsonIgnore]
-    public SFLibrary Parent { get; init; } = default!;
+    public SFLibrary Parent { get; set; } = default!;
 
     public override string ToLuaDoc()
     {

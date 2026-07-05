@@ -33,6 +33,8 @@ public class Program
 
         // API & Lua Generation
         builder.Services.AddSingleton<StorageManager>();
+        builder.Services.AddSingleton<ConfigManager>();
+
         builder.Services.AddSingleton<FetchService>();
         builder.Services.AddSingleton<ParserService>();
         builder.Services.AddSingleton<LuaGenerator>();

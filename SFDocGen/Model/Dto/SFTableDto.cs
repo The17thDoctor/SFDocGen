@@ -18,7 +18,7 @@ public record SFTableDto
             Realm = DtoUtils.RealmFromBools(Server, Client)
         };
 
-        DtoUtils.PopulateList(Field, table.Fields, (name, fdto) => fdto.FromData(table, name));
+        DtoUtils.PopulateDict(Field, table.Fields, (name, fdto) => fdto.FromData(table, name));
 
         return table;
     }

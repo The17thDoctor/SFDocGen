@@ -46,7 +46,7 @@ public class TableController(StorageManager storage) : BaseDocumentationControll
     public ActionResult<SFTableField> GetLibraryField(string tableName, string fieldName)
     {
         var table = Documentation.Tables.GetValueOrDefault(tableName);
-        var field = table?.Fields.Find(f => f.Name == fieldName);
+        var field = table?.Fields.GetValueOrDefault(fieldName);
 
         return field != null ? Json(field, SerializerOptions) : NotFound();
     }

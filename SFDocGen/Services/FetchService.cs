@@ -2,7 +2,7 @@
 
 namespace SFDocGen.Services;
 
-public class FetchService(IConfiguration configuration, IHttpClientFactory factory, ILogger<FetchService> logger, StorageManager storage)
+public class FetchService(IConfiguration configuration, IHttpClientFactory factory, ILogger<FetchService> logger, StorageManager storage, ConfigManager configs)
 {
     protected HttpClient FetchClient { get; } = factory.CreateClient();
 
@@ -16,24 +16,39 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
             return;
         }
 
+        // Fetch SFDoc
         Uri docUri = new(docUriString);
-        logger.LogInformation("Fetching {URI}", docUri.ToString());
+        FetchFile(docUri, storage.Files.OriginalDoc);
+
+        // Fetch Dependencies
+        if (Directory.Exists(storage.Folders.DependenciesFolder)) Directory.Delete(storage.Folders.DependenciesFolder, true);
+        Directory.CreateDirectory(storage.Folders.DependenciesFolder);
+
+        Parallel.ForEach(configs.GetDependencies(), dep =>
+        {
+            FetchFile(dep.Uri, Path.Combine(storage.Folders.DependenciesFolder, dep.Name));
+        });
+    }
+
+    protected void FetchFile(Uri uri, string path)
+    {
+        logger.LogInformation("Fetching {URI}", uri);
         try
         {
-            using HttpResponseMessage response = FetchClient.GetAsync(docUri).Result;
+            using HttpResponseMessage response = FetchClient.GetAsync(uri).Result;
             response.EnsureSuccessStatusCode();
-            SaveFile(response.Content);
+
+            SaveFile(response.Content, path);
         }
         catch (HttpRequestException ex)
         {
-            logger.LogError("Failed to fetch documentation: {Message}", ex.Message);
+            logger.LogError(ex, "Failed to fetch documentation");
         }
     }
 
-    protected void SaveFile(HttpContent content)
+    protected void SaveFile(HttpContent content, string path)
     {
-        using Stream fileStream = File.OpenWrite(storage.Files.OriginalDoc);
+        using Stream fileStream = File.OpenWrite(path);
         content.CopyTo(fileStream, null, CancellationToken.None);
-        logger.LogInformation("Documentation saved.");
     }
 }

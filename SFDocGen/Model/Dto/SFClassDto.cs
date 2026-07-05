@@ -25,9 +25,9 @@ public record SFClassDto
             SuperType = SuperType
         };
 
-        DtoUtils.PopulateList(Field, cl.Fields, (name, fdto) => fdto.FromData(cl, name));
-        DtoUtils.PopulateList(Methods, cl.Methods, (name, mdto) => mdto.FromData(cl, name));
-        DtoUtils.PopulateList(Operators, cl.Operators, (name, odto) => odto.FromData(cl, name));
+        DtoUtils.PopulateDict(Field, cl.Fields, (name, fdto) => fdto.FromData(cl, name));
+        DtoUtils.PopulateDict(Methods, cl.Methods, (name, mdto) => mdto.FromData(cl, name));
+        DtoUtils.PopulateDict(Operators, cl.Operators, (name, odto) => odto.FromData(cl, name));
 
         return cl;
     }

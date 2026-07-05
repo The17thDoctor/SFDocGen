@@ -7,7 +7,7 @@ namespace SFDocGen.Model;
 public record SFTable : SFDocElement, IHasRealm
 {
     public Realm Realm { get; set; }
-    public List<SFTableField> Fields { get; set; } = [];
+    public Dictionary<string, SFTableField> Fields { get; set; } = [];
 
     public override string ToLuaDoc()
     {
@@ -16,13 +16,13 @@ public record SFTable : SFDocElement, IHasRealm
         if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
         sb.AppendLine($"---@class {Name}");
 
+        sb.AppendLine($"{Name} = {{}}");
+
         if (Fields.Count > 0)
         {
-            sb.AppendJoin("\n", Fields.Select(f => f.ToLuaDoc()));
             sb.AppendLine();
+            sb.AppendJoin("\n", Fields.Values.Select(f => f.ToLuaDoc()));
         }
-
-        sb.Append($"{Name} = {{}}");
 
         return sb.ToString();
     }
@@ -30,21 +30,25 @@ public record SFTable : SFDocElement, IHasRealm
 
 public record SFTableField : SFDocValue, IChildObject<SFTable>
 {
-    public string Type { get; set; } = string.Empty;
+    public string? Type { get; set; }
+    public string? DefaultValue { get; set; }
 
     [JsonIgnore]
-    public SFTable Parent { get; init; } = default!;
+    public SFTable Parent { get; set; } = default!;
 
     public override string ToLuaDoc()
     {
         StringBuilder sb = new();
-        sb.Append($"---@field {Name} {Type}");
+        sb.Append($"---@type {Type ?? "unknown"}");
 
         if (Description != null)
         {
             sb.Append(' ');
             sb.Append(Description.Replace("\n", "\n---"));
         }
+
+        sb.AppendLine();
+        sb.AppendLine($"{Parent.Name}.{Name} = {DefaultValue ?? "nil"}");
 
         return sb.ToString();
     }

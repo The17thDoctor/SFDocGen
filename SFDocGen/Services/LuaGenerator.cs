@@ -7,7 +7,7 @@ namespace SFDocGen.Services;
 /// <summary>
 /// Generates the LuaLS formatted documentation from the current data.
 /// </summary>
-public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
+public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage, ConfigManager configs)
 {
     private readonly StorageManager.StorageFolders.LuaDocFolders _luaFolders = storage.Folders.LuaDoc;
 
@@ -20,8 +20,12 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
             Directory.Delete(_luaFolders.Root, recursive: true);
         }
 
+        // Delete previous files to avoid conflicts.
+        File.Delete(storage.Files.MinifiedLuaDocs);
+
         Directory.CreateDirectory(_luaFolders.Root);
         Directory.CreateDirectory(_luaFolders.Classes);
+        Directory.CreateDirectory(_luaFolders.Dependencies);
         Directory.CreateDirectory(_luaFolders.Directives);
         Directory.CreateDirectory(_luaFolders.Hooks);
         Directory.CreateDirectory(_luaFolders.Libraries);
@@ -34,6 +38,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
         minWriter.WriteLine("---@meta Starfall");
         AddDiagnostic(minWriter, "keyword", "assign-type-mismatch");
 
+        WriteAliases(documentation, minWriter);
         WriteHooks(documentation, minWriter);
         WriteDirectives(documentation, minWriter);
 
@@ -50,6 +55,23 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
         foreach (var table in documentation.Tables.Values.OrderBy(t => t.Name))
         {
             WriteTable(minWriter, table);
+        }
+
+        foreach (Dependency dep in configs.GetDependencies())
+        {
+            string srcPath = Path.Combine(storage.Folders.DependenciesFolder, dep.Name);
+            string dstPath = Path.Combine(storage.Folders.LuaDoc.Dependencies, dep.Name);
+
+            logger.LogInformation("Copying external dependency: {name}", dep.Name);
+            File.Copy(srcPath, dstPath);
+
+            minWriter.WriteLine();
+            foreach (var line in File.ReadAllLines(dstPath))
+            {
+                if (line.StartsWith("---@meta")) continue;
+                minWriter.WriteLine(line);
+            }
+            minWriter.WriteLine();
         }
 
         logger.LogInformation("Lua documentation generated.");
@@ -129,6 +151,24 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
         MultiWrite("---@overload fun(hookName: string, name: string, callback?: function)", hookWriter, minWriter);
         MultiWriteLine(null, hookWriter, minWriter);
         MultiWrite("hook = nil", hookWriter, minWriter);
+        minWriter.WriteLine();
+    }
+
+    private void WriteAliases(SFDocRoot documentation, TextWriter minWriter)
+    {
+        string aliasPath = Path.Combine(_luaFolders.Aliases, "aliases.lua");
+        using StreamWriter aliasWriter = new(File.OpenWrite(aliasPath));
+
+        aliasWriter.WriteLine("---@meta Aliases");
+
+        MultiWrite("\n", aliasWriter, minWriter);
+
+        foreach (var alias in documentation.Aliases.Values.OrderBy(h => h.Name))
+        {
+            MultiWriteLine(alias.ToLuaDoc(), aliasWriter, minWriter);
+            MultiWrite("\n", aliasWriter, minWriter);
+        }
+
         minWriter.WriteLine();
     }
 

@@ -46,7 +46,7 @@ public class ClassController(StorageManager storage) : BaseDocumentationControll
     public ActionResult<SFClassMethod> GetClassMethod(string className, string methodName)
     {
         var cl = Documentation.Classes.GetValueOrDefault(className);
-        var method = cl?.Methods.Find(m => m.Name == methodName);
+        var method = cl?.Methods.GetValueOrDefault(methodName);
 
         return method != null ? Json(method, SerializerOptions) : NotFound();
     }
@@ -68,7 +68,7 @@ public class ClassController(StorageManager storage) : BaseDocumentationControll
     public ActionResult<SFClassField> GetClassField(string className, string fieldName)
     {
         var cl = Documentation.Classes.GetValueOrDefault(className);
-        var field = cl?.Fields.Find(f => f.Name == fieldName);
+        var field = cl?.Fields.GetValueOrDefault(fieldName);
 
         return field != null ? Json(field, SerializerOptions) : NotFound();
     }
@@ -90,7 +90,7 @@ public class ClassController(StorageManager storage) : BaseDocumentationControll
     public ActionResult<SFClassField> GetClassOperator(string className, string operatorName)
     {
         var cl = Documentation.Classes.GetValueOrDefault(className);
-        var op = cl?.Operators.Find(o => o.Name == operatorName);
+        var op = cl?.Operators.GetValueOrDefault(operatorName);
 
         return op != null ? Json(op, SerializerOptions) : NotFound();
     }
