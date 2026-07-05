@@ -19,38 +19,9 @@ public class CorrecterService(ILogger<CorrecterService> logger, StorageManager s
             return;
         }
 
-        foreach (var entry in corrections.Hooks)
-        {
-            if (!documentation.Hooks.TryGetValue(entry.Key, out var hook))
-            {
-                documentation.Hooks.Add(entry.Key, entry.Value);
-                continue;
-            }
-
-            hook.ApplyCorrection(entry.Value);
-        }
-
-        foreach (var entry in corrections.Libraries)
-        {
-            if (!documentation.Libraries.TryGetValue(entry.Key, out var library))
-            {
-                documentation.Libraries.Add(entry.Key, entry.Value);
-                continue;
-            }
-
-            library.ApplyCorrection(entry.Value);
-        }
-
-        foreach (var entry in corrections.Classes)
-        {
-            if (!documentation.Classes.TryGetValue(entry.Key, out var cl))
-            {
-                documentation.Classes.Add(entry.Key, entry.Value);
-                continue;
-            }
-
-            cl.ApplyCorrection(entry.Value);
-        }
+        CorrecterExtensions.ApplyDict(documentation.Hooks, corrections.Hooks, CorrecterExtensions.ApplyCorrection);
+        CorrecterExtensions.ApplyDict(documentation.Libraries, corrections.Libraries, CorrecterExtensions.ApplyCorrection);
+        CorrecterExtensions.ApplyDict(documentation.Classes, corrections.Classes, CorrecterExtensions.ApplyCorrection);
     }
 }
 
@@ -69,38 +40,9 @@ file static class CorrecterExtensions
         library.ApplyCorrection((SFDocElement)correction);
         library.ApplyCorrection((IHasRealm)correction);
 
-        foreach (var entry in correction.Functions)
-        {
-            if (!library.Functions.TryGetValue(entry.Key, out var function))
-            {
-                library.Functions.Add(entry.Key, entry.Value);
-                continue;
-            }
-
-            function.ApplyCorrection(entry.Value);
-        }
-
-        foreach (var entry in correction.Fields)
-        {
-            if (!library.Fields.TryGetValue(entry.Key, out var field))
-            {
-                library.Fields.Add(entry.Key, entry.Value);
-                continue;
-            }
-
-            field.ApplyCorrection(entry.Value);
-        }
-
-        foreach (var entry in correction.Tables)
-        {
-            if (!library.Tables.TryGetValue(entry.Key, out var table))
-            {
-                library.Tables.Add(entry.Key, entry.Value);
-                continue;
-            }
-
-            table.ApplyCorrection(entry.Value);
-        }
+        ApplyDict(library.Functions, correction.Functions, ApplyCorrection);
+        ApplyDict(library.Fields, correction.Fields, ApplyCorrection);
+        ApplyDict(library.Tables, correction.Tables, ApplyCorrection);
     }
 
     public static void ApplyCorrection(this SFClass cl, SFClass correction)
@@ -108,38 +50,9 @@ file static class CorrecterExtensions
         cl.ApplyCorrection((SFDocElement)correction);
         cl.ApplyCorrection((IHasRealm)correction);
 
-        foreach (var entry in correction.Methods)
-        {
-            if (!cl.Methods.TryGetValue(entry.Key, out var method))
-            {
-                cl.Methods.Add(entry.Key, entry.Value);
-                continue;
-            }
-
-            method.ApplyCorrection(entry.Value);
-        }
-
-        foreach (var entry in correction.Fields)
-        {
-            if (!cl.Fields.TryGetValue(entry.Key, out var field))
-            {
-                cl.Fields.Add(entry.Key, entry.Value);
-                continue;
-            }
-
-            field.ApplyCorrection(entry.Value);
-        }
-
-        foreach (var entry in correction.Operators)
-        {
-            if (!cl.Operators.TryGetValue(entry.Key, out var op))
-            {
-                cl.Operators.Add(entry.Key, entry.Value);
-                continue;
-            }
-
-            op.ApplyCorrection(entry.Value);
-        }
+        ApplyDict(cl.Methods, correction.Methods, ApplyCorrection);
+        ApplyDict(cl.Fields, correction.Fields, ApplyCorrection);
+        ApplyDict(cl.Operators, correction.Operators, ApplyCorrection);
     }
 
     public static void ApplyCorrection(this SFClassField field, SFClassField correction)
@@ -257,5 +170,25 @@ file static class CorrecterExtensions
         element.ApplyCorrection((SFDocValue)correction);
         element.Deprecated ??= correction.Deprecated;
         element.Usage ??= correction.Usage;
+    }
+
+    public static void ApplyDict<T>(Dictionary<string, T> dict, Dictionary<string, T> corrections, Action<T, T> correcter)
+    {
+        foreach (var kvp in corrections)
+        {
+            if (kvp.Value == null)
+            {
+                dict.Remove(kvp.Key);
+                continue;
+            }
+
+            if (!dict.TryGetValue(kvp.Key, out T? value))
+            {
+                dict.Add(kvp.Key, kvp.Value);
+                continue;
+            }
+
+            correcter(value, kvp.Value);
+        }
     }
 }

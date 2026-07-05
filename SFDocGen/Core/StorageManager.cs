@@ -1,4 +1,6 @@
 ﻿using Model;
+using SFDocGen.Model;
+using System.Text.Json;
 
 namespace SFDocGen.Core;
 
@@ -25,16 +27,24 @@ public class StorageManager
         Directory.CreateDirectory(Folders.Root);
     }
 
+    public List<Dependency> ReadDependencies()
+    {
+        if (!File.Exists(Files.DependenciesManifest)) return [];
+        return JsonSerializer.Deserialize<List<Dependency>>(File.ReadAllText(Files.DependenciesManifest)) ?? [];
+    }
+
     public class StorageFolders(string root)
     {
         public readonly string Root = root;
         public LuaDocFolders LuaDoc { get; } = new(root);
+        public readonly string DependenciesFolder = Path.Combine(root, "Dependencies");
 
         public class LuaDocFolders(string root)
         {
             public readonly string Root = Path.Combine(root, "Lua");
 
             public readonly string Classes = Path.Combine(root, "Lua", "classes");
+            public readonly string Dependencies = Path.Combine(root, "Lua", "dependencies");
             public readonly string Directives = Path.Combine(root, "Lua");
             public readonly string Hooks = Path.Combine(root, "Lua");
             public readonly string Libraries = Path.Combine(root, "Lua", "libraries");
@@ -49,5 +59,6 @@ public class StorageManager
         public readonly string ImprovedDocSchema = Path.Combine(root, "docs-improved.schema.json");
         public readonly string CorrectionsFile = Path.Combine(root, "docs-corrections.json");
         public readonly string MinifiedLuaDocs = Path.Combine(root, "starfall.min.lua");
+        public readonly string DependenciesManifest = Path.Combine(root, "dependencies.json");
     }
 }

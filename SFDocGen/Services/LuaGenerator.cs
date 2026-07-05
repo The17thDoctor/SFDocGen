@@ -25,6 +25,7 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
 
         Directory.CreateDirectory(_luaFolders.Root);
         Directory.CreateDirectory(_luaFolders.Classes);
+        Directory.CreateDirectory(_luaFolders.Dependencies);
         Directory.CreateDirectory(_luaFolders.Directives);
         Directory.CreateDirectory(_luaFolders.Hooks);
         Directory.CreateDirectory(_luaFolders.Libraries);
@@ -53,6 +54,23 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
         foreach (var table in documentation.Tables.Values.OrderBy(t => t.Name))
         {
             WriteTable(minWriter, table);
+        }
+
+        foreach (Dependency dep in storage.ReadDependencies())
+        {
+            string srcPath = Path.Combine(storage.Folders.DependenciesFolder, dep.Name);
+            string dstPath = Path.Combine(storage.Folders.LuaDoc.Dependencies, dep.Name);
+
+            logger.LogInformation("Copying external dependency: {name}", dep.Name);
+            File.Copy(srcPath, dstPath);
+
+            minWriter.WriteLine();
+            foreach (var line in File.ReadAllLines(dstPath))
+            {
+                if (line.StartsWith("---@meta")) continue;
+                minWriter.WriteLine(line);
+            }
+            minWriter.WriteLine();
         }
 
         logger.LogInformation("Lua documentation generated.");
