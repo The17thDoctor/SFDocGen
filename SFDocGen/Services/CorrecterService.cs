@@ -40,6 +40,17 @@ public class CorrecterService(ILogger<CorrecterService> logger, StorageManager s
 
             library.ApplyCorrection(entry.Value);
         }
+
+        foreach (var entry in corrections.Classes)
+        {
+            if (!documentation.Classes.TryGetValue(entry.Key, out var cl))
+            {
+                documentation.Classes.Add(entry.Key, entry.Value);
+                continue;
+            }
+
+            cl.ApplyCorrection(entry.Value);
+        }
     }
 }
 
