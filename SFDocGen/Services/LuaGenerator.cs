@@ -20,6 +20,11 @@ public class LuaGenerator(ILogger<LuaGenerator> logger, StorageManager storage)
             Directory.Delete(_luaFolders.Root, recursive: true);
         }
 
+        // Delete previous files to avoid conflicts.
+        File.Delete(storage.Files.ImprovedDoc);
+        File.Delete(storage.Files.ImprovedDocSchema);
+        File.Delete(storage.Files.MinifiedLuaDocs);
+
         Directory.CreateDirectory(_luaFolders.Root);
         Directory.CreateDirectory(_luaFolders.Classes);
         Directory.CreateDirectory(_luaFolders.Directives);
