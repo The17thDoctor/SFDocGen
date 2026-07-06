@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Model;
 using SFDocGen.Core;
-using SFDocGen.Model.Json;
+using SFDocGen.Model.Core;
+using SFDocGen.Model.Starfall;
 using System.Text.Json;
 
 namespace SFDocGen.Controllers.Abstraction;

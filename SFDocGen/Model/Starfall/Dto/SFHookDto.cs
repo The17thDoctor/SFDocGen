@@ -1,8 +1,9 @@
 ﻿using SFDocGen.Model.Abstraction;
-using SFDocGen.Model.Json;
+using SFDocGen.Model.Core;
+using SFDocGen.Model.Starfall;
 using System.Text.Json;
 
-namespace SFDocGen.Model.Dto;
+namespace SFDocGen.Model.Starfall.Dto;
 
 public record SFHookDto
 {

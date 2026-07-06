@@ -1,8 +1,8 @@
 ﻿using SFDocGen.Model.Abstraction;
-using SFDocGen.Model.Json;
+using SFDocGen.Model.Core;
 using System.Text.Json;
 
-namespace SFDocGen.Model.Dto;
+namespace SFDocGen.Model.Starfall.Dto;
 
 public class DtoUtils
 {
@@ -27,7 +27,7 @@ public class DtoUtils
         }
     }
 
-    public static void PopulateDict<T1, T2>(FancyDict<T1> srcDict, Dictionary<string, T2> dstDict, Func<string, T1, T2> constructor) where T1 : class
+    public static void PopulateDict<T1, T2>(FancyDict<T1> srcDict, IDictionary<string, T2> dstDict, Func<string, T1, T2> constructor) where T1 : class
     {
         foreach (var entry in srcDict.Data)
         {

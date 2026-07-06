@@ -1,7 +1,7 @@
 ﻿using SFDocGen.Model.Abstraction;
 using System.Text;
 
-namespace SFDocGen.Model;
+namespace SFDocGen.Model.Starfall;
 
 /// <summary>
 /// Represents a starfall hook.

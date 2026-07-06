@@ -1,8 +1,9 @@
 ﻿using SFDocGen.Model.Abstraction;
+using SFDocGen.Model.Core;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace SFDocGen.Model;
+namespace SFDocGen.Model.Starfall;
 
 /// <summary>
 /// Represents a Starfall documentation class (table with methods, operators, fields)
@@ -12,9 +13,16 @@ public record SFClass : SFDocElement, IHasRealm
 {
     public string? SuperType { get; set; }
     public Realm Realm { get; set; }
-    public Dictionary<string, SFClassField> Fields { get; set; } = [];
-    public Dictionary<string, SFClassMethod> Methods { get; set; } = [];
-    public Dictionary<string, SFClassOperator> Operators { get; set; } = [];
+    public ChildItemDictionnary<SFClass, string, SFClassField> Fields { get; set; }
+    public ChildItemDictionnary<SFClass, string, SFClassMethod> Methods { get; set; }
+    public ChildItemDictionnary<SFClass, string, SFClassOperator> Operators { get; set; }
+
+    public SFClass()
+    {
+        Fields = new(this);
+        Methods = new(this);
+        Operators = new(this);
+    }
 
     public override string ToLuaDoc()
     {

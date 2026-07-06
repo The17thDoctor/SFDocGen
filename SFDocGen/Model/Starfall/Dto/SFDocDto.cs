@@ -1,6 +1,6 @@
-﻿using SFDocGen.Model.Json;
+﻿using SFDocGen.Model.Core;
 
-namespace SFDocGen.Model.Dto;
+namespace SFDocGen.Model.Starfall.Dto;
 
 public record SFDocDto
 {

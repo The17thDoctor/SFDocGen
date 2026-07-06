@@ -1,4 +1,5 @@
 ﻿using SFDocGen.Model.Abstraction;
+using SFDocGen.Model.Starfall;
 
 namespace SFDocGen.Model;
 

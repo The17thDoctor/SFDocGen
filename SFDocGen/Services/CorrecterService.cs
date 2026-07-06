@@ -1,7 +1,6 @@
-﻿using Model;
-using SFDocGen.Core;
-using SFDocGen.Model;
+﻿using SFDocGen.Core;
 using SFDocGen.Model.Abstraction;
+using SFDocGen.Model.Starfall;
 
 namespace SFDocGen.Services;
 
@@ -185,7 +184,7 @@ file static class CorrecterExtensions
         element.Usage ??= correction.Usage;
     }
 
-    public static void ApplyDict<T>(Dictionary<string, T> dict, Dictionary<string, T> corrections, Action<T, T> correcter)
+    public static void ApplyDict<T>(IDictionary<string, T> dict, IDictionary<string, T> corrections, Action<T, T> correcter)
     {
         foreach (var kvp in corrections)
         {

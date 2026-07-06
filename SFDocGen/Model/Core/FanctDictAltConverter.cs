@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SFDocGen.Model.Json;
+namespace SFDocGen.Model.Core;
 
 public class FancyDictAltConverter : JsonConverter<FancyDict<string>>
 {

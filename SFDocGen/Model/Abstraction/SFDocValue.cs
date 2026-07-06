@@ -8,6 +8,10 @@ public abstract record SFDocValue
 {
     public string? Name { get; set; }
     public string? Description { get; set; }
+
+    /// <summary>
+    /// Returns a LuaLS representation of this documentation value.
+    /// </summary>
     public abstract string ToLuaDoc();
 }
 

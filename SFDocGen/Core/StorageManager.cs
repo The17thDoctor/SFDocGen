@@ -1,5 +1,5 @@
-﻿using Model;
-using SFDocGen.Model;
+﻿using SFDocGen.Model;
+using SFDocGen.Model.Starfall;
 using System.Text.Json;
 
 namespace SFDocGen.Core;
