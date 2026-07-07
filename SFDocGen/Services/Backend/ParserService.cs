@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
 
-namespace SFDocGen.Services;
+namespace SFDocGen.Services.Backend;
 
 public class ParserService
 {

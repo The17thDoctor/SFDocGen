@@ -3,9 +3,16 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
 @using SFDocGen
 @using SFDocGen.Components
 @using SFDocGen.Components.Layout
+@using SFDocGen.Core
+@using SFDocGen.Model
+@using SFDocGen.Model.Json
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using MudBlazor
+
+@inject StorageManager Storage
+@inject NavigationManager Navigation

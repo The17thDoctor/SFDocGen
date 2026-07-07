@@ -1,23 +1,110 @@
-﻿@inherits LayoutComponentBase
+﻿@using SFDocGen.Model.Abstraction
+@inherits LayoutComponentBase
+@inject StorageManager Storage
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<MudThemeProvider @bind-IsDarkMode="IsDarkMode" Theme="@_theme" @rendermode="InteractiveServer" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+<MudLayout>
+    <MudAppBar Gutters="false" Class="pr-4" Elevation="2">
+        <MudContainer Style="width: 240px" Class="px-auto mr-4">
+            <MudText Style="font-weight: 900" Align="Align.Center" Typo="@Typo.h5">✨SFDOCGEN✨</MudText>
+        </MudContainer>
+        <MudButton Href="/swagger" Color="Color.Inherit">
+            <MudIcon Icon="@Icons.Material.Filled.Api" Class="me-2"/>
+            <MudText Typo="Typo.button">API Documentation</MudText>
+        </MudButton>
+        <MudSpacer />
+        <MudTooltip Text="@($"Switch to {(IsDarkMode ? "light" : "dark")} mode")">
+            <MudToggleIconButton @bind-Toggled="IsDarkMode"
+                                 Color="Color.Inherit"
+                                 Icon="@Icons.Material.Filled.LightMode"
+                                 ToggledColor="Color.Inherit"
+                                 ToggledIcon="@Icons.Material.Filled.DarkMode"
+                                 title="@(IsDarkMode ? "Dark" : "Light")" />
+        </MudTooltip>
+        <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
+        <MudTooltip Text="Check out the source code!">
+            <MudIconButton Target="_blank" ButtonType="ButtonType.Button" Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/The17thDoctor/SFDocGen" />
+        </MudTooltip>
+    </MudAppBar>
+    <MudDrawer Width="320px" Open Elevation="2" Class="z-100" ClipMode="@DrawerClipMode.Docked">
+        <MudNavMenu Rounded="true" Margin="Margin.Dense" Class="pa-2">
+            <MudTreeView ExpandOnClick Dense Items="TreeItems">
+                <ItemTemplate> 
+                    @{
+                        var presenter = context as SFDocValuePresenter;
+                    }
+                    <MudTreeViewItem @bind-Items="@context.Children" Text="@context.Text" TextTypo="Typo.caption">
+                        <BodyContent Context="bodyContext">
+                            @if (presenter?.DocValue is IHasRealm realmValue)
+                            {
+                                <MudImage Src="@RealmPicture(realmValue)" Height="16" Class="pr-2" />
+                            }
+                            <MudText Typo="Typo.body1">@(context.Value ?? context.Text)</MudText>
+                        </BodyContent>
+                    </MudTreeViewItem>
+                </ItemTemplate>
+            </MudTreeView>
+        </MudNavMenu>
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
             @Body
-        </article>
-    </main>
-</div>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+@code
+{
+    public bool IsDarkMode { get; set; } = true;
+    public List<TreeItemData<string>> TreeItems { get; set; } = [];
+    private MudTheme _theme = new();
+
+    protected override void OnInitialized()
+    {
+        PopulateTree();
+        base.OnInitialized();
+    }
+
+    protected void PopulateTree()
+    {
+        var sfdoc = Storage.Documentation;
+
+        var hookItem = CreateItem("Hooks", Icons.Material.Filled.Webhook, true);
+        hookItem.Children = sfdoc.Hooks.Values.OrderBy(h => h.Name).Select(h => new SFDocValuePresenter(h)).ToList();
+        TreeItems.Add(hookItem);
+
+        var libItem = CreateItem("Libraries", Icons.Material.Filled.Book, true);
+        libItem.Children = sfdoc.Libraries.Values.OrderBy(l => l.Name).Select(l => new SFDocValuePresenter(l)).ToList();
+
+        foreach (var child in libItem.Children)
+        {
+            var presenter = child as SFDocValuePresenter;
+            SFLibrary? lib = presenter!.DocValue as SFLibrary;
+            presenter!.Children = lib!.Functions.Values.OrderBy(f => f.Name).Select(f => new SFDocValuePresenter(f)).ToList();
+        }
+
+        TreeItems.Add(libItem);
+
+    }
+
+    protected TreeItemData<string> CreateItem(string name, string icon, bool expandable = false)
+    {
+        return new()
+            {
+                Text = name,
+                Icon = icon,
+                Expandable = expandable
+            };
+    }
+
+    protected string RealmPicture(IHasRealm value) => $"/assets/{value.Realm.ToString().ToLower()}.png";
+
+    public class SFDocValuePresenter(SFDocValue value) : TreeItemData<string>(value.Name)
+    {
+        public SFDocValue DocValue { get; } = value;
+    }
+}

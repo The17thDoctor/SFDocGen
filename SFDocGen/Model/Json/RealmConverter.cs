@@ -8,7 +8,8 @@ public class RealmConverter : JsonConverter<Realm>
 {
     public override Realm Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        throw new NotImplementedException();
+        string value = reader.GetString() ?? throw new JsonException();
+        return Enum.Parse<Realm>(value);
     }
 
     public override void Write(Utf8JsonWriter writer, Realm value, JsonSerializerOptions options)

@@ -1,6 +1,6 @@
 ﻿using SFDocGen.Core;
 
-namespace SFDocGen.Services;
+namespace SFDocGen.Services.Backend;
 
 public class FetchService(IConfiguration configuration, IHttpClientFactory factory, ILogger<FetchService> logger, StorageManager storage, ConfigManager configs)
 {
@@ -8,6 +8,8 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
 
     public void Fetch()
     {
+        if (configuration.GetValue<bool>("DisableFetch") == true) return;
+
         string? docUriString = configuration.GetValue<string>("FetchURI");
 
         if (docUriString is null)

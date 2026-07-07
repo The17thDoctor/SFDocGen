@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Logging.Console;
+using MudBlazor.Services;
 using SFDocGen.Components;
 using SFDocGen.Core;
-using SFDocGen.Services;
+using SFDocGen.Services.Backend;
 
 namespace SFDocGen;
 
 public class Program
 {
+    private static List<string> Urls = [];
+
     public static void Main(string[] args)
     {
         /* ------- BUILDER ------- */
@@ -28,8 +31,14 @@ public class Program
         builder.Services.AddHttpClient();
         builder.Services.AddOpenApi();
 
-        // Razor
+        // Blazor
+        builder.Services.AddMudServices();
         builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+        builder.Services.AddHttpClient("APIClient", (provider, client) =>
+        {
+            string baseUrl = Urls[0];
+            client.BaseAddress = new Uri(baseUrl + "/api/docs/");
+        });
 
         // API & Lua Generation
         builder.Services.AddSingleton<StorageManager>();
@@ -74,11 +83,13 @@ public class Program
         app.UseAuthorization();
         app.MapControllers();
 
-        // Razor
+        // Blazor
         app.UseAntiforgery();
         app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
         // Run
-        app.Run();
+        app.Start();
+        Urls = [.. app.Urls];
+        app.WaitForShutdown();
     }
 }

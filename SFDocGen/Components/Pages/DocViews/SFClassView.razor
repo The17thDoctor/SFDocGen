@@ -1,0 +1,42 @@
+﻿@page "/class/{ClassName}"
+
+
+<h3>@Class.Name</h3>
+
+@foreach (var method in Class.Methods.Values)
+{
+    <a href="/class/@ClassName/methods/@method.Name">
+        <img width="16" height="16" src="@GetRealmPic(method)"/>
+        @MethodName(Class, method)
+    </a>
+    <p/>
+}
+
+@code {
+
+    [Parameter]
+    public string ClassName { get; set; } = string.Empty;
+    public SFClass Class { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ClassName == string.Empty)
+        {
+            Navigation.ToBaseRelativePath("class");
+            return;
+        }
+
+
+        Class = Storage.Documentation.Classes.GetValueOrDefault(ClassName)!;
+        if (Class == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private string GetRealmPic(SFClassMethod method) => $"/assets/{method.Realm.ToString().ToLower()}.png"; 
+    private string MethodName(SFClass @class, SFClassMethod method) => $"{@class.Name}:{method.Name}({string.Join(", ", method.Parameters.Select(p => $"{p.Name}:{p.ConcatTypes()}"))})";
+}

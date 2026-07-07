@@ -3,7 +3,7 @@ using SFDocGen.Core;
 using SFDocGen.Model;
 using SFDocGen.Model.Abstraction;
 
-namespace SFDocGen.Services;
+namespace SFDocGen.Services.Backend;
 
 public class CorrecterService(ConfigManager configs)
 {

@@ -2,7 +2,7 @@
 using SFDocGen.Core;
 using SFDocGen.Model;
 
-namespace SFDocGen.Services;
+namespace SFDocGen.Services.Backend;
 
 /// <summary>
 /// Generates the LuaLS formatted documentation from the current data.

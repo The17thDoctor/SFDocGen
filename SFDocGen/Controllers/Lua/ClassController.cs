@@ -7,7 +7,7 @@ using System.Net.Mime;
 namespace SFDocGen.Controllers.Lua;
 
 [ApiController]
-[Route("api/doc/classes")]
+[Route("api/docs/classes")]
 public class ClassController(StorageManager storage) : BaseDocumentationController(storage)
 {
     [Tags("Classes")]

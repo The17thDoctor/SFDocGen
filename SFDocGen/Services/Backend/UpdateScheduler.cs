@@ -1,4 +1,4 @@
-﻿namespace SFDocGen.Services;
+﻿namespace SFDocGen.Services.Backend;
 
 public class UpdateScheduler(IConfiguration configuration, ILogger<UpdateScheduler> logger, IServiceProvider provider) : BackgroundService
 {
