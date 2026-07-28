@@ -13,16 +13,9 @@ public record SFClass : SFDocElement, IHasRealm
 {
     public string? SuperType { get; set; }
     public Realm Realm { get; set; }
-    public ChildItemDictionnary<SFClass, string, SFClassField> Fields { get; set; }
-    public ChildItemDictionnary<SFClass, string, SFClassMethod> Methods { get; set; }
-    public ChildItemDictionnary<SFClass, string, SFClassOperator> Operators { get; set; }
-
-    public SFClass()
-    {
-        Fields = new(this);
-        Methods = new(this);
-        Operators = new(this);
-    }
+    public Dictionary<string, SFClassField> Fields { get; set; } = [];
+    public Dictionary<string, SFClassMethod> Methods { get; set; } = [];
+    public Dictionary<string, SFClassOperator> Operators { get; set; } = [];
 
     public override string ToLuaDoc()
     {
