@@ -171,6 +171,12 @@ file static class CorrecterExtensions
         }
     }
 
+    public static void ApplyCorrection(this SFLibraryField value, SFLibraryField correction)
+    {
+        value.Value = correction.Value;
+        value.Type = correction.Type;
+    }
+
     public static void ApplyCorrection(this SFDocValue value, SFDocValue correction)
     {
         value.Name ??= correction.Name;
