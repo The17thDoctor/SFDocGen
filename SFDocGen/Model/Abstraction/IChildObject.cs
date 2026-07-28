@@ -5,7 +5,7 @@
 /// <br/>Example: Methods, Fields
 /// </summary>
 /// <typeparam name="TParent">The type of the parent object.</typeparam>
-public interface IChildObject<TParent>
+public interface IChildObject<TParent> where TParent : SFDocValue
 {
     TParent Parent { get; set; }
 }

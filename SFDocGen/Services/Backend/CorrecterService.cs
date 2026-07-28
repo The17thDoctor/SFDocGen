@@ -2,6 +2,7 @@
 using SFDocGen.Core;
 using SFDocGen.Model;
 using SFDocGen.Model.Abstraction;
+using static MudBlazor.CategoryTypes;
 
 namespace SFDocGen.Services.Backend;
 
@@ -22,7 +23,7 @@ file static class CorrecterExtensions
 {
     public static void ApplyCorrection(this SFHook hook, SFHook correction)
     {
-        hook.ApplyCorrection((SFDocElement)correction);
+        hook.ApplyCorrection((SFDocValue)correction);
         hook.ApplyCorrection((IHasRealm)correction);
         hook.ApplyCorrection((IHasTypedParams)correction);
         hook.ApplyCorrection((IReturnsValue)correction);
@@ -36,7 +37,7 @@ file static class CorrecterExtensions
 
     public static void ApplyCorrection(this SFLibrary library, SFLibrary correction)
     {
-        library.ApplyCorrection((SFDocElement)correction);
+        library.ApplyCorrection((SFDocValue)correction);
         library.ApplyCorrection((IHasRealm)correction);
 
         ApplyDict(library.Functions, correction.Functions, ApplyCorrection);
@@ -44,9 +45,21 @@ file static class CorrecterExtensions
         ApplyDict(library.Tables, correction.Tables, ApplyCorrection);
     }
 
+    public static void ApplyCorrection(this SFLibraryField field, SFLibraryField correction)
+    {
+        field.ApplyCorrection((SFDocValue)correction);
+        field.ApplyCorrection((IHasRealm)correction);
+    }
+
+    public static void ApplyCorrection(this SFLibraryTable table, SFLibraryTable correction)
+    {
+        table.ApplyCorrection((SFDocValue)correction);
+        table.ApplyCorrection((IHasRealm)correction);
+    }
+
     public static void ApplyCorrection(this SFClass cl, SFClass correction)
     {
-        cl.ApplyCorrection((SFDocElement)correction);
+        cl.ApplyCorrection((SFDocValue)correction);
         cl.ApplyCorrection((IHasRealm)correction);
 
         ApplyDict(cl.Methods, correction.Methods, ApplyCorrection);
@@ -56,7 +69,7 @@ file static class CorrecterExtensions
 
     public static void ApplyCorrection(this SFTable table, SFTable correction)
     {
-        table.ApplyCorrection((SFDocElement)correction);
+        table.ApplyCorrection((SFDocValue)correction);
         table.ApplyCorrection((IHasRealm)correction);
 
         ApplyDict(table.Fields, correction.Fields, ApplyCorrection);
@@ -76,16 +89,16 @@ file static class CorrecterExtensions
 
     public static void ApplyCorrection(this SFClassOperator op, SFClassOperator correction)
     {
-        op.ApplyCorrection((SFDocElement)correction);
+        op.ApplyCorrection((SFDocValue)correction);
         op.ApplyCorrection((IReturnsValue)correction);
 
         op.LeftOperand = correction.LeftOperand != string.Empty ? correction.LeftOperand : op.LeftOperand;
         op.RightOperand ??= correction.RightOperand;
     }
 
-    public static void ApplyCorrection(this SFFunction function, SFFunction correction)
+    public static void ApplyCorrection<T>(this SFFunction<T> function, SFFunction<T> correction) where T : SFDocValue
     {
-        function.ApplyCorrection((SFDocElement)correction);
+        function.ApplyCorrection((SFDocValue)correction);
         function.ApplyCorrection((IHasRealm)correction);
         function.ApplyCorrection((IHasTypedParams)correction);
         function.ApplyCorrection((IReturnsValue)correction);
@@ -96,7 +109,7 @@ file static class CorrecterExtensions
 
     public static void ApplyCorrection(this SFDirective directive, SFDirective correction)
     {
-        directive.ApplyCorrection((SFDocElement)correction);
+        directive.ApplyCorrection((SFDocValue)correction);
         directive.ApplyCorrection((IHasTypedParams)correction);
     }
 
@@ -175,14 +188,10 @@ file static class CorrecterExtensions
     public static void ApplyCorrection(this SFDocValue value, SFDocValue correction)
     {
         value.Name ??= correction.Name;
+        value.DocName ??= correction.DocName;
         value.Description ??= correction.Description;
-    }
-
-    public static void ApplyCorrection(this SFDocElement element, SFDocElement correction)
-    {
-        element.ApplyCorrection((SFDocValue)correction);
-        element.Deprecated ??= correction.Deprecated;
-        element.Usage ??= correction.Usage;
+        value.Deprecated ??= correction.Deprecated;
+        value.Usage ??= correction.Usage;
     }
 
     public static void ApplyDict<T>(Dictionary<string, T> dict, Dictionary<string, T> corrections, Action<T, T> correcter)

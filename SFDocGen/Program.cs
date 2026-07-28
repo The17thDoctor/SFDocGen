@@ -79,6 +79,7 @@ public class Program
         {
             options.SwaggerEndpoint("/openapi/v1.json", "v1");
             options.DocumentTitle = "SFDocGen API | Documentation";
+            options.RoutePrefix = "api/swagger";
         });
         app.UseAuthorization();
         app.MapControllers();
@@ -86,6 +87,7 @@ public class Program
         // Blazor
         app.UseAntiforgery();
         app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+        app.UseStatusCodePagesWithRedirects("/error/{0}");
 
         // Run
         app.Start();

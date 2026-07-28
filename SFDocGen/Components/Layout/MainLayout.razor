@@ -1,30 +1,34 @@
-﻿@using SFDocGen.Model.Abstraction
+﻿@using MudBlazor.Utilities
+
 @inherits LayoutComponentBase
-@inject StorageManager Storage
+@inject IHttpClientFactory HttpFactory
 
 <MudThemeProvider @bind-IsDarkMode="IsDarkMode" Theme="@_theme" @rendermode="InteractiveServer" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
+<MudHotkey Key="JsKey.KeyK" KeyModifiers="@(new List<JsKeyModifier>() { JsKeyModifier.ControlLeft })" OnHotkeyPressed="FocusSearch" />
+
 <MudLayout>
     <MudAppBar Gutters="false" Class="pr-4" Elevation="2">
-        <MudContainer Style="width: 240px" Class="px-auto mr-4">
-            <MudText Style="font-weight: 900" Align="Align.Center" Typo="@Typo.h5">✨SFDOCGEN✨</MudText>
-        </MudContainer>
-        <MudButton Href="/swagger" Color="Color.Inherit">
+        <a href="/">
+            <MudText Class="mx-4" Style="font-weight: 900" Align="Align.Center" Typo="@Typo.h5">✨SFDOCGEN✨</MudText>
+        </a>
+        <MudButton Href="/api/swagger" Color="Color.Inherit">
             <MudIcon Icon="@Icons.Material.Filled.Api" Class="me-2"/>
             <MudText Typo="Typo.button">API Documentation</MudText>
         </MudButton>
         <MudSpacer />
-        <MudTooltip Text="@($"Switch to {(IsDarkMode ? "light" : "dark")} mode")">
-            <MudToggleIconButton @bind-Toggled="IsDarkMode"
-                                 Color="Color.Inherit"
-                                 Icon="@Icons.Material.Filled.LightMode"
-                                 ToggledColor="Color.Inherit"
-                                 ToggledIcon="@Icons.Material.Filled.DarkMode"
-                                 title="@(IsDarkMode ? "Dark" : "Light")" />
-        </MudTooltip>
+        <MudAutocomplete @ref="_searchField" Placeholder="Search (Ctrl+K)" On Margin="Margin.Dense" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" T="SearchResult" SearchFunc="@Search">
+            <ItemTemplate>
+                <MudText Typo="Typo.body2">@context.Name</MudText>
+                <p/>
+                <MudText Typo="Typo.caption">@context.Description</MudText>
+            </ItemTemplate>
+        </MudAutocomplete>
+        <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
+        <MudToggleIconButton @bind-Toggled="IsDarkMode" Color="Color.Inherit" Icon="@Icons.Material.Filled.LightMode" ToggledColor="Color.Inherit" ToggledIcon="@Icons.Material.Filled.DarkMode" title="@(IsDarkMode ? "Dark" : "Light")" />
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
         <MudTooltip Text="Check out the source code!">
             <MudIconButton Target="_blank" ButtonType="ButtonType.Button" Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/The17thDoctor/SFDocGen" />
@@ -32,22 +36,7 @@
     </MudAppBar>
     <MudDrawer Width="320px" Open Elevation="2" Class="z-100" ClipMode="@DrawerClipMode.Docked">
         <MudNavMenu Rounded="true" Margin="Margin.Dense" Class="pa-2">
-            <MudTreeView ExpandOnClick Dense Items="TreeItems">
-                <ItemTemplate> 
-                    @{
-                        var presenter = context as SFDocValuePresenter;
-                    }
-                    <MudTreeViewItem @bind-Items="@context.Children" Text="@context.Text" TextTypo="Typo.caption">
-                        <BodyContent Context="bodyContext">
-                            @if (presenter?.DocValue is IHasRealm realmValue)
-                            {
-                                <MudImage Src="@RealmPicture(realmValue)" Height="16" Class="pr-2" />
-                            }
-                            <MudText Typo="Typo.body1">@(context.Value ?? context.Text)</MudText>
-                        </BodyContent>
-                    </MudTreeViewItem>
-                </ItemTemplate>
-            </MudTreeView>
+            <DocTreeView/>
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent>
@@ -60,51 +49,25 @@
 @code
 {
     public bool IsDarkMode { get; set; } = true;
-    public List<TreeItemData<string>> TreeItems { get; set; } = [];
+
     private MudTheme _theme = new();
+    private HttpClient _httpClient = default!;
+    private MudAutocomplete<SearchResult>? _searchField;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        PopulateTree();
-        base.OnInitialized();
+        _httpClient = HttpFactory.CreateClient("APIClient");
+        await base.OnInitializedAsync();
     }
 
-    protected void PopulateTree()
+    protected async Task<IEnumerable<SearchResult>> Search(string? search, CancellationToken cancel)
     {
-        var sfdoc = Storage.Documentation;
-
-        var hookItem = CreateItem("Hooks", Icons.Material.Filled.Webhook, true);
-        hookItem.Children = sfdoc.Hooks.Values.OrderBy(h => h.Name).Select(h => new SFDocValuePresenter(h)).ToList();
-        TreeItems.Add(hookItem);
-
-        var libItem = CreateItem("Libraries", Icons.Material.Filled.Book, true);
-        libItem.Children = sfdoc.Libraries.Values.OrderBy(l => l.Name).Select(l => new SFDocValuePresenter(l)).ToList();
-
-        foreach (var child in libItem.Children)
-        {
-            var presenter = child as SFDocValuePresenter;
-            SFLibrary? lib = presenter!.DocValue as SFLibrary;
-            presenter!.Children = lib!.Functions.Values.OrderBy(f => f.Name).Select(f => new SFDocValuePresenter(f)).ToList();
-        }
-
-        TreeItems.Add(libItem);
-
+        if (search == null || search.Length < 2) return [];
+        return await _httpClient.GetFromJsonAsync<IEnumerable<SearchResult>>($"search?term={search}", cancel) ?? [];
     }
 
-    protected TreeItemData<string> CreateItem(string name, string icon, bool expandable = false)
+    protected void FocusSearch(HotkeyEventArgs args)
     {
-        return new()
-            {
-                Text = name,
-                Icon = icon,
-                Expandable = expandable
-            };
-    }
-
-    protected string RealmPicture(IHasRealm value) => $"/assets/{value.Realm.ToString().ToLower()}.png";
-
-    public class SFDocValuePresenter(SFDocValue value) : TreeItemData<string>(value.Name)
-    {
-        public SFDocValue DocValue { get; } = value;
+        _searchField?.FocusAsync();
     }
 }

@@ -1,16 +1,73 @@
 ﻿@page "/class/{ClassName}"
+@using SFDocGen.Components.UI
+@using SFDocGen.Services.Frontend
 
+<CustomPageTitle Title="@Class.Name" />
 
-<h3>@Class.Name</h3>
+<MudTooltip Placement="Placement.Right" Arrow Text="Class">
+    <div class="d-flex flex-row mud-secondary-text">
+        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.Code" Size="Size.Large" />
+        <MudText Typo="Typo.h4">@Class.Name</MudText>
+    </div>
+</MudTooltip>
 
-@foreach (var method in Class.Methods.Values)
-{
-    <a href="/class/@ClassName/methods/@method.Name">
-        <img width="16" height="16" src="@GetRealmPic(method)"/>
-        @MethodName(Class, method)
-    </a>
-    <p/>
-}
+<MudText Typo="Typo.body1">@Class.Description</MudText>
+<MudDivider/>
+
+<MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+    <div class="d-flex flex-row mud-secondary-text">
+        <MudIcon Class="my-auto mr-1" Icon="@Icons.Custom.FileFormats.FileCode" Size="Size.Medium" />
+        <MudText Typo="Typo.h5">
+            Methods
+        </MudText>
+    </div>
+
+    <MudExpansionPanels MultiExpansion="true" Class="rounded-lg">
+        @foreach (var method in Class.Methods.Values)
+        {
+            <MudExpansionPanel Text="@method.GetSignature(true)">
+                @if (method.Deprecated != null)
+                {
+                    <MudAlert Severity="Severity.Error">Deprecated: @method.Deprecated</MudAlert>
+                }
+
+                <CodeView Code="@method.GetSignature()" />
+                
+                @foreach (var line in method.Description?.Split("\n") ?? [])
+                {
+                    <MudText Typo="Typo.body1">@line</MudText>
+                }
+                <br/>
+
+                @if (method.Parameters.Any())
+                {
+                    <MudText Color="Color.Tertiary" Typo="Typo.h6">Parameters</MudText>
+                    @foreach (var parameter in method.Parameters)
+                    {
+                        <MudText>@($"- {parameter.Name}: {parameter.ConcatTypes()} {parameter.Description}")</MudText>
+                    }
+                    <br />
+                }
+
+                @if (method.ReturnValues.Any())
+                {
+                    <MudText Color="Color.Tertiary" Typo="Typo.h6">Returns</MudText>
+                    @foreach (var returnValue in method.ReturnValues)
+                    {
+                        if (string.IsNullOrWhiteSpace(returnValue.Name))
+                        {
+                            <MudText>@($"- {returnValue.ConcatTypes()} {returnValue.Description}")</MudText>
+                        }
+                        else
+                        {
+                            <MudText>@($"- {returnValue.Name}: {returnValue.ConcatTypes()} {returnValue.Description}")</MudText>
+                        }
+                    }
+                }
+            </MudExpansionPanel>
+        }
+    </MudExpansionPanels>
+</MudContainer>
 
 @code {
 
@@ -18,14 +75,9 @@
     public string ClassName { get; set; } = string.Empty;
     public SFClass Class { get; set; } = default!;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnParametersSet()
     {
-        if (ClassName == string.Empty)
-        {
-            Navigation.ToBaseRelativePath("class");
-            return;
-        }
-
+        base.OnParametersSet();
 
         Class = Storage.Documentation.Classes.GetValueOrDefault(ClassName)!;
         if (Class == null)
@@ -33,8 +85,6 @@
             Navigation.NotFound();
             return;
         }
-
-        await base.OnInitializedAsync();
     }
 
     private string GetRealmPic(SFClassMethod method) => $"/assets/{method.Realm.ToString().ToLower()}.png"; 

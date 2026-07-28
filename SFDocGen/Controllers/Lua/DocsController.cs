@@ -85,7 +85,7 @@ public class DocsController(IServiceProvider provider, StorageManager storage) :
             {
                 SFDocValue value = (SFDocValue)entry.Value!;
                 RecursiveSearch(ref results, value, searchTerm);
-                SearchResult result = new(value);
+                SearchResult result = SearchResult.FromValue(value);
 
                 if (result.Name.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase))
                 {

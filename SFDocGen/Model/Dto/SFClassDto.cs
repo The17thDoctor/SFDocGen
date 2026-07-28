@@ -11,6 +11,7 @@ public record SFClassDto
     public string Description { get; set; } = string.Empty;
     public bool Server { get; set; } = default;
     public bool Client { get; set; } = default;
+    public string? Deprecated { get; set; }
     public FancyDict<SFClassFieldDto> Field { get; set; } = new();
     public FancyDict<SFClassOperatorDto> Operators { get; set; } = new();
     public FancyDict<SFClassMethodDto> Methods { get; set; } = new();
@@ -22,6 +23,7 @@ public record SFClassDto
             Name = name,
             Description = Description,
             Realm = DtoUtils.RealmFromBools(Server, Client),
+            Deprecated = Deprecated,
             SuperType = SuperType
         };
 
@@ -80,6 +82,7 @@ public record SFClassMethodDto
     public string Description { get; set; } = string.Empty;
     public JsonElement Ret { get; set; } = default!;
     public List<JsonElement> ReturnTypes { get; set; } = [];
+    public string? Deprecated { get; set; }
 
     [JsonConverter(typeof(FancyDictAltConverter))]
     public FancyDict<string> Param { get; set; } = new();
@@ -93,7 +96,8 @@ public record SFClassMethodDto
             Parent = parent,
             Description = Description,
             Parameters = SFParameter.MergeData(Param, ParamTypes),
-            ReturnValues = SFReturnValue.MergeData(Ret, ReturnTypes)
+            ReturnValues = SFReturnValue.MergeData(Ret, ReturnTypes),
+            Deprecated = Deprecated
         };
     }
 }

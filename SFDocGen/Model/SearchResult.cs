@@ -2,11 +2,21 @@
 
 namespace SFDocGen.Model;
 
-public class SearchResult(SFDocValue value) : IComparable<SearchResult>
+public class SearchResult : IComparable<SearchResult>
 {
-    public string Name => CraftName();
-    public string Type => value.GetType().Name;
-    public string? Description => value.Description;
+    public string Name { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public string? Description { get; set; }
+
+    public static SearchResult FromValue(SFDocValue value)
+    {
+        return new()
+        {
+            Name = CraftName(value),
+            Type = value.GetType().Name,
+            Description = value.Description
+        };
+    }
 
     public int CompareTo(SearchResult? other)
     {
@@ -14,13 +24,15 @@ public class SearchResult(SFDocValue value) : IComparable<SearchResult>
         return Name.Length - other.Name.Length;
     }
 
-    private string CraftName()
+    private static string CraftName(SFDocValue value)
     {
         string name = string.Empty;
         if (value is IChildObject<SFClass> classChild)
         {
             name += classChild.Parent.Name;
             name += ":";
+            name += value.Name;
+            name += "()";
         }
         else if (value is IChildObject<SFLibrary> libChild)
         {
@@ -29,9 +41,17 @@ public class SearchResult(SFDocValue value) : IComparable<SearchResult>
                 name += libChild.Parent.DocName ?? libChild.Parent.Name;
                 name += ".";
             }
+
+            name += value.Name;
+            name += "()";
+        }
+        else if (value is IChildObject<SFTable> tableChild)
+        {
+            name += tableChild.Parent.Name;
+            name += ".";
+            name += value.Name;
         }
 
-        name += value.Name;
         return name;
     }
 }

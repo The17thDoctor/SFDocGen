@@ -4,9 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model;
 
-public record SFLibrary : SFDocElement, IHasRealm
+public record SFLibrary : SFDocValue, IHasRealm
 {
-    public string? DocName { get; set; }
     public Realm Realm { get; set; } = Realm.Shared;
     public Dictionary<string, SFLibraryFunction> Functions { get; set; } = [];
     public Dictionary<string, SFLibraryField> Fields { get; set; } = [];
@@ -79,11 +78,8 @@ public record SFLibrary : SFDocElement, IHasRealm
 }
 
 
-public record SFLibraryFunction: SFFunction, IChildObject<SFLibrary>
+public record SFLibraryFunction: SFFunction<SFLibrary>
 {
-    [JsonIgnore]
-    public SFLibrary Parent { get; set; } = default!;
-
     public override string ToLuaDoc()
     {
         StringBuilder sb = new();
@@ -135,12 +131,15 @@ public record SFLibraryFunction: SFFunction, IChildObject<SFLibrary>
 
         return sb.ToString();
     }
+
+    protected override string GetParentDelimiter() => ".";
 }
 
-public record SFLibraryField : SFDocValue, IChildObject<SFLibrary>
+public record SFLibraryField : SFDocValue, IChildObject<SFLibrary>, IHasRealm
 {
     [JsonIgnore]
     public SFLibrary Parent { get; set; } = default!;
+    public Realm Realm { get; set; } = Realm.Shared;
     public string Type { get; set; } = "unknown";
     public string Value { get; set; } = "nil";
 
@@ -153,10 +152,11 @@ public record SFLibraryField : SFDocValue, IChildObject<SFLibrary>
         return sb.ToString();
     }}
 
-public record SFLibraryTable : SFDocValue, IChildObject<SFLibrary>
+public record SFLibraryTable : SFDocValue, IChildObject<SFLibrary>, IHasRealm
 {
     [JsonIgnore]
     public SFLibrary Parent { get; set; } = default!;
+    public Realm Realm { get; set; } = Realm.Shared;
 
     public override string ToLuaDoc()
     {

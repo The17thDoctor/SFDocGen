@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model;
 
-public record SFTable : SFDocElement, IHasRealm
+public record SFTable : SFDocValue, IHasRealm
 {
     public Realm Realm { get; set; }
     public Dictionary<string, SFTableField> Fields { get; set; } = [];

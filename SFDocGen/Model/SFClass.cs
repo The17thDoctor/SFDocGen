@@ -8,7 +8,7 @@ namespace SFDocGen.Model;
 /// Represents a Starfall documentation class (table with methods, operators, fields)
 /// <br/>Example: Entity, Vector
 /// </summary>
-public record SFClass : SFDocElement, IHasRealm
+public record SFClass : SFDocValue, IHasRealm
 {
     public string? SuperType { get; set; }
     public Realm Realm { get; set; }
@@ -81,11 +81,8 @@ public record SFClassField : SFDocValue, IChildObject<SFClass>
 /// <summary>
 /// Represents a method of a lua class.
 /// </summary>
-public record SFClassMethod : SFFunction, IChildObject<SFClass>
+public record SFClassMethod : SFFunction<SFClass>
 {
-    [JsonIgnore]
-    public SFClass Parent { get; set; } = default!;
-
     public override string ToLuaDoc()
     {
         StringBuilder sb = new();
@@ -127,12 +124,14 @@ public record SFClassMethod : SFFunction, IChildObject<SFClass>
 
         return sb.ToString();
     }
+
+    protected override string GetParentDelimiter() => ":";
 }
 
 /// <summary>
 /// Represents an operator of a lua class.
 /// </summary>
-public record SFClassOperator : SFDocElement, IReturnsValue, IChildObject<SFClass>
+public record SFClassOperator : SFDocValue, IReturnsValue, IChildObject<SFClass>
 {
     [JsonIgnore]
     public SFClass Parent { get; set; } = default!;

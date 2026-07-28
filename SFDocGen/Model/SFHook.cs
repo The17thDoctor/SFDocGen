@@ -7,7 +7,7 @@ namespace SFDocGen.Model;
 /// Represents a starfall hook.
 /// <br/>Example: render, net, think
 /// </summary>
-public record SFHook : SFDocElement, IHasRealm, IHasTypedParams, IReturnsValue
+public record SFHook : SFDocValue, IHasRealm, IHasTypedParams, IReturnsValue
 {
     public Realm Realm { get; set; }
     public List<SFParameter> Parameters { get; set; } = [];

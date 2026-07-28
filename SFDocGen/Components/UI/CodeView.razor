@@ -1,0 +1,10 @@
+﻿<MudPaper Elevation="4" Class="pa-2 my-4 mud-dark d-flex flex-row" Style="color: #FFFFFF99">
+    <MudText Color="Color.Inherit" Class="my-auto" Style="font-family: 'Cascadia Code'">@Code</MudText>
+    <MudSpacer/>
+    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FileCopy" />
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Code { get; set; }
+}

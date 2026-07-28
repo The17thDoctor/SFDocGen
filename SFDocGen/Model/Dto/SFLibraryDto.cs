@@ -69,6 +69,8 @@ public record SFLibraryFunctionDto
 public record SFLibraryFieldDto
 {
     public string? Description { get; set; }
+    public bool Server { get; set; }
+    public bool Client { get; set; }
 
     public SFLibraryField FromData(SFLibrary parent, string name)
     {
@@ -76,7 +78,8 @@ public record SFLibraryFieldDto
         {
             Parent = parent,
             Name = name,
-            Description = Description
+            Description = Description,
+            Realm = DtoUtils.RealmFromBools(Server, Client)
         };
     }
 }
@@ -84,6 +87,8 @@ public record SFLibraryFieldDto
 public record SFLibraryTableDto
 {
     public string? Description { get; set; }
+    public bool Server { get; set; }
+    public bool Client { get; set; }
 
     public SFLibraryTable FromData(SFLibrary parent, string name)
     {
@@ -91,7 +96,8 @@ public record SFLibraryTableDto
         {
             Parent = parent,
             Name = name,
-            Description = Description
+            Description = Description,
+            Realm = DtoUtils.RealmFromBools(Server, Client)
         };
     }
 }
