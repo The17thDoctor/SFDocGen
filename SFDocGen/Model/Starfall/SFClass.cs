@@ -1,5 +1,4 @@
 ﻿using SFDocGen.Model.Abstraction;
-using SFDocGen.Model.Core;
 using System.Text;
 using System.Text.Json.Serialization;
 

@@ -50,6 +50,7 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
 
     protected void SaveFile(HttpContent content, string path)
     {
+        if (File.Exists(path)) File.Delete(path);
         using Stream fileStream = File.OpenWrite(path);
         content.CopyTo(fileStream, null, CancellationToken.None);
     }

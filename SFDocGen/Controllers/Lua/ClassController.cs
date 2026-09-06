@@ -3,7 +3,6 @@ using SFDocGen.Controllers.Abstraction;
 using SFDocGen.Core;
 using SFDocGen.Model.Starfall;
 using System.Net.Mime;
-using System.Reflection;
 
 namespace SFDocGen.Controllers.Lua;
 

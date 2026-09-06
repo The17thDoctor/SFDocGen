@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace SFDocGen.Model.Core;
 
 public class ChildItemDictionnary<TParent, TKey, TValue>(TParent parent) : IDictionary<TKey, TValue>
+    where TParent : SFDocValue
     where TKey : notnull 
     where TValue : IChildObject<TParent>
 {

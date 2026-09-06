@@ -1,4 +1,4 @@
-﻿using SFDocGen.Model;
+﻿using SFDocGen.Model.Starfall;
 
 namespace SFDocGen.Services.Frontend;
 

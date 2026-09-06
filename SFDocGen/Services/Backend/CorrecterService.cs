@@ -19,18 +19,18 @@ public class CorrecterService(ConfigManager configs)
 
 file static class CorrecterExtensions
 {
+    public static void ApplyCorrection(this SFTypeAlias alias, SFTypeAlias correction)
+    {
+        alias.ApplyCorrection((SFDocValue)correction);
+        alias.Types = correction.Types;
+    }
+
     public static void ApplyCorrection(this SFHook hook, SFHook correction)
     {
         hook.ApplyCorrection((SFDocValue)correction);
         hook.ApplyCorrection((IHasRealm)correction);
         hook.ApplyCorrection((IHasTypedParams)correction);
         hook.ApplyCorrection((IReturnsValue)correction);
-    }
-
-    public static void ApplyCorrection(this SFTypeAlias alias, SFTypeAlias correction)
-    {
-        alias.ApplyCorrection((SFDocValue)correction);
-        alias.Types = correction.Types;
     }
 
     public static void ApplyCorrection(this SFLibrary library, SFLibrary correction)
@@ -41,18 +41,6 @@ file static class CorrecterExtensions
         ApplyDict(library.Functions, correction.Functions, ApplyCorrection);
         ApplyDict(library.Fields, correction.Fields, ApplyCorrection);
         ApplyDict(library.Tables, correction.Tables, ApplyCorrection);
-    }
-
-    public static void ApplyCorrection(this SFLibraryField field, SFLibraryField correction)
-    {
-        field.ApplyCorrection((SFDocValue)correction);
-        field.ApplyCorrection((IHasRealm)correction);
-    }
-
-    public static void ApplyCorrection(this SFLibraryTable table, SFLibraryTable correction)
-    {
-        table.ApplyCorrection((SFDocValue)correction);
-        table.ApplyCorrection((IHasRealm)correction);
     }
 
     public static void ApplyCorrection(this SFClass cl, SFClass correction)
@@ -71,6 +59,12 @@ file static class CorrecterExtensions
         table.ApplyCorrection((IHasRealm)correction);
 
         ApplyDict(table.Fields, correction.Fields, ApplyCorrection);
+    }
+
+    public static void ApplyCorrection(this SFDirective directive, SFDirective correction)
+    {
+        directive.ApplyCorrection((SFDocValue)correction);
+        directive.ApplyCorrection((IHasTypedParams)correction);
     }
 
     public static void ApplyCorrection(this SFTableField field, SFTableField correction)
@@ -94,6 +88,18 @@ file static class CorrecterExtensions
         op.RightOperand ??= correction.RightOperand;
     }
 
+    public static void ApplyCorrection(this SFLibraryField field, SFLibraryField correction)
+    {
+        field.Value = correction.Value;
+        field.Type = correction.Type;
+    }
+
+    public static void ApplyCorrection(this SFLibraryTable table, SFLibraryTable correction)
+    {
+        table.ApplyCorrection((SFDocValue)correction);
+        table.ApplyCorrection((IHasRealm)correction);
+    }
+
     public static void ApplyCorrection<T>(this SFFunction<T> function, SFFunction<T> correction) where T : SFDocValue
     {
         function.ApplyCorrection((SFDocValue)correction);
@@ -104,13 +110,7 @@ file static class CorrecterExtensions
 
         function.Overloads = correction.Overloads;
     }
-
-    public static void ApplyCorrection(this SFDirective directive, SFDirective correction)
-    {
-        directive.ApplyCorrection((SFDocValue)correction);
-        directive.ApplyCorrection((IHasTypedParams)correction);
-    }
-
+    
     public static void ApplyCorrection(this SFParameter param, SFParameter correction)
     {
         param.ApplyCorrection((SFDocValue)correction);
@@ -181,12 +181,6 @@ file static class CorrecterExtensions
                 }
             }
         }
-    }
-
-    public static void ApplyCorrection(this SFLibraryField value, SFLibraryField correction)
-    {
-        value.Value = correction.Value;
-        value.Type = correction.Type;
     }
 
     public static void ApplyCorrection(this SFDocValue value, SFDocValue correction)
