@@ -26,7 +26,7 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
         if (Directory.Exists(storage.Folders.DependenciesFolder)) Directory.Delete(storage.Folders.DependenciesFolder, true);
         Directory.CreateDirectory(storage.Folders.DependenciesFolder);
 
-        Parallel.ForEach(configs.GetDependencies(), dep =>
+        Parallel.ForEach(configs.GetDependencies(), new() { MaxDegreeOfParallelism = 10 }, dep =>
         {
             FetchFile(dep.Uri, Path.Combine(storage.Folders.DependenciesFolder, dep.Name));
         });

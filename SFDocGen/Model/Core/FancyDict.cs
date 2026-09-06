@@ -1,4 +1,4 @@
-﻿namespace SFDocGen.Model.Json;
+﻿namespace SFDocGen.Model.Core;
 
 public class FancyDict<T>
 {

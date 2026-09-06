@@ -1,7 +1,7 @@
-﻿using Model;
-using SFDocGen.Core;
-using SFDocGen.Model.Dto;
-using SFDocGen.Model.Json;
+﻿using SFDocGen.Core;
+using SFDocGen.Model.Core;
+using SFDocGen.Model.Starfall;
+using SFDocGen.Model.Starfall.Dto;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Schema;

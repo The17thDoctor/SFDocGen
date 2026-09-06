@@ -1,5 +1,5 @@
-﻿using SFDocGen.Model.Dto;
-using SFDocGen.Model.Json;
+﻿using SFDocGen.Model.Core;
+using SFDocGen.Model.Starfall.Dto;
 using System.Text;
 using System.Text.Json;
 

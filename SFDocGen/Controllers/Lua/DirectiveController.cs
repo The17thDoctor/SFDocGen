@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SFDocGen.Controllers.Abstraction;
 using SFDocGen.Core;
-using SFDocGen.Model;
+using SFDocGen.Model.Starfall;
 using System.Net.Mime;
 
 namespace SFDocGen.Controllers.Lua;

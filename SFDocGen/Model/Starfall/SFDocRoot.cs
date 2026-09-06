@@ -1,7 +1,6 @@
-﻿using SFDocGen.Model;
-using SFDocGen.Model.Abstraction;
+﻿using SFDocGen.Model.Abstraction;
 
-namespace Model;
+namespace SFDocGen.Model.Starfall;
 
 /// <summary>
 /// Represents the root of the starfall documentation.

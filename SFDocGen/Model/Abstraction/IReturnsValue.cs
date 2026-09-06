@@ -1,4 +1,4 @@
-﻿using SFDocGen.Model.Dto;
+﻿using SFDocGen.Model.Starfall.Dto;
 using System.Text;
 using System.Text.Json;
 

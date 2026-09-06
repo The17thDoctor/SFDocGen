@@ -1,8 +1,6 @@
-﻿using Model;
-using SFDocGen.Core;
-using SFDocGen.Model;
+﻿using SFDocGen.Core;
 using SFDocGen.Model.Abstraction;
-using static MudBlazor.CategoryTypes;
+using SFDocGen.Model.Starfall;
 
 namespace SFDocGen.Services.Backend;
 
@@ -185,6 +183,12 @@ file static class CorrecterExtensions
         }
     }
 
+    public static void ApplyCorrection(this SFLibraryField value, SFLibraryField correction)
+    {
+        value.Value = correction.Value;
+        value.Type = correction.Type;
+    }
+
     public static void ApplyCorrection(this SFDocValue value, SFDocValue correction)
     {
         value.Name ??= correction.Name;
@@ -194,7 +198,7 @@ file static class CorrecterExtensions
         value.Usage ??= correction.Usage;
     }
 
-    public static void ApplyDict<T>(Dictionary<string, T> dict, Dictionary<string, T> corrections, Action<T, T> correcter)
+    public static void ApplyDict<T>(IDictionary<string, T> dict, IDictionary<string, T> corrections, Action<T, T> correcter)
     {
         foreach (var kvp in corrections)
         {

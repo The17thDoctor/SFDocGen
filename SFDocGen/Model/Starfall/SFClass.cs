@@ -1,8 +1,9 @@
 ﻿using SFDocGen.Model.Abstraction;
+using SFDocGen.Model.Core;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace SFDocGen.Model;
+namespace SFDocGen.Model.Starfall;
 
 /// <summary>
 /// Represents a Starfall documentation class (table with methods, operators, fields)

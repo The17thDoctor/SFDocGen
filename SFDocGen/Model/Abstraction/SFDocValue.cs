@@ -11,5 +11,9 @@ public abstract record SFDocValue
     public string? Description { get; set; }
     public string? Deprecated { get; set; }
     public string? Usage { get; set; }
+
+    /// <summary>
+    /// Returns a LuaLS representation of this documentation value.
+    /// </summary>
     public abstract string ToLuaDoc();
 }

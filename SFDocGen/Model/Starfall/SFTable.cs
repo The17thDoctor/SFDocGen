@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace SFDocGen.Model;
+namespace SFDocGen.Model.Starfall;
 
 public record SFTable : SFDocValue, IHasRealm
 {

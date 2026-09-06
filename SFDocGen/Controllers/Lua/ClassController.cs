@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SFDocGen.Controllers.Abstraction;
 using SFDocGen.Core;
-using SFDocGen.Model;
+using SFDocGen.Model.Starfall;
 using System.Net.Mime;
+using System.Reflection;
 
 namespace SFDocGen.Controllers.Lua;
 
@@ -25,8 +26,8 @@ public class ClassController(StorageManager storage) : BaseDocumentationControll
     [EndpointSummary("Returns informations about a specific class.")]
     public ActionResult<SFClass> GetClass(string className)
     {
-        var cl = Documentation.Classes.GetValueOrDefault(className);
-        return cl != null ? Json(cl, SerializerOptions) : NotFound();
+        var @class = Documentation.Classes.GetValueOrDefault(className);
+        return @class != null ? Json(@class, SerializerOptions) : NotFound();
     }
 
     [Tags("Classes")]
@@ -35,8 +36,8 @@ public class ClassController(StorageManager storage) : BaseDocumentationControll
     [EndpointSummary("Returns informations about a specific class.")]
     public ActionResult<Dictionary<string, SFClassMethod>> GetClassMethods(string className)
     {
-        var cl = Documentation.Classes.GetValueOrDefault(className);
-        return cl != null ? Json(cl.Methods, SerializerOptions) : NotFound();
+        var @class = Documentation.Classes.GetValueOrDefault(className);
+        return @class != null ? Json(@class.Methods, SerializerOptions) : NotFound();
     }
 
     [Tags("Classes")]
@@ -45,10 +46,11 @@ public class ClassController(StorageManager storage) : BaseDocumentationControll
     [EndpointSummary("Returns informations about a specific class.")]
     public ActionResult<SFClassMethod> GetClassMethod(string className, string methodName)
     {
-        var cl = Documentation.Classes.GetValueOrDefault(className);
-        var method = cl?.Methods.GetValueOrDefault(methodName);
+        SFClass? @class = Documentation.Classes.GetValueOrDefault(className);
+        if (@class == null) return NotFound();
 
-        return method != null ? Json(method, SerializerOptions) : NotFound();
+        bool success = @class.Methods.TryGetValue(methodName, out SFClassMethod? method);
+        return success ? Json(method, SerializerOptions) : NotFound();
     }
 
     [Tags("Classes")]
@@ -57,8 +59,8 @@ public class ClassController(StorageManager storage) : BaseDocumentationControll
     [EndpointSummary("Returns informations about a specific class.")]
     public ActionResult<Dictionary<string, SFClassField>> GetClassFields(string className)
     {
-        var cl = Documentation.Classes.GetValueOrDefault(className);
-        return cl != null ? Json(cl.Fields, SerializerOptions) : NotFound();
+        var @class = Documentation.Classes.GetValueOrDefault(className);
+        return @class != null ? Json(@class.Fields, SerializerOptions) : NotFound();
     }
 
     [Tags("Classes")]
@@ -67,10 +69,11 @@ public class ClassController(StorageManager storage) : BaseDocumentationControll
     [EndpointSummary("Returns informations about a specific class.")]
     public ActionResult<SFClassField> GetClassField(string className, string fieldName)
     {
-        var cl = Documentation.Classes.GetValueOrDefault(className);
-        var field = cl?.Fields.GetValueOrDefault(fieldName);
+        SFClass? @class = Documentation.Classes.GetValueOrDefault(className);
+        if (@class == null) return NotFound();
 
-        return field != null ? Json(field, SerializerOptions) : NotFound();
+        bool success = @class.Fields.TryGetValue(fieldName, out SFClassField? field);
+        return success ? Json(field, SerializerOptions) : NotFound();
     }
 
     [Tags("Classes")]
@@ -79,8 +82,8 @@ public class ClassController(StorageManager storage) : BaseDocumentationControll
     [EndpointSummary("Returns informations about a specific class.")]
     public ActionResult<Dictionary<string, SFClassField>> GetClassOperators(string className)
     {
-        var cl = Documentation.Classes.GetValueOrDefault(className);
-        return cl != null ? Json(cl.Operators, SerializerOptions) : NotFound();
+        var @class = Documentation.Classes.GetValueOrDefault(className);
+        return @class != null ? Json(@class.Operators, SerializerOptions) : NotFound();
     }
 
     [Tags("Classes")]
@@ -89,9 +92,10 @@ public class ClassController(StorageManager storage) : BaseDocumentationControll
     [EndpointSummary("Returns informations about a specific class.")]
     public ActionResult<SFClassField> GetClassOperator(string className, string operatorName)
     {
-        var cl = Documentation.Classes.GetValueOrDefault(className);
-        var op = cl?.Operators.GetValueOrDefault(operatorName);
+        SFClass? @class = Documentation.Classes.GetValueOrDefault(className);
+        if (@class == null) return NotFound();
 
-        return op != null ? Json(op, SerializerOptions) : NotFound();
+        bool success = @class.Operators.TryGetValue(operatorName, out SFClassOperator? @operator);
+        return success ? Json(@operator, SerializerOptions) : NotFound();
     }
 }
