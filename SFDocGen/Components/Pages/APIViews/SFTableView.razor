@@ -1,13 +1,13 @@
-﻿@page "/api/table/{TableName}"
+﻿@page "/ref/table/{TableName}"
 @using System.Text
 @using SFDocGen.Components.UI
 @using SFDocGen.Services.Frontend
 
 <CustomPageTitle Title="@Table.Name" />
 
-<MudTooltip Placement="Placement.Right" Arrow Text="Hook">
+<MudTooltip Placement="Placement.Right" Arrow Text="Structure">
     <div class="d-flex flex-row mud-secondary-text">
-        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.Settings" Size="Size.Large" />
+        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.AutoAwesomeMotion" Size="Size.Large" />
         <MudText Typo="Typo.h4">@Table.Name</MudText>
     </div>
 </MudTooltip>

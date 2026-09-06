@@ -1,11 +1,10 @@
-﻿@page "/api/class/{ClassName}/operator/{OperatorName}"
-@using SFDocGen.Components.UI
+﻿@page "/ref/class/{ClassName}/operator/{OperatorName}"
 
 <CustomPageTitle Title="@GetSignature()" />
 
-<MudTooltip Placement="Placement.Right" Arrow Text="Field">
+<MudTooltip Placement="Placement.Right" Arrow Text="Operator">
     <div class="d-flex flex-row mud-secondary-text">
-        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.ViewList" Size="Size.Large" />
+        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.Superscript" Size="Size.Large" />
         <MudText Typo="Typo.h4">@GetSignature()</MudText>
     </div>
 </MudTooltip>

@@ -7,7 +7,7 @@ namespace SFDocGen.Services.Frontend;
 /// </summary>
 public static class SFDocUriMapper
 {
-    public const string ApiPrefix = "/api";
+    public const string ApiPrefix = "/ref";
 
     // Hook
 
