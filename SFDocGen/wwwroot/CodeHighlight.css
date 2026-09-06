@@ -1,0 +1,94 @@
+﻿pre code.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 1em;
+    font-family: 'Cascadia Code';
+    font-size: 16px
+}
+
+code.hljs {
+    padding: 3px 5px
+}
+/*
+
+Dark style from softwaremaniacs.org (c) Ivan Sagalaev <Maniac@SoftwareManiacs.Org>
+
+*/
+.hljs {
+    color: #ddd;
+    background: #222222;
+    border-radius: 8px;
+    box-shadow: rgba(0,0,0,0.3) 3px 3px 4px
+}
+
+.hljs-keyword {
+    color: #CC7833
+}
+
+.hljs-literal {
+    color: #6C99BB
+}
+
+.hljs-selector-tag,
+.hljs-section,
+.hljs-link {
+    color: white
+}
+
+.hljs-subst {
+    /* default */
+}
+
+.hljs-string {
+    color: #A5C261
+}
+
+.hljs-type {
+    color: #B83426
+}
+
+.hljs-built_in {
+    color: #B83426
+}
+
+.hljs-punctuation {
+    color: #AAAAAA
+}
+
+.hljs-title,
+.hljs-name,
+.hljs-attribute,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+    color: #d88
+}
+
+.hljs-comment {
+    color: #BC9458
+}
+
+.hljs-quote,
+.hljs-deletion,
+.hljs-meta {
+    color: #979797
+}
+
+.hljs-keyword,  
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-title,
+.hljs-section,
+.hljs-doctag,
+.hljs-type,
+.hljs-name,
+.hljs-strong {
+    font-weight: bold
+}
+
+.hljs-emphasis {
+    font-style: italic
+}

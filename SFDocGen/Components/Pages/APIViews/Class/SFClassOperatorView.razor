@@ -1,0 +1,92 @@
+﻿@page "/api/class/{ClassName}/operator/{OperatorName}"
+@using SFDocGen.Components.UI
+
+<CustomPageTitle Title="@GetSignature()" />
+
+<MudTooltip Placement="Placement.Right" Arrow Text="Field">
+    <div class="d-flex flex-row mud-secondary-text">
+        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.ViewList" Size="Size.Large" />
+        <MudText Typo="Typo.h4">@GetSignature()</MudText>
+    </div>
+</MudTooltip>
+
+<MudDivider />
+
+<MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+    <CodeHighlight CodeLanguage="lua" Code="@GetSignature(includeVariable: true)" />
+
+    <MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">        
+        @foreach (string line in (Operator.Description ?? string.Empty).Split("\n"))
+        {
+            <MudText Typo="Typo.body1">@line</MudText>
+        }
+
+        <br />
+
+        @if (Operator.Usage != null)
+        {
+            <MudText Color="Color.Tertiary" Typo="Typo.h6">Usage</MudText>
+            <CodeHighlight CodeLanguage="lua" Code="@Operator.Usage" />
+        }
+    </MudContainer>
+</MudContainer>
+
+
+@code {
+    [Parameter]
+    public string OperatorName { get; set; } = string.Empty;
+
+    [Parameter]
+    public string ClassName { get; set; } = string.Empty;
+
+    public SFClassOperator Operator { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        SFClass? @class = Storage.Documentation.Classes.GetValueOrDefault(ClassName);
+        if (@class == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+
+        Operator = @class.Operators.GetValueOrDefault(OperatorName)!;
+        if (Operator == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    private string GetSignature(bool includeVariable = false)
+    {
+        Dictionary<string, string> operatorFormats = new()
+        {
+            { "mul", "{0} * {1}" },
+            { "div", "{0} / {1}" },
+            { "eq", "{0} == {1}" },
+            { "add", "{0} + {1}" },
+            { "sub", "{0} - {1}" },
+            { "unm", "-{0}" }
+        };
+
+        string identifier = Operator.Name?.Split('_')[0] ?? string.Empty;
+        string varStr = includeVariable ? "local x = " : string.Empty;
+
+        if (!operatorFormats.TryGetValue(identifier, out string? format))
+        {
+            return Operator.Name ?? "UNKNOWN OPERATOR";
+        }
+
+        if (Operator.RightOperand != null)
+        {
+            return varStr + string.Format(format, Operator.LeftOperand, Operator.RightOperand);
+        }
+        else
+        {
+            return varStr + string.Format(format, Operator.LeftOperand);
+        }
+    }
+}

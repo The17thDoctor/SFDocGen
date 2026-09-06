@@ -1,0 +1,46 @@
+﻿@using SFDocGen.Model.Abstraction
+@using SFDocGen.Services.Frontend
+
+<MudText>
+    <b class="mud-secondary-text">@Field.Name</b>:
+    @{
+        string? uri = FindReference(Field.Type ?? string.Empty);
+
+        if (uri != null)
+        {
+            <b><a class="mud-info-text" href="@uri">@Field.Type</a></b>
+        }
+        else
+        {
+            <b>@Field.Type</b>
+        }
+    }
+</MudText>
+
+@if (Field.Description != null)
+{
+    @foreach (string line in Field.Description.Split('\n'))
+    {
+        <MudText>@line</MudText>
+    }
+}
+<br />
+
+@code {
+    [Parameter, EditorRequired]
+    public SFTableField Field { get; set; }
+
+    public string? FindReference(string typeName)
+    {
+        if (Storage.Documentation.Classes.TryGetValue(typeName, out SFClass? @class))
+        {
+            return SFDocUriMapper.Map(@class);
+        }
+        else if (Storage.Documentation.Tables.TryGetValue(typeName, out SFTable? table))
+        {
+            return SFDocUriMapper.Map(table);
+        }
+
+        return null;
+    }
+}

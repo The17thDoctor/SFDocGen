@@ -1,0 +1,87 @@
+﻿@page "/api/table/{TableName}"
+@using System.Text
+@using SFDocGen.Components.UI
+@using SFDocGen.Services.Frontend
+
+<CustomPageTitle Title="@Table.Name" />
+
+<MudTooltip Placement="Placement.Right" Arrow Text="Hook">
+    <div class="d-flex flex-row mud-secondary-text">
+        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.Settings" Size="Size.Large" />
+        <MudText Typo="Typo.h4">@Table.Name</MudText>
+    </div>
+</MudTooltip>
+
+<MudDivider />
+
+<MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+    <CodeHighlight CodeLanguage="json" Code="@GetSignature()" />
+
+    <MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+        
+        <MudStack Row Spacing="1" Class="m-0 p-0">
+            <MudIcon Icon="@CustomIcons.RealmIcon(Table)" />
+            <MudText>
+                @(Table.Realm == Model.Abstraction.Realm.Server 
+                ? "Usable SERVERSIDE."
+                : Table.Realm == Model.Abstraction.Realm.Client 
+                ? "Usable CLIENTSIDE"
+                : "Usable both SERVERSIDE & CLIENTSIDE.")
+            </MudText>
+        </MudStack>
+        
+
+        @foreach (string line in (Table.Description ?? string.Empty).Split("\n"))
+        {
+            <MudText Typo="Typo.body1">@line</MudText>
+        }
+
+        <br />
+
+        @if (Table.Fields.Any())
+        {
+            <MudText Color="Color.Tertiary" Typo="Typo.h6">Fields</MudText>
+            @foreach (var field in Table.Fields.Values)
+            {
+                <TableFieldView Field="@field" />
+            }
+            <br />
+        }
+
+        @if (Table.Usage != null)
+        {
+            <MudText Color="Color.Tertiary" Typo="Typo.h6">Usage</MudText>
+            <CodeHighlight CodeLanguage="lua" Code="@Table.Usage" />
+        }
+    </MudContainer>
+</MudContainer>
+
+
+@code {
+    [Parameter]
+    public string TableName { get; set; } = string.Empty;
+    public SFTable Table { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        Table = Storage.Documentation.Tables.GetValueOrDefault(TableName)!;
+        if (Table == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    protected string GetSignature()
+    {
+        StringBuilder builder = new();
+        builder.Append(Table.Name + "\n");
+        builder.Append("{\n    ");
+        builder.AppendJoin("\n    ", Table.Fields.Values.Select(field => field.Name + ": " + field.Type));
+        builder.Append("\n}");
+
+        return builder.ToString();
+    }
+}

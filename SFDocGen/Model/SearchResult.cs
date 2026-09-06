@@ -24,17 +24,22 @@ public class SearchResult : IComparable<SearchResult>
         return Name.Length - other.Name.Length;
     }
 
+    public override string ToString()
+    {
+        return Name;
+    }
+
     private static string CraftName(SFDocValue value)
     {
         string name = string.Empty;
-        if (value is IChildObject<SFClass> classChild)
+        if (value is SFClassMethod classChild)
         {
             name += classChild.Parent.Name;
             name += ":";
             name += value.Name;
             name += "()";
         }
-        else if (value is IChildObject<SFLibrary> libChild)
+        else if (value is SFLibraryFunction libChild)
         {
             if (libChild.Parent.DocName != "_G")
             {
@@ -45,7 +50,7 @@ public class SearchResult : IComparable<SearchResult>
             name += value.Name;
             name += "()";
         }
-        else if (value is IChildObject<SFTable> tableChild)
+        else if (value is SFTableField tableChild)
         {
             name += tableChild.Parent.Name;
             name += ".";

@@ -57,10 +57,11 @@ public record SFClass : SFDocValue, IHasRealm
 /// <summary>
 /// Represents a field of a lua class.
 /// </summary>
-public record SFClassField : SFDocValue, IChildObject<SFClass>
+public record SFClassField : SFDocValue, IChildObject<SFClass>, IHasRealm
 {
     [JsonIgnore]
     public SFClass Parent { get; set; } = default!;
+    public Realm Realm { get; set; }
     public string? Type { get; set; }
 
     public override string ToLuaDoc()

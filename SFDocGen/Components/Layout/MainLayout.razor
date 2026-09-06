@@ -2,6 +2,7 @@
 
 @inherits LayoutComponentBase
 @inject IHttpClientFactory HttpFactory
+@inject HighlightService Highlight
 
 <MudThemeProvider @bind-IsDarkMode="IsDarkMode" Theme="@_theme" @rendermode="InteractiveServer" />
 <MudPopoverProvider />
@@ -15,28 +16,47 @@
         <a href="/">
             <MudText Class="mx-4" Style="font-weight: 900" Align="Align.Center" Typo="@Typo.h5">✨SFDOCGEN✨</MudText>
         </a>
-        <MudButton Href="/api/swagger" Color="Color.Inherit">
-            <MudIcon Icon="@Icons.Material.Filled.Api" Class="me-2"/>
-            <MudText Typo="Typo.button">API Documentation</MudText>
+        <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
+        <MudButton Href="/api" Color="Color.Primary">
+            <MudText Typo="Typo.button">API Reference</MudText>
+        </MudButton>
+        <MudButton Href="/doc" Color="Color.Primary">
+            <MudText Typo="Typo.button">Documentation</MudText>
+        </MudButton>
+        <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
+        <MudButton Href="/api/swagger" Color="Color.Secondary">
+            <MudText Typo="Typo.button">SFDocGen API</MudText>
         </MudButton>
         <MudSpacer />
-        <MudAutocomplete @ref="_searchField" Placeholder="Search (Ctrl+K)" On Margin="Margin.Dense" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" T="SearchResult" SearchFunc="@Search">
-            <ItemTemplate>
-                <MudText Typo="Typo.body2">@context.Name</MudText>
-                <p/>
-                <MudText Typo="Typo.caption">@context.Description</MudText>
-            </ItemTemplate>
-        </MudAutocomplete>
+        <MudTooltip Arrow Placement="Placement.Bottom" Text="Search is not yet implemented :)">
+            <MudAutocomplete @ref="_searchField" Disabled Placeholder="Search (Ctrl+K)" On Margin="Margin.Dense" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" T="SearchResult" SearchFunc="@Search">
+                <ItemTemplate>
+                    <MudText Typo="Typo.body2">@context.Name</MudText>
+                    <p />
+                    <MudText Typo="Typo.caption">@context.Description</MudText>
+                </ItemTemplate>
+            </MudAutocomplete>
+        </MudTooltip>
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
-        <MudToggleIconButton @bind-Toggled="IsDarkMode" Color="Color.Inherit" Icon="@Icons.Material.Filled.LightMode" ToggledColor="Color.Inherit" ToggledIcon="@Icons.Material.Filled.DarkMode" title="@(IsDarkMode ? "Dark" : "Light")" />
+        <MudTooltip Arrow Placement="Placement.Bottom" Text="Theme switching is not yet implemented either :)">
+            <MudToggleIconButton Disabled @bind-Toggled="IsDarkMode" Color="Color.Inherit" Icon="@Icons.Material.Filled.LightMode" ToggledColor="Color.Inherit" ToggledIcon="@Icons.Material.Filled.DarkMode" title="@(IsDarkMode ? "Dark" : "Light")" />
+        </MudTooltip>
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
-        <MudTooltip Text="Check out the source code!">
+        <MudTooltip Arrow Text="Check out the source code!">
             <MudIconButton Target="_blank" ButtonType="ButtonType.Button" Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/The17thDoctor/SFDocGen" />
         </MudTooltip>
     </MudAppBar>
     <MudDrawer Width="320px" Open Elevation="2" Class="z-100" ClipMode="@DrawerClipMode.Docked">
         <MudNavMenu Rounded="true" Margin="Margin.Dense" Class="pa-2">
-            <DocTreeView/>
+            @if (Navigation.Uri.StartsWith(Navigation.BaseUri + "doc"))
+            {
+                <MudText Class="pl-6" Align="Align.Left" Typo="Typo.h6">Documentation Index</MudText>
+            }
+            else
+            {
+                <MudText Class="pl-6" Align="Align.Left" Typo="Typo.h6">API Reference</MudText>
+                <APITreeView />
+            }
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent>
@@ -58,6 +78,12 @@
     {
         _httpClient = HttpFactory.CreateClient("APIClient");
         await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await Highlight.SetStyleAsync(Navigation.BaseUri + "CodeHighlight.css");
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     protected async Task<IEnumerable<SearchResult>> Search(string? search, CancellationToken cancel)

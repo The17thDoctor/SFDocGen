@@ -1,0 +1,75 @@
+﻿@page "/api/directive/{DirectiveName}"
+@using SFDocGen.Components.UI
+
+<CustomPageTitle Title="@Directive.Name" />
+
+<MudTooltip Placement="Placement.Right" Arrow Text="Directive">
+    <div class="d-flex flex-row mud-secondary-text">
+        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.Code" Size="Size.Large" />
+        <MudText Typo="Typo.h4">@Directive.Name</MudText>
+    </div>
+</MudTooltip>
+
+<MudDivider />
+
+<MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+    <CodeHighlight CodeLanguage="lua" Code="@GetSignature()" />
+
+    <MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+        @foreach (string line in (Directive.Description ?? string.Empty).Split("\n"))
+        {
+            <MudText Typo="Typo.body1">@line</MudText>
+        }
+
+        <br />
+
+        @if (Directive.Parameters.Any())
+        {
+            <MudText Color="Color.Tertiary" Typo="Typo.h6">Parameters</MudText>
+            @foreach (var parameter in Directive.Parameters)
+            {
+                <ParameterView Parameter="parameter" />
+            }
+            <br/>
+        }
+
+        @if (Directive.Usage != null)
+        {
+            <MudText Color="Color.Tertiary" Typo="Typo.h6">Usage</MudText>
+            <CodeHighlight CodeLanguage="lua" Code="@Directive.Usage" />
+        }
+    </MudContainer>
+</MudContainer>
+
+
+    @code {
+    [Parameter]
+    public string DirectiveName { get; set; } = string.Empty;
+    public SFDirective Directive { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        Directive = Storage.Documentation.Directives.GetValueOrDefault(DirectiveName)!;
+        if (Directive == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    protected string GetSignature()
+    {
+        string signature = "--@";
+        signature += Directive.Name;
+
+        if (Directive.Parameters.Any())
+        {
+            signature += " ";
+            signature += string.Join(" ", Directive.Parameters.Select(p => p.Name));
+        }
+
+        return signature;
+    }
+}

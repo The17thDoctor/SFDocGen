@@ -1,0 +1,18 @@
+﻿@using SFDocGen.Model.Abstraction
+@using SFDocGen.Services.Frontend
+
+<MudStack Row Spacing="1" Class="m-0 p-0">
+    <MudIcon Icon="@CustomIcons.RealmIcon(Value)" />
+    <MudText>
+        @(Value.Realm == Model.Abstraction.Realm.Server
+        ? "Usable SERVERSIDE."
+        : Value.Realm == Model.Abstraction.Realm.Client
+        ? "Usable CLIENTSIDE"
+        : "Usable both SERVERSIDE & CLIENTSIDE.")
+    </MudText>
+</MudStack>
+
+@code {
+    [Parameter, EditorRequired]
+    public IHasRealm Value { get; set; }
+}

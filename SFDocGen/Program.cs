@@ -1,3 +1,4 @@
+using HighlightBlazor;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Logging.Console;
 using MudBlazor.Services;
@@ -32,6 +33,7 @@ public class Program
         builder.Services.AddOpenApi();
 
         // Blazor
+        builder.Services.AddHighlight();
         builder.Services.AddMudServices();
         builder.Services.AddRazorComponents().AddInteractiveServerComponents();
         builder.Services.AddHttpClient("APIClient", (provider, client) =>

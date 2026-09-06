@@ -1,0 +1,70 @@
+﻿@page "/api/class/{ClassName}/field/{FieldName}"
+@using SFDocGen.Components.UI
+
+<CustomPageTitle Title="@GetSignature()" />
+
+<MudTooltip Placement="Placement.Right" Arrow Text="Field">
+    <div class="d-flex flex-row mud-secondary-text">
+        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.ViewList" Size="Size.Large" />
+        <MudText Typo="Typo.h4">@GetSignature()</MudText>
+    </div>
+</MudTooltip>
+
+<MudDivider />
+
+<MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+    <CodeHighlight CodeLanguage="lua" Code="@GetSignature()" />
+
+    <MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+        <RealmText Value="@Field" />
+
+        
+        @foreach (string line in (Field.Description ?? string.Empty).Split("\n"))
+        {
+            <MudText Typo="Typo.body1">@line</MudText>
+        }
+
+        <br />
+
+        @if (Field.Usage != null)
+        {
+            <MudText Color="Color.Tertiary" Typo="Typo.h6">Usage</MudText>
+            <CodeHighlight CodeLanguage="lua" Code="@Field.Usage" />
+        }
+    </MudContainer>
+</MudContainer>
+
+
+@code {
+    [Parameter]
+    public string FieldName { get; set; } = string.Empty;
+
+    [Parameter]
+    public string ClassName { get; set; } = string.Empty;
+
+    public SFClassField Field { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        SFClass? @class = Storage.Documentation.Classes.GetValueOrDefault(ClassName);
+        if (@class == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+
+        Field = @class.Fields.GetValueOrDefault(FieldName)!;
+        if (Field == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    private string GetSignature()
+    {
+        return $"{Field.Parent.Name}.{Field.Name}";
+    }
+}

@@ -1,0 +1,73 @@
+﻿@page "/api/hook/{HookName}"
+@using SFDocGen.Components.UI
+@using SFDocGen.Services.Frontend
+
+<CustomPageTitle Title="@Hook.Name" />
+
+<MudTooltip Placement="Placement.Right" Arrow Text="Hook">
+    <div class="d-flex flex-row mud-secondary-text">
+        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.Settings" Size="Size.Large" />
+        <MudText Typo="Typo.h4">@Hook.Name</MudText>
+    </div>
+</MudTooltip>
+
+<MudDivider />
+
+<MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+    <CodeHighlight CodeLanguage="lua" Code="@GetSignature()" />
+
+    <MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+        <RealmText Value="@Hook" />
+
+        @foreach (string line in (Hook.Description ?? string.Empty).Split("\n"))
+        {
+            <MudText Typo="Typo.body1">@line</MudText>
+        }
+
+        <br />
+
+        @if (Hook.Parameters.Any())
+        {
+            <MudText Color="Color.Tertiary" Typo="Typo.h6">Parameters</MudText>
+            @foreach (var parameter in Hook.Parameters)
+            {
+                <ParameterView Parameter="parameter" />
+            }
+            <br />
+        }
+
+        @if (Hook.Usage != null)
+        {
+            <MudText Color="Color.Tertiary" Typo="Typo.h6">Usage</MudText>
+            <CodeHighlight CodeLanguage="lua" Code="@Hook.Usage" />
+        }
+    </MudContainer>
+</MudContainer>
+
+
+@code {
+    [Parameter]
+    public string HookName { get; set; } = string.Empty;
+    public SFHook Hook { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        Hook = Storage.Documentation.Hooks.GetValueOrDefault(HookName)!;
+        if (Hook == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    protected string GetSignature()
+    {
+        string signature = $"hook(\"{Hook.Name}\", \"hookname\", function(";
+        signature += string.Join(", ", Hook.Parameters.Select(p => p.Name));
+        signature += ") end)";
+
+        return signature;
+    }
+}

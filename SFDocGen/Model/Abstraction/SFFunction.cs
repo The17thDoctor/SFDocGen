@@ -14,33 +14,6 @@ public abstract record SFFunction<T> : SFDocValue, IHasTypedParams, IHasRealm, I
     public List<SFFunctionOverload> Overloads { get; set; } = [];
 
     protected abstract string GetParentDelimiter();
-
-    public string GetSignature(bool omitParameters = false)
-    {
-        StringBuilder sb = new();
-
-        sb.Append(Parent.DocName ?? Parent.Name);
-        sb.Append(GetParentDelimiter());
-        sb.Append(DocName ?? Name);
-        sb.Append('(');
-        
-        if (omitParameters)
-        {
-            sb.Append(')');
-            return sb.ToString();
-        }
-
-        sb.AppendJoin(", ", Parameters.Select(p => $"{p.Name}: {p.ConcatTypes()}"));
-        sb.Append(')');
-
-        if (ReturnValues.Count > 0)
-        {
-            sb.Append(": ");
-            sb.AppendJoin(", ", ReturnValues.Select(r => r.ConcatTypes()));
-        }
-
-        return sb.ToString();
-    }
 }
 
 public record SFFunctionOverload : IHasTypedParams, IReturnsValue
