@@ -1,0 +1,38 @@
+﻿@page "/ref/library/{LibraryName}/function/{FunctionName}"
+@using SFDocGen.Blazor.Components
+
+
+<SFDocValueView TValue="SFLibraryFunction" Value="Function" Signature="@GetSignature()" CustomName="@(LibraryName + "." + FunctionName + "()")" />
+
+
+@code {
+    [Parameter]
+    public string FunctionName { get; set; } = string.Empty;
+
+    [Parameter]
+    public string LibraryName { get; set; } = string.Empty;
+
+    public SFLibraryFunction Function { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        SFLibrary? @class = Storage.Documentation.Libraries.GetValueOrDefault(LibraryName);
+        Function = @class?.Functions.GetValueOrDefault(FunctionName)!;
+
+        if (Function == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    private string GetSignature(bool includeParams = true)
+    {
+        string paramList = includeParams ? string.Join(", ", Function.Parameters.Select(p => p.Name)) : string.Empty;
+
+        if (Function.Parent.Name == "builtin") return $"function {Function.Name}({paramList})";
+        return $"{(includeParams ? "function " : string.Empty)}{Function.Parent.Name}.{Function.Name}({paramList})";
+    }
+}

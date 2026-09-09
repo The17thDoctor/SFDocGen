@@ -1,8 +1,8 @@
-using HighlightBlazor;
+using Brism;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Logging.Console;
 using MudBlazor.Services;
-using SFDocGen.Components;
+using SFDocGen.Blazor;
 using SFDocGen.Core;
 using SFDocGen.Services.Backend;
 
@@ -33,7 +33,7 @@ public class Program
         builder.Services.AddOpenApi();
 
         // Blazor
-        builder.Services.AddHighlight();
+        builder.Services.AddBrism();
         builder.Services.AddMudServices();
         builder.Services.AddRazorComponents().AddInteractiveServerComponents();
         builder.Services.AddHttpClient("APIClient", (provider, client) =>

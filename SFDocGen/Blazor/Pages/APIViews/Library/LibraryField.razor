@@ -1,0 +1,36 @@
+﻿@page "/ref/library/{LibraryName}/field/{FieldName}"
+@using SFDocGen.Blazor.Components
+
+
+<SFDocValueView TValue="SFLibraryField" Value="Field" Signature="@GetSignature()" CustomName="@GetSignature()" />
+
+
+@code {
+    [Parameter]
+    public string FieldName { get; set; } = string.Empty;
+
+    [Parameter]
+    public string LibraryName { get; set; } = string.Empty;
+
+    public SFLibraryField Field { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        SFLibrary? library = Storage.Documentation.Libraries.GetValueOrDefault(LibraryName);
+        Field = library?.Fields.GetValueOrDefault(FieldName)!;
+
+        if (Field == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    private string GetSignature()
+    {
+        if (Field.Parent.Name == "builtin") return Field.Name ?? string.Empty;
+        return $"{Field.Parent.Name}.{Field.Name}";
+    }
+}

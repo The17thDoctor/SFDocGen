@@ -1,0 +1,33 @@
+﻿@page "/ref/hook/{Name}"
+@using SFDocGen.Blazor.Components
+
+
+<SFDocValueView TValue="SFHook" Value="@Value" Signature="@GetSignature()" />
+
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = string.Empty;
+    public SFHook Value { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        Value = Storage.Documentation.Hooks.GetValueOrDefault(Name)!;
+        if (Value == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    protected string GetSignature()
+    {
+        string signature = $"hook(\"{Value.Name}\", \"hookname\", function(";
+        signature += string.Join(", ", Value.Parameters.Select(p => p.Name));
+        signature += ") end)";
+
+        return signature;
+    }
+}

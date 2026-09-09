@@ -1,0 +1,113 @@
+﻿@using SFDocGen.Model.Abstraction
+@using SFDocGen.Services.Frontend
+@typeparam TValue where TValue : SFDocValue
+
+
+<MudIcon Color="Color.Secondary" Icon="@IconsHelper.SFDocIcon(Value, useRealm: false)" Style="font-size: 2.5rem;" Class="mr-2"/>
+<MudText Color="Color.Secondary" Typo="Typo.h3" Class="py-auto" Inline>@(CustomName ?? Value.Name)</MudText>
+
+<MudDivider Class="mt-2 mb-4" />
+
+@if (Signature != null)
+{
+    <CodeBlock @key="Value" Language="CodeLanguage.Lua" Code="@Signature" EnableLineNumbers="false" />
+}
+
+<MudContainer Class="mt-4" Gutters MaxWidth="MaxWidth.False">
+    <!-- Realm -->
+    @if (Value is IHasRealm realmValue)
+    {
+        <RealmText Value="@realmValue" />
+        <br />
+    }
+    
+    @if (ContentPlacement == ContentPlacement.Realm)
+    {
+        @ChildContent
+        <br />
+    }
+
+    <!-- Description -->
+    @if (Value.Description != null)
+    {
+        <MudText Color="Color.Tertiary" Typo="Typo.h5">Description</MudText>
+        <MudText Class="description-text" Style="a { color: #0097FF; }">@((MarkupString)Value.Description.Replace("\n", "<br/>"))</MudText>
+        <br />
+    }
+    
+    @if (ContentPlacement == ContentPlacement.Description)
+    {
+        @ChildContent
+        <br/>
+    }
+
+    <!-- Parameters -->
+    @if (Value is IHasTypedParams paramValue && paramValue.Parameters.Any())
+    {
+        <MudText Color="Color.Tertiary" Typo="Typo.h5">Parameters</MudText>
+        @foreach (var parameter in paramValue.Parameters)
+        {
+            <ParameterView Parameter="parameter" />
+        }
+    }
+
+    @if (ContentPlacement == ContentPlacement.Parameters)
+    {
+        @ChildContent
+        <br />
+    }
+
+    <!-- Returns -->
+    @if (Value is IReturnsValue returnsValues && returnsValues.ReturnValues.Any())
+    {
+        <MudText Color="Color.Tertiary" Typo="Typo.h5">Returns</MudText>
+        @foreach (var returnValue in returnsValues.ReturnValues)
+        {
+            if (returnValue is null) continue;
+            <ReturnValueView ReturnValue="returnValue" />
+        }
+
+        <br />
+    }
+
+    @if (ContentPlacement == ContentPlacement.ReturnValues)
+    {
+        @ChildContent
+        <br />
+    }
+
+    <!-- Usage -->
+    @if (Value.Usage != null)
+    {
+        <MudText Color="Color.Tertiary" Typo="Typo.h5">Usage</MudText>
+        <CodeBlock Language="CodeLanguage.Lua" Code="@Value.Usage" />
+        <br/>
+    }
+
+    @if (ContentPlacement == ContentPlacement.Usage)
+    {
+        @ChildContent
+        <br />
+    }
+</MudContainer>
+
+
+    @code {
+    [Parameter, EditorRequired]
+    public TValue Value { get; set; }
+
+    [Parameter]
+    public string? CustomName { get; set; }
+
+    [Parameter]
+    public string? Signature { get; set; }
+
+    /// <summary>
+    /// Defines the placement of child content.
+    /// </summary>
+    [Parameter]
+    public ContentPlacement ContentPlacement { get; set; } = ContentPlacement.None;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

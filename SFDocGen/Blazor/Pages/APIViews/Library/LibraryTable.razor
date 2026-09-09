@@ -1,0 +1,41 @@
+﻿@page "/ref/library/{LibraryName}/table/{TableName}"
+@using SFDocGen.Blazor.Components
+
+
+<SFDocValueView TValue="SFLibraryTable" Value="Table" Signature="@GetSignature()" CustomName="@(LibraryName + "." + TableName)" />
+
+
+@code {
+    [Parameter]
+    public string TableName { get; set; } = string.Empty;
+
+    [Parameter]
+    public string LibraryName { get; set; } = string.Empty;
+
+    public SFLibraryTable Table { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        SFLibrary? library = Storage.Documentation.Libraries.GetValueOrDefault(LibraryName);
+        if (library == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+
+        Table = library.Tables.GetValueOrDefault(TableName)!;
+        if (Table == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    private string GetSignature()
+    {
+        if (Table.Parent.Name == "builtin") return Table.Name ?? string.Empty;
+        return $"{Table.Parent.Name}.{Table.Name}";
+    }
+}

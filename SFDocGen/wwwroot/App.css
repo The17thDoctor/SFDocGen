@@ -1,3 +1,7 @@
 ﻿.mud-layout {
     min-height: 100vh;
 }
+
+.description-text > a {
+    color: #0097FF;
+}

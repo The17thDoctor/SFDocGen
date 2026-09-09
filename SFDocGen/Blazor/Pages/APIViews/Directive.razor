@@ -1,0 +1,38 @@
+﻿@page "/ref/directive/{Name}"
+@using SFDocGen.Blazor.Components
+
+
+<SFDocValueView TValue="SFDirective" Value="Value" Signature="@GetSignature()" />
+
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = string.Empty;
+    public SFDirective Value { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        Value = Storage.Documentation.Directives.GetValueOrDefault(Name)!;
+        if (Value == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    protected string GetSignature()
+    {
+        string signature = "--@";
+        signature += Value.Name;
+
+        if (Value.Parameters.Any())
+        {
+            signature += " ";
+            signature += string.Join(" ", Value.Parameters.Select(p => p.Name));
+        }
+
+        return signature;
+    }
+}

@@ -1,34 +1,7 @@
 ﻿@page "/ref/class/{ClassName}/operator/{OperatorName}"
 
-<CustomPageTitle Title="@GetSignature()" />
 
-<MudTooltip Placement="Placement.Right" Arrow Text="Operator">
-    <div class="d-flex flex-row mud-secondary-text">
-        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.Superscript" Size="Size.Large" />
-        <MudText Typo="Typo.h4">@GetSignature()</MudText>
-    </div>
-</MudTooltip>
-
-<MudDivider />
-
-<MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
-    <CodeHighlight CodeLanguage="lua" Code="@GetSignature(includeVariable: true)" />
-
-    <MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">        
-        @foreach (string line in (Operator.Description ?? string.Empty).Split("\n"))
-        {
-            <MudText Typo="Typo.body1">@line</MudText>
-        }
-
-        <br />
-
-        @if (Operator.Usage != null)
-        {
-            <MudText Color="Color.Tertiary" Typo="Typo.h6">Usage</MudText>
-            <CodeHighlight CodeLanguage="lua" Code="@Operator.Usage" />
-        }
-    </MudContainer>
-</MudContainer>
+<SFDocValueView TValue="SFClassOperator" Value="Operator" Signature="@GetSignature()" CustomName="@GetSignature()" />
 
 
 @code {

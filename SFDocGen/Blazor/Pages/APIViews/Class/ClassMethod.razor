@@ -1,0 +1,39 @@
+﻿@page "/ref/class/{ClassName}/method/{MethodName}"
+@using SFDocGen.Blazor.Components
+
+<SFDocValueView TValue="SFClassMethod" Value="Method" Signature="@GetSignature(includeParams: true)" CustomName="@GetSignature(includeParams: false)" />
+
+@code {
+    [Parameter]
+    public string MethodName { get; set; } = string.Empty;
+
+    [Parameter]
+    public string ClassName { get; set; } = string.Empty;
+
+    public SFClassMethod Method { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        SFClass? @class = Storage.Documentation.Classes.GetValueOrDefault(ClassName);
+        if (@class == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+
+        Method = @class.Methods.GetValueOrDefault(MethodName)!;
+        if (Method == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+
+    private string GetSignature(bool includeParams = true)
+    {
+        string paramList = includeParams ? string.Join(", ", Method.Parameters.Select(p => p.Name)) : string.Empty;
+        return $"{(includeParams ? "function " : string.Empty)}{Method.Parent.Name}:{Method.Name}({paramList})";
+    }
+}

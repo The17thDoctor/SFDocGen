@@ -1,0 +1,50 @@
+﻿@page "/ref/table/{Name}"
+@using System.Text
+@using SFDocGen.Blazor.Components
+
+
+<SFDocValueView TValue="SFTable" Value="Value" ContentPlacement="ContentPlacement.Description" Signature="@GetSignature()">
+    @if (Value.Fields.Any())
+    {
+        <MudText Color="Color.Tertiary" Typo="Typo.h5">Fields</MudText>
+        @foreach (var field in Value.Fields.Values)
+        {
+            <TableFieldView Field="@field" />
+        }
+    }
+</SFDocValueView>
+
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = string.Empty;
+    public SFTable Value { get; set; } = default!;
+
+    public string Signature { get; set; } = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        Value = Storage.Documentation.Tables.GetValueOrDefault(Name)!;
+        if (Value == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+
+        Signature = GetSignature();
+        StateHasChanged();
+    }
+
+    protected string GetSignature()
+    {
+        StringBuilder builder = new();
+        builder.Append(Value.Name + "\n");
+        builder.Append("{\n    ");
+        builder.AppendJoin("\n    ", Value.Fields.Values.Select(field => field.Name + ": " + field.Type));
+        builder.Append("\n}");
+
+        return builder.ToString();
+    }
+}

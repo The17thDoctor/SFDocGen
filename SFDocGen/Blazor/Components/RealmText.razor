@@ -2,7 +2,7 @@
 @using SFDocGen.Services.Frontend
 
 <MudStack Row Spacing="1" Class="m-0 p-0">
-    <MudIcon Icon="@CustomIcons.RealmIcon(Value)" />
+    <MudIcon Icon="@IconsHelper.RealmIcon(Value)" />
     <MudText>
         @(Value.Realm == Model.Abstraction.Realm.Server
         ? "Usable SERVERSIDE."

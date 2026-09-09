@@ -1,0 +1,285 @@
+﻿@using SFDocGen.Services.Frontend
+@using UriMapper = SFDocGen.Services.Frontend.SFDocUriMapper
+
+<MudTreeView AutoExpand @ref="_treeView" T="string" Dense @bind-Items="TreeItems" SelectionMode="SelectionMode.SingleSelection" @bind-SelectedValue="ViewedElement">
+    <ItemTemplate>
+        <MudTreeViewItem Icon="@context.Icon" Value="@context.Value" Text="@context.Text" @bind-Items="@context.Children" Expanded="@context.Expanded" />
+    </ItemTemplate>
+</MudTreeView>
+
+@code {
+    public List<TreeItemData<string>> TreeItems { get; set; } = [];
+    public string? ViewedElement
+    {
+        get;
+        set
+        {
+            field = value;
+            if (ShouldNavigate) Navigate(value);
+        }
+    }
+
+    protected bool ShouldNavigate { get; set; } = true;
+
+    private MudTreeView<string>? _treeView;
+    private static readonly Dictionary<string, string> _operatorFormats = new()
+    {
+        { "mul", "{0} * {1}" },
+        { "div", "{0} / {1}" },
+        { "eq",  "{0} == {1}" },
+        { "add", "{0} + {1}" },
+        { "sub", "{0} - {1}" },
+        { "unm", "-{0}" }
+    };
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Populate();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        Uri currentUri = new(Navigation.Uri);
+
+        // Updates the currently selected element without
+        // triggering a navigation call.
+        ShouldNavigate = false;
+        ViewedElement = currentUri.AbsolutePath;
+        ShouldNavigate = true;
+    }
+
+    protected void Navigate(string? uri)
+    {
+        if (string.IsNullOrEmpty(uri)) return;
+        Navigation.NavigateTo(uri);
+    }
+
+    protected void Populate()
+    {
+        var documentation = Storage.Documentation;
+
+        // Hooks
+        TreeItemData<string> hookHeader = new() {
+            Text = "Hooks",
+            Icon = IconsHelper.SFDocIcon(typeof(SFHook))
+        };
+
+        hookHeader.Children = documentation.Hooks.Values.Select(hook => new TreeItemData<string>() {
+            Text = hook.Name,
+            Value = UriMapper.Map(hook),
+            Icon = IconsHelper.RealmIcon(hook)
+        }).ToList();
+
+        TreeItems.Add(hookHeader);
+
+
+        // Libraries
+        TreeItemData<string> libraryHeader = new() {
+            Text = "Libraries",
+            Icon = IconsHelper.SFDocIcon(typeof(SFLibrary))
+        };
+
+        libraryHeader.Children = documentation.Libraries.Values.Select(PopulateLibraries).ToList();
+        TreeItems.Add(libraryHeader);
+
+
+        // Classes
+        TreeItemData<string> classHeader = new() {
+            Text = "Classes",
+            Icon = IconsHelper.SFDocIcon(typeof(SFClass))
+        };
+
+        classHeader.Children = documentation.Classes.Values.Select(PopulateClasses).ToList();
+        TreeItems.Add(classHeader);
+
+
+        // Tables (Structures)
+        TreeItemData<string> tableHeader = new() {
+            Text = "Structures",
+            Icon = IconsHelper.SFDocIcon(typeof(SFTable))
+        };
+
+        tableHeader.Children = documentation.Tables.Values.Select(table => new TreeItemData<string> {
+            Text = table.Name,
+            Value = UriMapper.Map(table),
+            Icon = IconsHelper.SFDocIcon(table)
+        }).ToList();
+
+        TreeItems.Add(tableHeader);
+
+
+        // Directives
+        TreeItemData<string> directiveHeader = new() {
+            Text = "Preprocessor Directives",
+            Icon = IconsHelper.SFDocIcon(typeof(SFDirective))
+        };
+
+        directiveHeader.Children = documentation.Directives.Values.Select(directive => new TreeItemData<string>() {
+            Text = directive.Name,
+            Value = UriMapper.Map(directive),
+            Icon = IconsHelper.SFDocIcon(directive)
+        }).ToList();
+
+        TreeItems.Add(directiveHeader);
+    }
+
+    protected TreeItemData<string> PopulateClasses(SFClass @class)
+    {
+        TreeItemData<string> node = new() {
+            Text = @class.Name,
+            Value = UriMapper.Map(@class),
+            Icon = IconsHelper.SFDocIcon(@class)
+        };
+
+        List<TreeItemData<string>> nodeChildren = [];
+
+        // Fields
+        if (@class.Fields.Any())
+        {
+            TreeItemData<string> fieldHeader = new() {
+                Text = "Fields",
+                Icon = IconsHelper.SFDocIcon(typeof(SFClassField)),
+                Expanded = true
+            };
+
+            fieldHeader.Children = @class.Fields.Values.Select(field => new TreeItemData<string>() {
+                Text = $"{@class.DocName ?? @class.Name}.{field.Name}",
+                Value = UriMapper.Map(field),
+                Icon = IconsHelper.SFDocIcon(field) 
+            }).ToList();
+
+            nodeChildren.Add(fieldHeader);
+        }
+
+        // Methods
+        if (@class.Methods.Any())
+        {
+            TreeItemData<string> methodHeader = new() {
+                Text = "Methods",
+                Icon = IconsHelper.SFDocIcon(typeof(SFClassMethod)),
+                Expanded = true
+            };
+
+            methodHeader.Children = @class.Methods.Values.Select(method => new TreeItemData<string>() {
+                Text = $"{@class.DocName ?? @class.Name}:{method.Name}()",
+                Value = UriMapper.Map(method),
+                Icon = IconsHelper.SFDocIcon(@method)
+            }).ToList();
+
+            nodeChildren.Add(methodHeader);
+        }
+
+        // Operators
+        if (@class.Operators.Any())
+        {
+            TreeItemData<string> operatorHeader = new() {
+                Text = "Operators",
+                Icon = IconsHelper.SFDocIcon(typeof(SFClassOperator)),
+                Expanded = true
+            };
+
+            operatorHeader.Children = @class.Operators.Values.Select(@operator => new TreeItemData<string>() {
+                Text = FormatOperator(@operator),
+                Value = UriMapper.Map(@operator),
+                Icon = IconsHelper.SFDocIcon(@operator)
+            }).ToList();
+
+            nodeChildren.Add(operatorHeader);
+        }
+
+        node.Children = nodeChildren;
+        return node;
+    }
+
+    protected TreeItemData<string> PopulateLibraries(SFLibrary library)
+    {
+        TreeItemData<string> node = new() {
+            Text = library.Name,
+            Value = UriMapper.Map(library),
+            Icon = IconsHelper.SFDocIcon(library)
+        };
+
+        List<TreeItemData<string>> nodeChildren = [];
+
+        // Special case for the builtin library to make documentation clearer.
+        string libraryPrefix = library.Name == "builtin" ? string.Empty : $"{library.DocName ?? library.Name}.";
+
+        // Fields
+        if (library.Fields.Any())
+        {
+            TreeItemData<string> fieldHeader = new() {
+                Text = "Fields",
+                Icon = IconsHelper.SFDocIcon(typeof(SFLibraryField)),
+                Expanded = true
+            };
+
+            fieldHeader.Children = library.Fields.Values.Select(field => new TreeItemData<string>() {
+                Text = $"{libraryPrefix}{field.Name}",
+                Value = UriMapper.Map(field),
+                Icon = IconsHelper.RealmIcon(field)
+            }).ToList();
+
+            nodeChildren.Add(fieldHeader);
+        }
+
+        // Functions
+        if (library.Functions.Any())
+        {
+            TreeItemData<string> functionHeader = new() {
+                Text = "Functions",
+                Icon = IconsHelper.SFDocIcon(typeof(SFLibraryFunction)),
+                Expanded = true
+            };
+
+            functionHeader.Children = library.Functions.Values.Select(function => new TreeItemData<string>() {
+                Text = $"{libraryPrefix}{function.Name}()",
+                Value = UriMapper.Map(function),
+                Icon = IconsHelper.RealmIcon(function)
+            }).ToList();
+
+            nodeChildren.Add(functionHeader);
+        }
+
+        // Tables
+        if (library.Tables.Any())
+        {
+            TreeItemData<string> tableHeader = new() {
+                Text = "Tables",
+                Icon = IconsHelper.SFDocIcon(typeof(SFLibraryTable)),
+                Expanded = true
+            };
+
+            tableHeader.Children = library.Tables.Values.Select(table => new TreeItemData<string>() {
+                Text = $"{libraryPrefix}{table.Name}",
+                Value = UriMapper.Map(table),
+                Icon = IconsHelper.RealmIcon(table)
+            }).ToList();
+
+            nodeChildren.Add(tableHeader);
+        }
+
+        node.Children = nodeChildren;
+        return node;
+    }
+
+    private string FormatOperator(SFClassOperator @operator)
+    {
+        string identifier = @operator.Name?.Split('_')[0] ?? string.Empty;
+
+        if (!_operatorFormats.TryGetValue(identifier, out string? format))
+        {
+            return @operator.Name ?? "UNKNOWN OPERATOR";
+        }
+
+        if (@operator.RightOperand != null)
+        {
+            return string.Format(format, @operator.LeftOperand, @operator.RightOperand);
+        }
+        else
+        {
+            return string.Format(format, @operator.LeftOperand);
+        }
+    }
+}

@@ -1,0 +1,76 @@
+﻿@using System.Diagnostics.CodeAnalysis
+@using SFDocGen.Model.Abstraction
+@using SFDocGen.Services.Frontend
+
+<MudText>
+    <MudText Typo="Typo.inherit" Inline Color="Color.Secondary"><b>@(ReturnValue.Name ?? "<unnamed>")</b></MudText>
+    <MudText Typo="Typo.inherit" Inline>: </MudText>
+
+    @if (!ReturnValue.Types.Any())
+    {
+        <MudTooltip Arrow Placement="Placement.Right" Text="Type information unavailable.">
+            <MudText Typo="Typo.inherit" Inline><b>Unknown</b></MudText>
+        </MudTooltip>
+    }
+    else
+    {
+        int i = 0;
+        foreach (string type in ReturnValue.Types)
+        {
+            i++;
+            if (TryGetReference(type, out string? uri))
+            {
+                <MudText Typo="Typo.inherit" Color="Color.Info" Inline><a style="color: inherit" href="@uri"><b>@type</b></a></MudText>
+            }
+            else
+            {
+                <MudText Inline><b>@type</b></MudText>
+            }
+
+            if (i < ReturnValue.Types.Count)
+            {
+                <MudText Inline Class="px-1">|</MudText>
+            }
+        }
+    }
+</MudText>
+
+<MudText>@((MarkupString)(ReturnValue.Description ?? "No description available.").Replace("\n", "<br/>"))</MudText>
+<br />
+
+@code {
+    [Parameter, EditorRequired]
+    public SFReturnValue ReturnValue { get; set; }
+
+    public string? FindReference(string typeName)
+    {
+        if (Storage.Documentation.Classes.TryGetValue(typeName, out SFClass? @class))
+        {
+            return SFDocUriMapper.Map(@class);
+        }
+        else if (Storage.Documentation.Tables.TryGetValue(typeName, out SFTable? table))
+        {
+            return SFDocUriMapper.Map(table);
+        }
+
+        return null;
+    }
+
+    protected bool TryGetReference(string name, [NotNullWhen(true)] out string? uri)
+    {
+        if (Storage.Documentation.Classes.TryGetValue(name, out SFClass? @class))
+        {
+            uri = SFDocUriMapper.Map(@class);
+            return true;
+        }
+
+        if (Storage.Documentation.Tables.TryGetValue(name, out SFTable? table))
+        {
+            uri = SFDocUriMapper.Map(table);
+            return true;
+        }
+
+        uri = null;
+        return false;
+    }
+}

@@ -1,5 +1,5 @@
 ﻿@page "/ref/class/{ClassName}/field/{FieldName}"
-@using SFDocGen.Components.UI
+@using SFDocGen.Blazor.Components
 
 <CustomPageTitle Title="@GetSignature()" />
 
@@ -12,10 +12,10 @@
 
 <MudDivider />
 
-<MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
-    <CodeHighlight CodeLanguage="lua" Code="@GetSignature()" />
+<MudContainer Class="pt-4" MaxWidth="MaxWidth.False">
+    <CodeBlock @key="ClassName + '.' + FieldName" Language="CodeLanguage.Lua" Code="@GetSignature()" />
 
-    <MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+    <MudContainer Class="pt-4" MaxWidth="MaxWidth.False">
         <RealmText Value="@Field" />
 
         
@@ -29,7 +29,7 @@
         @if (Field.Usage != null)
         {
             <MudText Color="Color.Tertiary" Typo="Typo.h6">Usage</MudText>
-            <CodeHighlight CodeLanguage="lua" Code="@Field.Usage" />
+            <CodeBlock @key="ClassName + '.' + FieldName" Language="CodeLanguage.Lua" Code="@Field.Usage" />
         }
     </MudContainer>
 </MudContainer>

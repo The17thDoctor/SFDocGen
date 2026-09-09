@@ -1,0 +1,43 @@
+﻿@page "/ref/class/{Name}"
+
+
+<SFDocValueView TValue="SFClass" Value="Value" ContentPlacement="ContentPlacement.Description">
+    <MudGrid Spacing="6" Justify="Justify.Center">
+        <MudItem>
+            <MudPaper Elevation="5">
+                <MudStack>
+                    <MudText Typo="Typo.h4">Methods</MudText>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+        <MudItem>
+            <MudPaper Elevation="5">
+
+            </MudPaper>
+        </MudItem>
+        <MudItem>
+            <MudPaper Elevation="5">
+
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</SFDocValueView>
+
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = string.Empty;
+    public SFClass Value { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        Value = Storage.Documentation.Classes.GetValueOrDefault(Name)!;
+        if (Value == null)
+        {
+            Navigation.NotFound();
+            return;
+        }
+    }
+}

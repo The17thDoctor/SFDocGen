@@ -6,22 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
     <ResourcePreloader />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&display=swap" rel="stylesheet">
-    <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
-    <link href="@Assets["_content/HighlightBlazor/highlight-blazor-styles.css"]" rel="stylesheet">
+
+    <!-- Blazor -->
     <link href="App.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&display=swap" rel="stylesheet" />
+
+    <!-- MudBlazor -->
+    <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
+    <link href="@Assets["_content/MudBlazor.FontIcons.MaterialSymbols/css/font.min.css"]" rel="stylesheet" />
+
+    <!-- PrismJS -->
+    <link href="@Assets["prismjs/prism.css"]" rel="stylesheet" />
+    <link href="@Assets["prismjs/prism-vsc-dark-plus.css"]" rel="stylesheet" />
+
     <ImportMap />
-    <link rel="icon" href="favicon.png" />
+    <link href="@Assets["favicon.png"]" rel="icon" />
     <HeadOutlet />
     <PageTitle>@Title</PageTitle>
 </head>
 
 <body>
+    <!-- Blazor -->
     <Routes @rendermode="InteractiveServer" />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
+
+    <!-- MudBlazor -->
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
-    <script src="/highlight-blazor.js"></script>
+
+    <!-- PrismJS -->
+    <script src="@Assets["prismjs/prism.js"]"></script>
+    <script src="@Assets["_content/Brism/prismInterop.js"]" type="module"></script>
 </body>
 
 </html>

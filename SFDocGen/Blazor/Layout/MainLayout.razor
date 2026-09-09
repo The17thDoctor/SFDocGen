@@ -1,8 +1,8 @@
 ﻿@using MudBlazor.Utilities
+@using SFDocGen.Blazor.Components
 
 @inherits LayoutComponentBase
 @inject IHttpClientFactory HttpFactory
-@inject HighlightService Highlight
 
 <MudThemeProvider @bind-IsDarkMode="IsDarkMode" Theme="@_theme" @rendermode="InteractiveServer" />
 <MudPopoverProvider />
@@ -12,24 +12,16 @@
 <MudHotkey Key="JsKey.KeyK" KeyModifiers="@(new List<JsKeyModifier>() { JsKeyModifier.ControlLeft })" OnHotkeyPressed="FocusSearch" />
 
 <MudLayout>
-    <MudAppBar Gutters="false" Class="pr-4" Elevation="2">
-        <a href="/">
-            <MudText Class="mx-4" Style="font-weight: 900" Align="Align.Center" Typo="@Typo.h5">✨SFDOCGEN✨</MudText>
-        </a>
+    <MudAppBar Gutters="true" Elevation="2">
+        <MudLink Href="/" Color="Color.Default" Underline="Underline.None" Style="font-weight: 900" Typo="Typo.h5">✨SFDOCGEN✨</MudLink>
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
-        <MudButton Href="/ref" Color="Color.Primary">
-            <MudText Typo="Typo.button">API Reference</MudText>
-        </MudButton>
-        <MudButton Href="/doc" Color="Color.Primary">
-            <MudText Typo="Typo.button">Documentation</MudText>
-        </MudButton>
+        <MudButton Href="/ref" Color="Color.Primary">API Reference</MudButton>
+        <MudButton Href="/doc" Color="Color.Primary">Documentation</MudButton>
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
-        <MudButton Href="/api/swagger" Color="Color.Secondary">
-            <MudText Typo="Typo.button">SFDocGen API</MudText>
-        </MudButton>
+        <MudButton Href="/api/swagger" Color="Color.Secondary">Backend API</MudButton>
         <MudSpacer />
         <MudTooltip Arrow Placement="Placement.Bottom" Text="Search is not yet implemented :)">
-            <MudAutocomplete @ref="_searchField" Disabled Placeholder="Search (Ctrl+K)" On Margin="Margin.Dense" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" T="SearchResult" SearchFunc="@Search">
+            <MudAutocomplete @ref="_searchField" Disabled Placeholder="Search (Ctrl+K)" Margin="Margin.Dense" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" T="SearchResult" SearchFunc="@Search">
                 <ItemTemplate>
                     <MudText Typo="Typo.body2">@context.Name</MudText>
                     <p />
@@ -48,19 +40,12 @@
     </MudAppBar>
     <MudDrawer Width="320px" Open Elevation="2" Class="z-100" ClipMode="@DrawerClipMode.Docked">
         <MudNavMenu Rounded="true" Margin="Margin.Dense" Class="pa-2">
-            @if (Navigation.Uri.StartsWith(Navigation.BaseUri + "doc"))
-            {
-                <MudText Class="pl-6" Align="Align.Left" Typo="Typo.h6">Documentation Index</MudText>
-            }
-            else
-            {
-                <MudText Class="pl-6" Align="Align.Left" Typo="Typo.h6">API Reference</MudText>
-                <APITreeView />
-            }
+            <MudText Class="pl-6" Align="Align.Left" Typo="Typo.h6">API Reference</MudText>
+            <APITreeView @ref="_apiTree" />
         </MudNavMenu>
     </MudDrawer>
-    <MudMainContent>
-        <MudContainer Class="pt-4" MaxWidth="MaxWidth.ExtraExtraLarge">
+    <MudMainContent Class="d-flex h-full" >
+        <MudContainer Class="pa-4" MaxWidth="MaxWidth.False" Gutters="false">
             @Body
         </MudContainer>
     </MudMainContent>
@@ -73,17 +58,12 @@
     private MudTheme _theme = new();
     private HttpClient _httpClient = default!;
     private MudAutocomplete<SearchResult>? _searchField;
+    private APITreeView? _apiTree;
 
     protected override async Task OnInitializedAsync()
     {
         _httpClient = HttpFactory.CreateClient("APIClient");
         await base.OnInitializedAsync();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await Highlight.SetStyleAsync(Navigation.BaseUri + "CodeHighlight.css");
-        await base.OnAfterRenderAsync(firstRender);
     }
 
     protected async Task<IEnumerable<SearchResult>> Search(string? search, CancellationToken cancel)
