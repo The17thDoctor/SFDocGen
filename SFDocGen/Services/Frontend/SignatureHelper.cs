@@ -3,6 +3,9 @@ using SFDocGen.Model.Starfall;
 
 namespace SFDocGen.Services.Frontend;
 
+/// <summary>
+/// Helper class for creating signatures for various SFDocValue types.
+/// </summary>
 public static class SignatureHelper
 {
     public static string Create(this SFDocValue value)

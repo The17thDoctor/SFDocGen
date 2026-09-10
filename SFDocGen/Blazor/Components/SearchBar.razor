@@ -1,0 +1,72 @@
+@using SFDocGen.Extensions
+@using SFDocGen.Model.Abstraction
+@using SFDocGen.Services.Frontend
+
+<style>
+    .mud-input-inherit {
+        color: inherit;
+    }
+</style>
+
+<MudAutocomplete @ref="_searchField"
+                 T="SFDocValue"
+                 
+                 InputClass="mud-input-inherit"
+                 ToStringFunc="@(value => null)"
+                 ValueChanged="SearchItemSelected"
+                 SearchFunc="@Search"
+                 MaxItems="null"
+
+                 Placeholder="Search (Ctrl+K)"
+                 Margin="Margin.Dense"
+                 Variant="Variant.Outlined"
+                 AdornmentColor="Color.Inherit"
+                 AdornmentIcon="@Icons.Material.Filled.Search">
+    <!-- Standard element template -->
+    <ItemTemplate>
+        <div class="d-flex">
+            <MudIcon Icon="@IconsHelper.SFDocIcon(context)" Class="mr-1" />
+            <MudText Inline Typo="Typo.subtitle2">@SignatureHelper.Create(context)</MudText>
+        </div>
+        <p />
+        <MudText Typo="Typo.caption">@context.Description</MudText>
+    </ItemTemplate>
+
+    <!-- Shown when no element found -->
+    <NoItemsTemplate>
+        <MudText Typo="Typo.body1" Color="Color.Default">No match found.</MudText>
+    </NoItemsTemplate>
+</MudAutocomplete>
+
+@code
+{
+    private MudAutocomplete<SFDocValue>? _searchField;
+
+    protected async Task<IEnumerable<SFDocValue>> Search(string? search, CancellationToken cancel)
+    {
+        if (search == null || search.Length < 2) return [];
+
+        var result = Storage.Documentation.Find(value =>
+        {
+            if (value is SFParameter or SFReturnValue or SFTableField) return false;
+            return SignatureHelper.Create(value).Contains(search, StringComparison.InvariantCultureIgnoreCase);
+        });
+
+        return result;
+    }
+
+    protected void SearchItemSelected(SFDocValue? value)
+    {
+        if (value == null) return;
+
+        string uri = "/ref/" + value.Id();
+        Navigation.NavigateTo(uri);
+
+        _searchField?.ClearAsync();
+    }
+
+    public void Focus()
+    {
+        _searchField?.FocusAsync();
+    }
+}

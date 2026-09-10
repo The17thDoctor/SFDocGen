@@ -1,66 +1,83 @@
-﻿@using MudBlazor.Utilities
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using MudBlazor.Utilities
 @using SFDocGen.Blazor.Components
-@using SFDocGen.Extensions
-@using SFDocGen.Model.Abstraction
-@using SFDocGen.Services.Frontend
+
 
 @inherits LayoutComponentBase
-@inject IHttpClientFactory HttpFactory
+@inject IHostEnvironment HostEnvironment
+@inject ProtectedLocalStorage SessionStorage
 
-<MudThemeProvider @bind-IsDarkMode="IsDarkMode" Theme="@_theme" @rendermode="InteractiveServer" />
+
+<MudThemeProvider IsDarkMode="@ThemeProvider.IsDarkMode" Theme="@ThemeProvider.Theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
+@if (Loading)
+{
+    <MudLayout Class="d-flex">
+        @if (Loading)
+        {
+            <MudContainer MaxWidth="MaxWidth.False" Class="d-flex align-content-center my-auto">
+                <MudContainer MaxWidth="MaxWidth.False" Class="d-flex align-content-center justify-center mx-auto">
+                    <MudProgressCircular Class="my-auto mr-6" Color="Color.Default" Indeterminate="true" Size="Size.Large" />
+                    <MudText Typo="Typo.h2">Loading...</MudText>
+                </MudContainer>
+            </MudContainer>
+        }
+    </MudLayout>
+
+    return;
+}
+
 <MudHotkey Key="JsKey.KeyK" KeyModifiers="@(new List<JsKeyModifier>() { JsKeyModifier.ControlLeft })" OnHotkeyPressed="FocusSearch" />
 
 <MudLayout>
+    <!-- App Bar -->
     <MudAppBar Gutters="true" Elevation="2">
-        <MudLink Href="/" Color="Color.Default" Underline="Underline.None" Style="font-weight: 900" Typo="Typo.h5">✨SFDOCGEN✨</MudLink>
+        <!-- Logo -->
+        <MudLink Href="/" Underline="Underline.None" Typo="Typo.h1" Color="Color.Inherit">✨SFDOCGEN✨</MudLink>
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
-        <MudButton Href="/ref" Color="Color.Primary">API Reference</MudButton>
-        <MudButton Href="/doc" Color="Color.Primary">Documentation</MudButton>
+
+        <!-- Navigation Buttons -->
+        <MudButton Href="/ref" Color="Color.Inherit">API Reference</MudButton>
+        <MudButton Href="/doc" Color="Color.Inherit">Documentation</MudButton>
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
-        <MudButton Href="/api/swagger" Color="Color.Secondary">Backend API</MudButton>
+        <MudButton Href="/api/swagger" Color="Color.Inherit">Backend API</MudButton>
         <MudSpacer />
-        <MudAutocomplete 
-            @ref="_searchField"
-            ValueChanged="@SearchItemSelected"
-            Placeholder="Search (Ctrl+K)"
-            Margin="Margin.Dense"
-            AdornmentIcon="@Icons.Material.Filled.Search"
-            Variant="Variant.Outlined"
-            T="SFDocValue"
-            MaxItems="null"
-            ToStringFunc="@(value => value != null ? SignatureHelper.Create(value) : null)"
-            SearchFunc="@Search">
-            <ItemTemplate>
-                <div class="d-flex">
-                    <MudIcon Icon="@IconsHelper.SFDocIcon(context)" Class="mr-1" />
-                    <MudText Inline Typo="Typo.subtitle2">@SignatureHelper.Create(context)</MudText>
-                </div>
-                <p />
-                <MudText Typo="Typo.caption">@context.Description</MudText>
-            </ItemTemplate>
-            <NoItemsTemplate>
-                <MudText Typo="Typo.body1">No match found.</MudText>
-            </NoItemsTemplate>
-        </MudAutocomplete>
+
+        <!-- Search Bar -->
+        <SearchBar @ref="_searchBar" />
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
-        <MudTooltip Arrow Placement="Placement.Bottom" Text="Theme switching is not yet implemented either :)">
-            <MudToggleIconButton Disabled @bind-Toggled="IsDarkMode" Color="Color.Inherit" Icon="@Icons.Material.Filled.LightMode" ToggledColor="Color.Inherit" ToggledIcon="@Icons.Material.Filled.DarkMode" title="@(IsDarkMode ? "Dark" : "Light")" />
-        </MudTooltip>
+
+        <!-- Theme Switching -->
+        <MudToggleIconButton Toggled="@ThemeProvider.IsDarkMode"
+                             ToggledChanged="ChangeTheme"
+                             Color="Color.Inherit"
+                             ToggledColor="Color.Inherit"
+                             Icon="@Icons.Material.Filled.LightMode"
+                             ToggledIcon="@Icons.Material.Filled.DarkMode" />
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
+
+        <!-- Github Link -->
         <MudTooltip Arrow Text="Check out the source code!">
-            <MudIconButton Target="_blank" ButtonType="ButtonType.Button" Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/The17thDoctor/SFDocGen" />
+            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" 
+                           ButtonType="ButtonType.Button"
+                           Color="Color.Inherit"
+                           Target="_blank"
+                           Href="https://github.com/The17thDoctor/SFDocGen" />
         </MudTooltip>
     </MudAppBar>
+
+    <!-- Navigation Drawer -->
     <MudDrawer Width="320px" Open Elevation="2" Class="z-100" ClipMode="@DrawerClipMode.Docked">
         <MudNavMenu Rounded="true" Margin="Margin.Dense" Class="pa-2">
             <MudText Class="pl-6" Align="Align.Left" Typo="Typo.h6">API Reference</MudText>
-            <APITreeView @ref="_apiTree" />
+            <APITreeView />
         </MudNavMenu>
     </MudDrawer>
+
+    <!-- Main Content -->
     <MudMainContent Class="d-flex h-full" >
         <MudContainer Class="pa-4" MaxWidth="MaxWidth.False" Gutters="false">
             @Body
@@ -70,41 +87,43 @@
 
 @code
 {
-    public bool IsDarkMode { get; set; } = true;
+    protected bool Loading { get; set; } = true;
+    private SearchBar? _searchBar;
 
-    private MudTheme _theme = new();
-    private HttpClient _httpClient = default!;
-    private MudAutocomplete<SFDocValue>? _searchField;
-    private APITreeView? _apiTree;
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnParametersSet()
     {
-        _httpClient = HttpFactory.CreateClient("APIClient");
-        await base.OnInitializedAsync();
+        base.OnParametersSetAsync();
     }
 
-    protected async Task<IEnumerable<SFDocValue>> Search(string? search, CancellationToken cancel)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (search == null || search.Length < 2) return [];
-        var result = Storage.Documentation.Find(value =>
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
         {
-            if (value is SFParameter or SFReturnValue or SFTableField) return false;
-            return SignatureHelper.Create(value).Contains(search, StringComparison.InvariantCultureIgnoreCase);
-        });
+            try
+            {
+                var result = await SessionStorage.GetAsync<string>("theme");
+                if (result.Success)
+                {
+                    ThemeProvider.SetTheme(result.Value == "dark");
+                }
 
-        return result;
+                Loading = false;
+                StateHasChanged();
+            }
+            catch (TaskCanceledException) { }
+        }
     }
 
-    protected void SearchItemSelected(SFDocValue? value)
+    protected void ChangeTheme()
     {
-        if (value == null) return;
-
-        string uri = "/ref/" + value.Id();
-        Navigation.NavigateTo(uri);
+        ThemeProvider.SwitchTheme();
+        SessionStorage.SetAsync("theme", ThemeProvider.IsDarkMode ? "dark" : "light");
     }
 
     protected void FocusSearch(HotkeyEventArgs args)
     {
-        _searchField?.FocusAsync();
+        _searchBar?.Focus();
     }
 }

@@ -9,6 +9,7 @@
 
     <!-- Blazor -->
     <link href="App.css" rel="stylesheet" />
+    <link href="@Assets["SFDocGen.styles.css"]" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&display=swap" rel="stylesheet" />
 
@@ -23,7 +24,7 @@
     <ImportMap />
     <link href="@Assets["favicon.png"]" rel="icon" />
     <HeadOutlet />
-    <PageTitle>@Title</PageTitle>
+    <PageTitle>SFDocGen | API Reference</PageTitle>
 </head>
 
 <body>
@@ -40,11 +41,3 @@
 </body>
 
 </html>
-
-@code {
-    public static string Title
-    {
-        get => $"SFDocGen | {field}";
-        set => field = value;
-    }
-}
