@@ -1,6 +1,6 @@
 ﻿@using System.Diagnostics.CodeAnalysis
+@using SFDocGen.Extensions
 @using SFDocGen.Model.Abstraction
-@using SFDocGen.Services.Frontend
 
 <MudText>
     <MudText Typo="Typo.inherit" Inline Color="Color.Secondary"><b>@(Parameter.Name ?? "<unnamed>")</b></MudText>
@@ -38,7 +38,7 @@
 <MudText>@((MarkupString)(Parameter.Description ?? "No description available.").Replace("\n", "<br/>"))</MudText>
 <br />
 
-@code {
+    @code {
     [Parameter, EditorRequired]
     public SFParameter Parameter { get; set; }
 
@@ -46,11 +46,11 @@
     {
         if (Storage.Documentation.Classes.TryGetValue(typeName, out SFClass? @class))
         {
-            return SFDocUriMapper.Map(@class);
+            return @class.Id();
         }
         else if (Storage.Documentation.Tables.TryGetValue(typeName, out SFTable? table))
         {
-            return SFDocUriMapper.Map(table);
+            return table.Id();
         }
 
         return null;
@@ -60,13 +60,13 @@
     {
         if (Storage.Documentation.Classes.TryGetValue(name, out SFClass? @class))
         {
-            uri = SFDocUriMapper.Map(@class);
+            uri = @class.Id();
             return true;
         }
 
         if (Storage.Documentation.Tables.TryGetValue(name, out SFTable? table))
         {
-            uri = SFDocUriMapper.Map(table);
+            uri = table.Id();
             return true;
         }
 

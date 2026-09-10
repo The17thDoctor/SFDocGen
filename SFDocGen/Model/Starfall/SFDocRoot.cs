@@ -15,7 +15,7 @@ public record SFDocRoot
     public Dictionary<string, SFTypeAlias> Aliases { get; set; } = [];
     public SFDocValue? this[string property] => GetType().GetProperty(property)?.GetValue(this) as SFDocValue;
 
-    public void Visit(IDocumentationVisitor visitor)
+    public void Accept(IDocumentationVisitor visitor)
     {
         foreach (var hook in Hooks.Values) hook.Accept(visitor);
         foreach (var library in Libraries.Values) library.Accept(visitor);

@@ -1,4 +1,4 @@
-﻿@using SFDocGen.Services.Frontend
+﻿@using SFDocGen.Extensions
 
 <MudText>
     <b class="mud-secondary-text">@Field.Name</b>:
@@ -33,11 +33,11 @@
     {
         if (Storage.Documentation.Classes.TryGetValue(typeName, out SFClass? @class))
         {
-            return SFDocUriMapper.Map(@class);
+            return @class.Id();
         }
         else if (Storage.Documentation.Tables.TryGetValue(typeName, out SFTable? table))
         {
-            return SFDocUriMapper.Map(table);
+            return table.Id();
         }
 
         return null;

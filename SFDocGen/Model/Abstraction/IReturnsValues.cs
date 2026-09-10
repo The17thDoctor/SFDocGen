@@ -1,7 +1,4 @@
-﻿using SFDocGen.Model.Starfall.Dto;
-using System.Text.Json;
-
-namespace SFDocGen.Model.Abstraction;
+﻿namespace SFDocGen.Model.Abstraction;
 
 /// <summary>
 /// Indicates that the documentation element returns a value
@@ -19,39 +16,5 @@ public record SFReturnValue : SFDocValue
     public override void Accept(IDocumentationVisitor visitor)
     {
         visitor.VisitReturnValue(this);
-    }
-
-    public static SFReturnValue FromData(string name, string description)
-    {
-        return new()
-        {
-            Name = name,
-            Description = description
-        };
-    }
-
-    public static List<SFReturnValue> MergeData(List<string> descs, List<JsonElement> typesList)
-    {
-        List<SFReturnValue> list = [];
-        for (int i = 0; i < int.Max(descs.Count, typesList.Count); i++)
-        {
-            string? desc = descs.ElementAtOrDefault(i);
-            JsonElement types = typesList.ElementAtOrDefault(i);
-
-            SFReturnValue rv = new()
-            {
-                Description = desc,
-                Types = types.ValueKind != JsonValueKind.Undefined ? DtoUtils.SanitizeTypes(DtoUtils.Demistify(types)) : []
-            };
-
-            list.Add(rv);
-        }
-
-        return list;
-    }
-
-    public static List<SFReturnValue> MergeData(JsonElement descs, List<JsonElement> typesList)
-    {
-        return MergeData(DtoUtils.Demistify(descs), typesList);
     }
 }

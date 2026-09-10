@@ -1,4 +1,5 @@
 ﻿using SFDocGen.Model.Abstraction;
+using SFDocGen.Model.Core;
 using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model.Starfall;
@@ -9,7 +10,12 @@ namespace SFDocGen.Model.Starfall;
 public record SFTable : SFDocValue, IHasRealm
 {
     public Realm Realm { get; set; }
-    public Dictionary<string, SFTableField> Fields { get; set; } = [];
+    public ChildDictionary<SFTable, string, SFTableField> Fields { get; }
+
+    public SFTable()
+    {
+        Fields = new ChildDictionary<SFTable, string, SFTableField>(this);
+    }
 
     public override void Accept(IDocumentationVisitor visitor)
     {

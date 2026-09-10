@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SFDocGen.Model.Core;
 
-public class ChildItemDictionnary<TParent, TKey, TValue>(TParent parent) : IDictionary<TKey, TValue>
+public class ChildDictionary<TParent, TKey, TValue>(TParent parent) : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
     where TParent : SFDocValue
     where TKey : notnull 
     where TValue : IChildObject<TParent>
@@ -28,6 +28,10 @@ public class ChildItemDictionnary<TParent, TKey, TValue>(TParent parent) : IDict
     public int Count => _internalDict.Count;
 
     public bool IsReadOnly => false;
+
+    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
+
+    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
 
     public void Add(TKey key, TValue value)
     {

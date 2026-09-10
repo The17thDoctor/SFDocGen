@@ -10,7 +10,7 @@ public record SFDirectiveDto
     public string? Deprecated { get; set; }
     public FancyDict<string> Param { get; set; } = new();
 
-    public SFDirective FromData(string name)
+    public SFDirective Convert(string name)
     {
         SFDirective directive = new()
         {
@@ -20,7 +20,10 @@ public record SFDirectiveDto
             Usage = Usage
         };
 
-        DtoUtils.PopulateList(Param, directive.Parameters, SFParameter.FromData);
+        DtoUtils.PopulateList(Param, directive.Parameters, (name, description) => new SFParameter() {
+            Name = name,
+            Description = description
+        });
 
         return directive;
     }

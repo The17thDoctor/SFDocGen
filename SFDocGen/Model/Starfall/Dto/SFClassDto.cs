@@ -1,5 +1,4 @@
-﻿using SFDocGen.Model.Abstraction;
-using SFDocGen.Model.Core;
+﻿using SFDocGen.Model.Core;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -16,7 +15,7 @@ public record SFClassDto
     public FancyDict<SFClassOperatorDto> Operators { get; set; } = new();
     public FancyDict<SFClassMethodDto> Methods { get; set; } = new();
 
-    public SFClass FromData(string name)
+    public SFClass Convert(string name)
     {
         SFClass cl = new()
         {
@@ -75,7 +74,7 @@ public record SFClassOperatorDto
             LeftOperand = Lhs,
             RightOperand = Rhs,
             Parent = parent,
-            ReturnValues = SFReturnValue.MergeData(Ret, ReturnTypes)
+            ReturnValues = DtoUtils.MergeReturnValueData(DtoUtils.Demistify(Ret), ReturnTypes)
         };
     }
 }
@@ -101,8 +100,8 @@ public record SFClassMethodDto
             Parent = parent,
             Description = Description,
             Realm = DtoUtils.RealmFromBools(Server, Client),
-            Parameters = SFParameter.MergeData(Param, ParamTypes),
-            ReturnValues = SFReturnValue.MergeData(Ret, ReturnTypes),
+            Parameters = DtoUtils.MergeParameterData(Param, ParamTypes),
+            ReturnValues = DtoUtils.MergeReturnValueData(DtoUtils.Demistify(Ret), ReturnTypes),
             Deprecated = Deprecated
         };
     }

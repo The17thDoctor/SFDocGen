@@ -1,9 +1,4 @@
-﻿using SFDocGen.Model.Core;
-using SFDocGen.Model.Starfall.Dto;
-using System.Text;
-using System.Text.Json;
-
-namespace SFDocGen.Model.Abstraction;
+﻿namespace SFDocGen.Model.Abstraction;
 
 /// <summary>
 /// Indicates that the documentation element has typed parameters.
@@ -27,42 +22,5 @@ public record SFParameter : SFDocValue
     public override void Accept(IDocumentationVisitor visitor)
     {
         visitor.VisitParameter(this);
-    }
-
-    public string ConcatTypes()
-    {
-        if (Types.Count == 0) return "unknown";
-        return string.Join("|", Types);
-    }
-
-    public static SFParameter FromData(string name, string description)
-    {
-        return new()
-        {
-            Name = name,
-            Description = description
-        };
-    }
-
-    public static List<SFParameter> MergeData(FancyDict<string> datas, Dictionary<string, JsonElement> typesList)
-    {
-        List<SFParameter> result = [];
-
-        foreach (var entry in datas.IndexMap)
-        {
-            string? desc = datas.Data.GetValueOrDefault(entry.Value);
-            JsonElement elem = typesList.GetValueOrDefault(entry.Value);
-
-            SFParameter param = new()
-            {
-                Name = entry.Value,
-                Description = desc,
-                Types = DtoUtils.SanitizeTypes(DtoUtils.Demistify(elem))
-            };
-
-            result.Insert(entry.Key, param);
-        }
-
-        return result;
     }
 }

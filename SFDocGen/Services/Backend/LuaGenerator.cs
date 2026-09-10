@@ -1,12 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.Abstractions;
-using SFDocGen.Blazor.Pages.APIViews.Library;
-using SFDocGen.Core;
+﻿using SFDocGen.Core;
 using SFDocGen.Model;
 using SFDocGen.Model.Abstraction;
 using SFDocGen.Model.Starfall;
 using System.Text;
-using System.Xml.Linq;
-using static MudBlazor.CategoryTypes;
 
 namespace SFDocGen.Services.Backend;
 
@@ -446,7 +442,7 @@ public class LuaWriterVisitor(TextWriter writer) : IDocumentationVisitor
     protected string FormatParameter(SFParameter parameter)
     {
         StringBuilder sb = new();
-        sb.Append($"---@param {parameter.Name} {parameter.ConcatTypes()} ");
+        sb.Append($"---@param {parameter.Name} {ConcatTypes(parameter)} ");
 
         if (parameter.Description != null) sb.Append(parameter.Description.Replace("\n", "<br>\n---"));
 

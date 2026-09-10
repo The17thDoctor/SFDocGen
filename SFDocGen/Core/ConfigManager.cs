@@ -29,11 +29,11 @@ public class ConfigManager
         //foreach (var (Parent, Child) in corrections.Classes.Values.Where(l => l != null).SelectMany(l => l.Operators.Values, Couple)) SetParent(Parent, Child);
         //foreach (var (Parent, Child) in corrections.Classes.Values.Where(l => l != null).SelectMany(l => l.Methods.Values, Couple)) SetParent(Parent, Child);
 
-        foreach (var (Parent, Child) in corrections.Libraries.Values.Where(l => l != null).SelectMany(l => l.Functions.Values, Couple)) SetParent(Parent, Child);
-        foreach (var (Parent, Child) in corrections.Libraries.Values.Where(l => l != null).SelectMany(l => l.Tables.Values, Couple)) SetParent(Parent, Child);
-        foreach (var (Parent, Child) in corrections.Libraries.Values.Where(l => l != null).SelectMany(l => l.Fields.Values, Couple)) SetParent(Parent, Child);
+        //foreach (var (Parent, Child) in corrections.Libraries.Values.Where(l => l != null).SelectMany(l => l.Functions.Values, Couple)) SetParent(Parent, Child);
+        //foreach (var (Parent, Child) in corrections.Libraries.Values.Where(l => l != null).SelectMany(l => l.Tables.Values, Couple)) SetParent(Parent, Child);
+        //foreach (var (Parent, Child) in corrections.Libraries.Values.Where(l => l != null).SelectMany(l => l.Fields.Values, Couple)) SetParent(Parent, Child);
 
-        foreach (var (Parent, Child) in corrections.Tables.Values.Where(l => l != null).SelectMany(l => l.Fields.Values, Couple)) SetParent(Parent, Child);
+        //foreach (var (Parent, Child) in corrections.Tables.Values.Where(l => l != null).SelectMany(l => l.Fields.Values, Couple)) SetParent(Parent, Child);
 
         return corrections;
     }

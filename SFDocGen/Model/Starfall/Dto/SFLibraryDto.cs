@@ -1,5 +1,4 @@
-﻿using SFDocGen.Model.Abstraction;
-using SFDocGen.Model.Core;
+﻿using SFDocGen.Model.Core;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -16,7 +15,7 @@ public record SFLibraryDto
     public FancyDict<SFLibraryFieldDto> Fields { get; set; } = new();
     public FancyDict<SFLibraryTableDto> Tables { get; set; } = new();
 
-    public SFLibrary FromData(string name)
+    public SFLibrary Convert(string name)
     {
         SFLibrary lib = new()
         {
@@ -60,8 +59,8 @@ public record SFLibraryFunctionDto
             Deprecated = Deprecated,
             Usage = Usage,
             Realm = DtoUtils.RealmFromBools(Server, Client),
-            Parameters = SFParameter.MergeData(Param, ParamTypes),
-            ReturnValues = SFReturnValue.MergeData(Ret, ReturnTypes)
+            Parameters = DtoUtils.MergeParameterData(Param, ParamTypes),
+            ReturnValues = DtoUtils.MergeReturnValueData(DtoUtils.Demistify(Ret), ReturnTypes)
         };
     }
 }

@@ -1,4 +1,5 @@
 ﻿using SFDocGen.Model.Abstraction;
+using SFDocGen.Model.Core;
 using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model.Starfall;
@@ -9,9 +10,16 @@ namespace SFDocGen.Model.Starfall;
 public record SFLibrary : SFDocValue, IHasRealm
 {
     public Realm Realm { get; set; } = Realm.Shared;
-    public Dictionary<string, SFLibraryField> Fields { get; set; } = [];
-    public Dictionary<string, SFLibraryFunction> Functions { get; set; } = [];
-    public Dictionary<string, SFLibraryTable> Tables { get; set; } = [];
+    public ChildDictionary<SFLibrary, string, SFLibraryField> Fields { get; }
+    public ChildDictionary<SFLibrary, string, SFLibraryFunction> Functions { get; }
+    public ChildDictionary<SFLibrary, string, SFLibraryTable> Tables { get; }
+
+    public SFLibrary()
+    {
+        Fields = new(this);
+        Functions = new(this);
+        Tables = new(this);
+    }
 
     public override void Accept(IDocumentationVisitor visitor)
     {

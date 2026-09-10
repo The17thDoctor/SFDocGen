@@ -38,9 +38,9 @@ file static class CorrecterExtensions
         library.ApplyCorrection((SFDocValue)correction);
         library.ApplyCorrection((IHasRealm)correction);
 
-        ApplyDictParent(library, library.Functions, correction.Functions, ApplyCorrection);
-        ApplyDictParent(library, library.Fields, correction.Fields, ApplyCorrection);
-        ApplyDictParent(library, library.Tables, correction.Tables, ApplyCorrection);
+        ApplyDict(library.Functions, correction.Functions, ApplyCorrection);
+        ApplyDict(library.Fields, correction.Fields, ApplyCorrection);
+        ApplyDict(library.Tables, correction.Tables, ApplyCorrection);
     }
 
     public static void ApplyCorrection(this SFClass cl, SFClass correction)
@@ -48,9 +48,9 @@ file static class CorrecterExtensions
         cl.ApplyCorrection((SFDocValue)correction);
         cl.ApplyCorrection((IHasRealm)correction);
 
-        ApplyDictParent(cl, cl.Methods, correction.Methods, ApplyCorrection);
-        ApplyDictParent(cl, cl.Fields, correction.Fields, ApplyCorrection);
-        ApplyDictParent(cl, cl.Operators, correction.Operators, ApplyCorrection);
+        ApplyDict(cl.Methods, correction.Methods, ApplyCorrection);
+        ApplyDict(cl.Fields, correction.Fields, ApplyCorrection);
+        ApplyDict(cl.Operators, correction.Operators, ApplyCorrection);
     }
 
     public static void ApplyCorrection(this SFTable table, SFTable correction)
@@ -58,7 +58,7 @@ file static class CorrecterExtensions
         table.ApplyCorrection((SFDocValue)correction);
         table.ApplyCorrection((IHasRealm)correction);
 
-        ApplyDictParent(table, table.Fields, correction.Fields, ApplyCorrection);
+        ApplyDict(table.Fields, correction.Fields, ApplyCorrection);
     }
 
     public static void ApplyCorrection(this SFDirective directive, SFDirective correction)

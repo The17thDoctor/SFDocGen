@@ -73,26 +73,22 @@ public class ParserService
 
         // Convert DTO => Starfall Documentation
         SFDocRoot doc = new();
-        DtoUtils.PopulateDict(dto.Hooks, doc.Hooks, (name, dto) => dto.FromData(name));
-        DtoUtils.PopulateDict(dto.Libraries, doc.Libraries, (name, dto) => dto.FromData(name));
-        DtoUtils.PopulateDict(dto.Tables, doc.Tables, (name, dto) => dto.FromData(name));
-        DtoUtils.PopulateDict(dto.Classes, doc.Classes, (name, dto) => dto.FromData(name));
-        DtoUtils.PopulateDict(dto.Directives, doc.Directives, (name, dto) => dto.FromData(name));
+        DtoUtils.PopulateDict(dto.Hooks, doc.Hooks, (name, dto) => dto.Convert(name));
+        DtoUtils.PopulateDict(dto.Libraries, doc.Libraries, (name, dto) => dto.Convert(name));
+        DtoUtils.PopulateDict(dto.Tables, doc.Tables, (name, dto) => dto.Convert(name));
+        DtoUtils.PopulateDict(dto.Classes, doc.Classes, (name, dto) => dto.Convert(name));
+        DtoUtils.PopulateDict(dto.Directives, doc.Directives, (name, dto) => dto.Convert(name));
 
         // Apply corrections to the documentation
         _correcterService.ApplyCorrection(doc);
         _storage.Documentation = doc;
 
-        // Delete old files to avoid issues
-        File.Delete(_storage.Files.ImprovedDoc);
-        File.Delete(_storage.Files.ImprovedDocSchema);
-
         // Write Starfall Documentation & Schema to file.
-        using FileStream stream = File.OpenWrite(_storage.Files.ImprovedDoc);
+        using FileStream stream = File.Open(_storage.Files.ImprovedDoc, FileMode.Create, FileAccess.Write);
         JsonSerializer.Serialize(stream, doc, SerializerOptions);
         _logger.LogInformation("Model updated.");
 
-        using FileStream schemaStream = File.OpenWrite(_storage.Files.ImprovedDocSchema);
+        using FileStream schemaStream = File.Open(_storage.Files.ImprovedDocSchema, FileMode.Create, FileAccess.Write);
         using Utf8JsonWriter writer = new(schemaStream, new() { Indented = true });
         JsonNode schema = SerializerOptions.GetJsonSchemaAsNode(typeof(SFDocRoot));
         schema.WriteTo(writer, SerializerOptions);

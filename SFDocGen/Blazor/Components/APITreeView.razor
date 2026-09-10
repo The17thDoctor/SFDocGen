@@ -1,5 +1,5 @@
-﻿@using SFDocGen.Services.Frontend
-@using UriMapper = SFDocGen.Services.Frontend.SFDocUriMapper
+﻿@using SFDocGen.Extensions
+@using SFDocGen.Services.Frontend
 
 <MudTreeView AutoExpand @ref="_treeView" T="string" Dense @bind-Items="TreeItems" SelectionMode="SelectionMode.SingleSelection" @bind-SelectedValue="ViewedElement">
     <ItemTemplate>
@@ -53,7 +53,7 @@
     protected void Navigate(string? uri)
     {
         if (string.IsNullOrEmpty(uri)) return;
-        Navigation.NavigateTo(uri);
+        Navigation.NavigateTo("ref/" + uri);
     }
 
     protected void Populate()
@@ -68,7 +68,7 @@
 
         hookHeader.Children = documentation.Hooks.Values.Select(hook => new TreeItemData<string>() {
             Text = hook.Name,
-            Value = UriMapper.Map(hook),
+            Value = hook.Id(),
             Icon = IconsHelper.RealmIcon(hook)
         }).ToList();
 
@@ -103,7 +103,7 @@
 
         tableHeader.Children = documentation.Tables.Values.Select(table => new TreeItemData<string> {
             Text = table.Name,
-            Value = UriMapper.Map(table),
+            Value = table.Id(),
             Icon = IconsHelper.SFDocIcon(table)
         }).ToList();
 
@@ -118,7 +118,7 @@
 
         directiveHeader.Children = documentation.Directives.Values.Select(directive => new TreeItemData<string>() {
             Text = directive.Name,
-            Value = UriMapper.Map(directive),
+            Value = directive.Id(),
             Icon = IconsHelper.SFDocIcon(directive)
         }).ToList();
 
@@ -129,7 +129,7 @@
     {
         TreeItemData<string> node = new() {
             Text = @class.Name,
-            Value = UriMapper.Map(@class),
+            Value = @class.Id(),
             Icon = IconsHelper.SFDocIcon(@class)
         };
 
@@ -146,7 +146,7 @@
 
             fieldHeader.Children = @class.Fields.Values.Select(field => new TreeItemData<string>() {
                 Text = $"{@class.DocName ?? @class.Name}.{field.Name}",
-                Value = UriMapper.Map(field),
+                Value = field.Id(),
                 Icon = IconsHelper.SFDocIcon(field) 
             }).ToList();
 
@@ -164,7 +164,7 @@
 
             methodHeader.Children = @class.Methods.Values.Select(method => new TreeItemData<string>() {
                 Text = $"{@class.DocName ?? @class.Name}:{method.Name}()",
-                Value = UriMapper.Map(method),
+                Value = method.Id(),
                 Icon = IconsHelper.SFDocIcon(@method)
             }).ToList();
 
@@ -182,7 +182,7 @@
 
             operatorHeader.Children = @class.Operators.Values.Select(@operator => new TreeItemData<string>() {
                 Text = FormatOperator(@operator),
-                Value = UriMapper.Map(@operator),
+                Value = @operator.Id(),
                 Icon = IconsHelper.SFDocIcon(@operator)
             }).ToList();
 
@@ -197,7 +197,7 @@
     {
         TreeItemData<string> node = new() {
             Text = library.Name,
-            Value = UriMapper.Map(library),
+            Value = library.Id(),
             Icon = IconsHelper.SFDocIcon(library)
         };
 
@@ -217,7 +217,7 @@
 
             fieldHeader.Children = library.Fields.Values.Select(field => new TreeItemData<string>() {
                 Text = $"{libraryPrefix}{field.Name}",
-                Value = UriMapper.Map(field),
+                Value = field.Id(),
                 Icon = IconsHelper.RealmIcon(field)
             }).ToList();
 
@@ -235,7 +235,7 @@
 
             functionHeader.Children = library.Functions.Values.Select(function => new TreeItemData<string>() {
                 Text = $"{libraryPrefix}{function.Name}()",
-                Value = UriMapper.Map(function),
+                Value = function.Id(),
                 Icon = IconsHelper.RealmIcon(function)
             }).ToList();
 
@@ -253,7 +253,7 @@
 
             tableHeader.Children = library.Tables.Values.Select(table => new TreeItemData<string>() {
                 Text = $"{libraryPrefix}{table.Name}",
-                Value = UriMapper.Map(table),
+                Value = table.Id(),
                 Icon = IconsHelper.RealmIcon(table)
             }).ToList();
 

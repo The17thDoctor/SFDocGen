@@ -9,7 +9,7 @@ public record SFTableDto
     public bool Client { get; set; } = default;
     public FancyDict<SFTableFieldDto> Field { get; set; } = new();
 
-    public SFTable FromData(string name)
+    public SFTable Convert(string name)
     {
         SFTable table = new()
         {

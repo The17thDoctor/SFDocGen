@@ -35,6 +35,48 @@ public class DtoUtils
         }
     }
 
+    public static List<SFReturnValue> MergeReturnValueData(List<string> descriptions, List<JsonElement> types)
+    {
+        List<SFReturnValue> list = [];
+        for (int i = 0; i < int.Max(descriptions.Count, types.Count); i++)
+        {
+            string? desc = descriptions.ElementAtOrDefault(i);
+            JsonElement typeList = types.ElementAtOrDefault(i);
+
+            SFReturnValue returnValue = new()
+            {
+                Description = desc,
+                Types = typeList.ValueKind != JsonValueKind.Undefined ? SanitizeTypes(Demistify(typeList)) : []
+            };
+
+            list.Add(returnValue);
+        }
+
+        return list;
+    }
+
+    public static List<SFParameter> MergeParameterData(FancyDict<string> datas, Dictionary<string, JsonElement> typesList)
+    {
+        List<SFParameter> result = [];
+
+        foreach (var entry in datas.IndexMap)
+        {
+            string? desc = datas.Data.GetValueOrDefault(entry.Value);
+            JsonElement elem = typesList.GetValueOrDefault(entry.Value);
+
+            SFParameter param = new()
+            {
+                Name = entry.Value,
+                Description = desc,
+                Types = DtoUtils.SanitizeTypes(DtoUtils.Demistify(elem))
+            };
+
+            result.Insert(entry.Key, param);
+        }
+
+        return result;
+    }
+
     public static List<string> Demistify(JsonElement mystified)
     {
         if (mystified.ValueKind == JsonValueKind.String)
@@ -70,6 +112,6 @@ public class DtoUtils
 
     public static List<string> SanitizeTypes(List<string> types)
     {
-        return [.. types.Select(t => SanitizeType(t))];
+        return [.. types.Select(SanitizeType)];
     }
 }
