@@ -1,9 +1,8 @@
-﻿using System.Text;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model.Abstraction;
 
-public abstract record SFFunction<T> : SFDocValue, IHasTypedParams, IHasRealm, IReturnsValue, ICanBeGeneric, IChildObject<T> where T : SFDocValue
+public abstract record SFFunction<T> : SFDocValue, IHasTypedParams, IHasRealm, IReturnsValues, ICanBeGeneric, IChildObject<T> where T : SFDocValue
 {
     [JsonIgnore]
     public T Parent { get; set; } = default!;
@@ -12,28 +11,15 @@ public abstract record SFFunction<T> : SFDocValue, IHasTypedParams, IHasRealm, I
     public List<SFParameter> Parameters { get; set; } = [];
     public List<SFReturnValue> ReturnValues { get; set; } = [];
     public List<SFFunctionOverload> Overloads { get; set; } = [];
-
-    protected abstract string GetParentDelimiter();
 }
 
-public record SFFunctionOverload : IHasTypedParams, IReturnsValue
+public record SFFunctionOverload : SFDocValue, IHasTypedParams, IReturnsValues
 {
     public List<SFParameter> Parameters { get; set; } = [];
     public List<SFReturnValue> ReturnValues { get; set; } = [];
 
-    public string ToLuaDoc()
+    public override void Accept(IDocumentationVisitor visitor)
     {
-        StringBuilder sb = new();
-        sb.Append("---@overload fun(");
-        sb.AppendJoin(", ", Parameters.Select(p => $"{p.Name}: {p.ConcatTypes()}"));
-        sb.Append(')');
-
-        if (ReturnValues.Count > 0)
-        {
-            sb.Append(": ");
-            sb.AppendJoin(", ", ReturnValues.Select(r => r.ConcatTypes()));
-        }
-
-        return sb.ToString();
+        visitor.VisitFunctionOverload(this);
     }
 }

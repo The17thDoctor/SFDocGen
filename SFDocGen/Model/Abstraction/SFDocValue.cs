@@ -13,7 +13,7 @@ public abstract record SFDocValue
     public string? Usage { get; set; }
 
     /// <summary>
-    /// Returns a LuaLS representation of this documentation value.
+    /// Allows a visitor to explore the current value.
     /// </summary>
-    public abstract string ToLuaDoc();
+    public abstract void Accept(IDocumentationVisitor visitor);
 }

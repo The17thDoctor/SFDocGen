@@ -79,6 +79,7 @@ public class ParserService
         DtoUtils.PopulateDict(dto.Classes, doc.Classes, (name, dto) => dto.FromData(name));
         DtoUtils.PopulateDict(dto.Directives, doc.Directives, (name, dto) => dto.FromData(name));
 
+        // Apply corrections to the documentation
         _correcterService.ApplyCorrection(doc);
         _storage.Documentation = doc;
 

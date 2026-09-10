@@ -57,6 +57,10 @@ public class SearchResult : IComparable<SearchResult>
             name += ".";
             name += value.Name;
         }
+        else
+        {
+            name += value.Name;
+        }
 
         return name;
     }

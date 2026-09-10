@@ -30,7 +30,7 @@ file static class CorrecterExtensions
         hook.ApplyCorrection((SFDocValue)correction);
         hook.ApplyCorrection((IHasRealm)correction);
         hook.ApplyCorrection((IHasTypedParams)correction);
-        hook.ApplyCorrection((IReturnsValue)correction);
+        hook.ApplyCorrection((IReturnsValues)correction);
     }
 
     public static void ApplyCorrection(this SFLibrary library, SFLibrary correction)
@@ -82,7 +82,7 @@ file static class CorrecterExtensions
     public static void ApplyCorrection(this SFClassOperator op, SFClassOperator correction)
     {
         op.ApplyCorrection((SFDocValue)correction);
-        op.ApplyCorrection((IReturnsValue)correction);
+        op.ApplyCorrection((IReturnsValues)correction);
 
         op.LeftOperand = correction.LeftOperand != string.Empty ? correction.LeftOperand : op.LeftOperand;
         op.RightOperand ??= correction.RightOperand;
@@ -105,7 +105,7 @@ file static class CorrecterExtensions
         function.ApplyCorrection((SFDocValue)correction);
         function.ApplyCorrection((IHasRealm)correction);
         function.ApplyCorrection((IHasTypedParams)correction);
-        function.ApplyCorrection((IReturnsValue)correction);
+        function.ApplyCorrection((IReturnsValues)correction);
         function.ApplyCorrection((ICanBeGeneric)correction);
 
         function.Overloads = correction.Overloads;
@@ -158,7 +158,7 @@ file static class CorrecterExtensions
         }
     }
 
-    public static void ApplyCorrection(this IReturnsValue returns, IReturnsValue correction, bool replace = false)
+    public static void ApplyCorrection(this IReturnsValues returns, IReturnsValues correction, bool replace = false)
     {
         if (replace)
         {

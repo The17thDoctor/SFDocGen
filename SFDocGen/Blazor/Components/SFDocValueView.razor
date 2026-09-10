@@ -58,7 +58,7 @@
     }
 
     <!-- Returns -->
-    @if (Value is IReturnsValue returnsValues && returnsValues.ReturnValues.Any())
+    @if (Value is IReturnsValues returnsValues && returnsValues.ReturnValues.Any())
     {
         <MudText Color="Color.Tertiary" Typo="Typo.h5">Returns</MudText>
         @foreach (var returnValue in returnsValues.ReturnValues)

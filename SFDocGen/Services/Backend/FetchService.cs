@@ -28,7 +28,7 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
 
         Parallel.ForEach(configs.GetDependencies(), new() { MaxDegreeOfParallelism = 10 }, dep =>
         {
-            FetchFile(dep.Uri, Path.Combine(storage.Folders.DependenciesFolder, dep.Name));
+            FetchFile(dep.Uri, Path.Combine(storage.Folders.DependenciesFolder, $"{dep.Name}.lua"));
         });
     }
 
@@ -50,8 +50,7 @@ public class FetchService(IConfiguration configuration, IHttpClientFactory facto
 
     protected void SaveFile(HttpContent content, string path)
     {
-        if (File.Exists(path)) File.Delete(path);
-        using Stream fileStream = File.OpenWrite(path);
+        using Stream fileStream = File.Open(path, FileMode.Create, FileAccess.Write);
         content.CopyTo(fileStream, null, CancellationToken.None);
     }
 }

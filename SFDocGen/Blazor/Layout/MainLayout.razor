@@ -20,15 +20,20 @@
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
         <MudButton Href="/api/swagger" Color="Color.Secondary">Backend API</MudButton>
         <MudSpacer />
-        <MudTooltip Arrow Placement="Placement.Bottom" Text="Search is not yet implemented :)">
-            <MudAutocomplete @ref="_searchField" Disabled Placeholder="Search (Ctrl+K)" Margin="Margin.Dense" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" T="SearchResult" SearchFunc="@Search">
-                <ItemTemplate>
-                    <MudText Typo="Typo.body2">@context.Name</MudText>
-                    <p />
-                    <MudText Typo="Typo.caption">@context.Description</MudText>
-                </ItemTemplate>
-            </MudAutocomplete>
-        </MudTooltip>
+        <MudAutocomplete 
+            @ref="_searchField"
+            Placeholder="Search (Ctrl+K)"
+            Margin="Margin.Dense"
+            AdornmentIcon="@Icons.Material.Filled.Search"
+            Variant="Variant.Outlined"
+            T="SearchResult"
+            SearchFunc="@Search">
+            <ItemTemplate>
+                <MudText Typo="Typo.subtitle2">@context.Name</MudText>
+                <p />
+                <MudText Typo="Typo.caption">@context.Description</MudText>
+            </ItemTemplate>
+        </MudAutocomplete>
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
         <MudTooltip Arrow Placement="Placement.Bottom" Text="Theme switching is not yet implemented either :)">
             <MudToggleIconButton Disabled @bind-Toggled="IsDarkMode" Color="Color.Inherit" Icon="@Icons.Material.Filled.LightMode" ToggledColor="Color.Inherit" ToggledIcon="@Icons.Material.Filled.DarkMode" title="@(IsDarkMode ? "Dark" : "Light")" />

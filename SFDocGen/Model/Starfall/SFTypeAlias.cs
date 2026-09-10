@@ -1,24 +1,16 @@
 ﻿using SFDocGen.Model.Abstraction;
-using System.Text;
 
 namespace SFDocGen.Model.Starfall;
 
+/// <summary>
+/// Represents a type alias (---@alias in the LuaLS syntax)
+/// </summary>
 public record SFTypeAlias : SFDocValue
 {
     public List<string> Types { get; set; } = [];
 
-    public override string ToLuaDoc()
+    public override void Accept(IDocumentationVisitor visitor)
     {
-        StringBuilder sb = new();
-
-        if (Description != null)
-        {
-            sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
-        }
-
-        sb.Append($"---@alias {Name} ");
-        sb.AppendJoin('|', Types);
-
-        return sb.ToString();
+        visitor.VisitAlias(this);
     }
 }

@@ -14,7 +14,11 @@ public class ChildItemDictionnary<TParent, TKey, TValue>(TParent parent) : IDict
     public TValue this[TKey key]
     {
         get => _internalDict[key];
-        set => _internalDict[key] = value;
+        set
+        {
+            value.Parent = parent;
+            _internalDict[key] = value;
+        }
     }
 
     public ICollection<TKey> Keys => _internalDict.Keys;

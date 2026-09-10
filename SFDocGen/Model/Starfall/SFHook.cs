@@ -1,5 +1,4 @@
 ﻿using SFDocGen.Model.Abstraction;
-using System.Text;
 
 namespace SFDocGen.Model.Starfall;
 
@@ -7,33 +6,14 @@ namespace SFDocGen.Model.Starfall;
 /// Represents a starfall hook.
 /// <br/>Example: render, net, think
 /// </summary>
-public record SFHook : SFDocValue, IHasRealm, IHasTypedParams, IReturnsValue
+public record SFHook : SFDocValue, IHasRealm, IHasTypedParams, IReturnsValues
 {
     public Realm Realm { get; set; }
     public List<SFParameter> Parameters { get; set; } = [];
     public List<SFReturnValue> ReturnValues { get; set; } = [];
 
-    public override string ToLuaDoc()
+    public override void Accept(IDocumentationVisitor visitor)
     {
-        StringBuilder sb = new();
-        sb.Append($"---@overload fun(hookName: \"{Name}\", name: string, callback?: fun(");
-        sb.AppendJoin(", ", Parameters.Select(p => $"{p.Name}: {p.ConcatTypes()}"));
-        sb.Append(')');
-
-        if (ReturnValues.Count > 0)
-        {
-            sb.Append(": ");
-            sb.AppendJoin(", ", ReturnValues.Select(rv => rv.ConcatTypes()));
-        }
-
-        sb.Append(')');
-
-        if (Description != null)
-        {
-            sb.Append(' ');
-            sb.Append(Description.Replace("\n", "<br>"));
-        }
-
-        return sb.ToString();
+        visitor.VisitHook(this);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using SFDocGen.Model.Starfall.Dto;
-using System.Text;
 using System.Text.Json;
 
 namespace SFDocGen.Model.Abstraction;
@@ -8,7 +7,7 @@ namespace SFDocGen.Model.Abstraction;
 /// Indicates that the documentation element returns a value
 /// <br/>Example: Functions, Methods
 /// </summary>
-public interface IReturnsValue
+public interface IReturnsValues
 {
     List<SFReturnValue> ReturnValues { get; set; }
 }
@@ -17,10 +16,9 @@ public record SFReturnValue : SFDocValue
 {
     public List<string> Types { get; set; } = [];
 
-    public string ConcatTypes()
+    public override void Accept(IDocumentationVisitor visitor)
     {
-        if (Types.Count == 0) return "unknown";
-        return string.Join("|", Types);
+        visitor.VisitReturnValue(this);
     }
 
     public static SFReturnValue FromData(string name, string description)
@@ -55,15 +53,5 @@ public record SFReturnValue : SFDocValue
     public static List<SFReturnValue> MergeData(JsonElement descs, List<JsonElement> typesList)
     {
         return MergeData(DtoUtils.Demistify(descs), typesList);
-    }
-
-    public override string ToLuaDoc()
-    {
-        StringBuilder sb = new();
-        sb.Append($"---@return {ConcatTypes()}");
-
-        if (Name != null) { sb.Append($" {Name}"); }
-        if (Description != null) { sb.Append(" '" + Description.Replace("\n", "<br>").Replace("'", "\\'") + "'"); }
-        return sb.ToString();
     }
 }

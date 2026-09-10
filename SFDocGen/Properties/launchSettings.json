@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "http": {
+    "Browser": {
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -8,6 +8,15 @@
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5003",
       "launchBrowser": true
+    },
+    "Console": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5003",
+      "launchBrowser": false
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",

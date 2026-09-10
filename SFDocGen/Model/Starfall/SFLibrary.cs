@@ -1,140 +1,47 @@
 ﻿using SFDocGen.Model.Abstraction;
-using System.Text;
 using System.Text.Json.Serialization;
 
 namespace SFDocGen.Model.Starfall;
 
+/// <summary>
+/// Represents a Starfall library (a set of functions, fields & tables)
+/// </summary>
 public record SFLibrary : SFDocValue, IHasRealm
 {
     public Realm Realm { get; set; } = Realm.Shared;
-    public Dictionary<string, SFLibraryFunction> Functions { get; set; } = [];
     public Dictionary<string, SFLibraryField> Fields { get; set; } = [];
+    public Dictionary<string, SFLibraryFunction> Functions { get; set; } = [];
     public Dictionary<string, SFLibraryTable> Tables { get; set; } = [];
 
-    public override string ToLuaDoc()
+    public override void Accept(IDocumentationVisitor visitor)
     {
-        // Special case for the builtin library.
-        if (Name == "builtin") return ToLuaDocBuiltin();
+        visitor.VisitLibrary(this);
 
-        StringBuilder sb = new();
-        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
-        sb.Append($"{DocName ?? Name} = {{");
-
-        if (Fields.Count > 0)
-        {
-            sb.AppendLine();
-            sb.AppendJoin(",\n\n", Fields.Values.OrderBy(f => f.Name).Select(f => "\t" + f.ToLuaDoc().Replace("\n", "\n\t")));
-            if (Tables.Count > 0) sb.Append(',');
-            sb.AppendLine();
-        }
-
-        if (Tables.Count > 0)
-        {
-            sb.AppendLine();
-            sb.AppendJoin(",\n\n", Tables.Values.OrderBy(t => t.Name).Select(t => "\t" + t.ToLuaDoc().Replace("\n", "\n\t")));
-            sb.AppendLine();
-        }
-
-        sb.Append('}');
-
-        if (Functions.Count > 0)
-        {
-            sb.AppendLine();
-            sb.AppendLine();
-            sb.AppendJoin("\n\n", Functions.Values.OrderBy(f => f.Name).Select(f => f.ToLuaDoc()));
-        }
-
-        return sb.ToString();
-    }
-
-    protected string ToLuaDocBuiltin()
-    {
-        StringBuilder sb = new();
-        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
-        sb.AppendLine($"{DocName ?? Name} = {{}}");
-
-        if (Fields.Count > 0)
-        {
-            sb.AppendLine();
-            sb.AppendJoin("\n\n", Fields.Values.OrderBy(f => f.Name).Select(f => f.ToLuaDoc()));
-            sb.AppendLine();
-        }
-
-        if (Tables.Count > 0)
-        {
-            sb.AppendLine();
-            sb.AppendJoin("\n\n", Tables.Values.OrderBy(t => t.Name).Select(t => t.ToLuaDoc()));
-            sb.AppendLine();
-        }
-        
-        if (Functions.Count > 0)
-        {
-            sb.AppendLine();
-            sb.AppendJoin("\n\n", Functions.Values.OrderBy(f => f.Name).Select(f => f.ToLuaDoc().Replace("_G.", "")));
-        }
-
-        return sb.ToString();
+        foreach (var field in Fields.Values) field.Accept(visitor);
+        foreach (var function in Functions.Values) function.Accept(visitor);
+        foreach (var table in Tables.Values) table.Accept(visitor);
     }
 }
 
 
+/// <summary>
+/// Represents a function within a library.
+/// </summary>
 public record SFLibraryFunction: SFFunction<SFLibrary>
 {
-    public override string ToLuaDoc()
+    public override void Accept(IDocumentationVisitor visitor)
     {
-        StringBuilder sb = new();
+        visitor.VisitLibraryFunction(this);
 
-        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
-
-        if (Usage != null)
-        {
-            sb.AppendLine("---");
-            sb.AppendLine("---Usage:");
-            sb.AppendLine("---```lua");
-            sb.AppendLine("---" + Usage.Replace("\n", "\n---"));
-            sb.AppendLine("---```");
-        }
-
-        if (Deprecated != null)
-        {
-            sb.AppendLine("---@deprecated " + Deprecated.Replace("\n", "<br>\n---"));
-        }
-
-        if (GenericTypes.Count > 0)
-        {
-            sb.Append("---@generic ");
-            sb.AppendJoin(", ", GenericTypes);
-            sb.AppendLine();
-        }
-
-        if (Parameters.Count > 0)
-        {
-            sb.AppendJoin("\n", Parameters.Select(p => p.ToLuaDoc()));
-            sb.AppendLine();
-        }
-
-        if (ReturnValues.Count > 0)
-        {
-            sb.AppendJoin("\n", ReturnValues.Select(rv => rv.ToLuaDoc()));
-            sb.AppendLine();
-        }
-
-        if (Overloads.Count > 0)
-        {
-            sb.AppendJoin("\n", Overloads.Select(o => o.ToLuaDoc()));
-            sb.AppendLine();
-        }
-
-        sb.Append($"function {Parent.DocName ?? Parent.Name}.{Name}(");
-        sb.AppendJoin(", ", Parameters.Select(p => p.Name));
-        sb.AppendLine(") end");
-
-        return sb.ToString();
+        foreach (var parameter in Parameters) parameter.Accept(visitor);
+        foreach (var returnValue in ReturnValues) returnValue.Accept(visitor);
     }
-
-    protected override string GetParentDelimiter() => ".";
 }
 
+
+/// <summary>
+/// Represents a constant field within a library.
+/// </summary>
 public record SFLibraryField : SFDocValue, IChildObject<SFLibrary>, IHasRealm
 {
     [JsonIgnore]
@@ -143,26 +50,24 @@ public record SFLibraryField : SFDocValue, IChildObject<SFLibrary>, IHasRealm
     public string Type { get; set; } = "unknown";
     public string Value { get; set; } = "nil";
 
-    public override string ToLuaDoc()
+    public override void Accept(IDocumentationVisitor visitor)
     {
-        StringBuilder sb = new();
-        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
-        sb.AppendLine("---@type " + Type);
-        sb.Append($"{Name} = {Value}");
-        return sb.ToString();
-    }}
+        visitor.VisitLibraryField(this);
+    }
+}
 
+
+/// <summary>
+/// Represents a table within a library.
+/// </summary>
 public record SFLibraryTable : SFDocValue, IChildObject<SFLibrary>, IHasRealm
 {
     [JsonIgnore]
     public SFLibrary Parent { get; set; } = default!;
     public Realm Realm { get; set; } = Realm.Shared;
 
-    public override string ToLuaDoc()
+    public override void Accept(IDocumentationVisitor visitor)
     {
-        StringBuilder sb = new();
-        if (Description != null) sb.AppendLine("---" + Description.Replace("\n", "<br>\n---"));
-        sb.Append($"{Name} = {{}}");
-        return sb.ToString();
+        visitor.VisitLibraryTable(this);
     }
 }

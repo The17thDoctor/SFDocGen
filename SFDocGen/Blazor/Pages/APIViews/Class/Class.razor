@@ -1,23 +1,32 @@
 ﻿@page "/ref/class/{Name}"
+@using SFDocGen.Services.Frontend
 
 
 <SFDocValueView TValue="SFClass" Value="Value" ContentPlacement="ContentPlacement.Description">
     <MudGrid Spacing="6" Justify="Justify.Center">
-        <MudItem>
-            <MudPaper Elevation="5">
-                <MudStack>
-                    <MudText Typo="Typo.h4">Methods</MudText>
+        <MudItem Class="flex-1">
+            <MudPaper Elevation="3">
+                <MudStack Spacing="0">
+                    <MudText Align="Align.Center" Typo="Typo.h5" Class="py-1">METHODS</MudText>
+                    @{
+                        foreach (var method in Value.Methods.Values)
+                        {
+                            <MudButton @key="method" StartIcon="@IconsHelper.SFDocIcon(method)" Class="rounded-0 justify-start">
+                                <MudText Typo="Typo.subtitle2">@(Name + ":" + method.Name + "()")</MudText>
+                            </MudButton>
+                        }
+                    }
                 </MudStack>
             </MudPaper>
         </MudItem>
-        <MudItem>
-            <MudPaper Elevation="5">
-
+        <MudItem Class="flex-1">
+            <MudPaper Elevation="3">
+                <MudText Align="Align.Center" Typo="Typo.h5" Class="py-1">FIELDS</MudText>
             </MudPaper>
         </MudItem>
-        <MudItem>
-            <MudPaper Elevation="5">
-
+        <MudItem Class="flex-1">
+            <MudPaper Elevation="3" Class="rounded-lg">
+                <MudText Align="Align.Center" Typo="Typo.h5" Class="py-1">OPERATORS</MudText>
             </MudPaper>
         </MudItem>
     </MudGrid>

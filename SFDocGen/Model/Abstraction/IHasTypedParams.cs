@@ -24,6 +24,11 @@ public record SFParameter : SFDocValue
 {
     public List<string> Types { get; set; } = [];
 
+    public override void Accept(IDocumentationVisitor visitor)
+    {
+        visitor.VisitParameter(this);
+    }
+
     public string ConcatTypes()
     {
         if (Types.Count == 0) return "unknown";
@@ -59,13 +64,5 @@ public record SFParameter : SFDocValue
         }
 
         return result;
-    }
-
-    public override string ToLuaDoc()
-    {
-        StringBuilder sb = new();
-        sb.Append($"---@param {Name} {ConcatTypes()} ");
-        if (Description != null) sb.Append(Description.Replace("\n", "<br>\n---"));
-        return sb.ToString();
     }
 }
