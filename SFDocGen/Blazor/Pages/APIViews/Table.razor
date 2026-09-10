@@ -1,9 +1,10 @@
 ﻿@page "/ref/table/{Name}"
 @using System.Text
 @using SFDocGen.Blazor.Components
+@using SFDocGen.Services.Frontend
 
 
-<SFDocValueView TValue="SFTable" Value="Value" ContentPlacement="ContentPlacement.Description" Signature="@GetSignature()">
+<SFDocValueView TValue="SFTable" Value="Value" ContentPlacement="ContentPlacement.Description" Signature="@SignatureHelper.Create(Value)">
     @if (Value.Fields.Any())
     {
         <MudText Color="Color.Tertiary" Typo="Typo.h5">Fields</MudText>

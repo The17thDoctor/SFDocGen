@@ -1,7 +1,8 @@
 ﻿@page "/ref/class/{ClassName}/operator/{OperatorName}"
+@using SFDocGen.Services.Frontend
 
 
-<SFDocValueView TValue="SFClassOperator" Value="Operator" Signature="@GetSignature()" CustomName="@GetSignature()" />
+<SFDocValueView TValue="SFClassOperator" Value="Operator" CustomName="@SignatureHelper.Create(Operator)" />
 
 
 @code {

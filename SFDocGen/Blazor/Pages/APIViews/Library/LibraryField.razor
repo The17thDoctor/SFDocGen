@@ -1,8 +1,9 @@
 ﻿@page "/ref/library/{LibraryName}/field/{FieldName}"
 @using SFDocGen.Blazor.Components
+@using SFDocGen.Services.Frontend
 
 
-<SFDocValueView TValue="SFLibraryField" Value="Field" Signature="@GetSignature()" CustomName="@GetSignature()" />
+<SFDocValueView TValue="SFLibraryField" Value="Field" CustomName="@SignatureHelper.Create(Field)" />
 
 
 @code {

@@ -1,5 +1,8 @@
 ﻿@using MudBlazor.Utilities
 @using SFDocGen.Blazor.Components
+@using SFDocGen.Extensions
+@using SFDocGen.Model.Abstraction
+@using SFDocGen.Services.Frontend
 
 @inherits LayoutComponentBase
 @inject IHttpClientFactory HttpFactory
@@ -22,17 +25,26 @@
         <MudSpacer />
         <MudAutocomplete 
             @ref="_searchField"
+            ValueChanged="@SearchItemSelected"
             Placeholder="Search (Ctrl+K)"
             Margin="Margin.Dense"
             AdornmentIcon="@Icons.Material.Filled.Search"
             Variant="Variant.Outlined"
-            T="SearchResult"
+            T="SFDocValue"
+            MaxItems="null"
+            ToStringFunc="@(value => value != null ? SignatureHelper.Create(value) : null)"
             SearchFunc="@Search">
             <ItemTemplate>
-                <MudText Typo="Typo.subtitle2">@context.Name</MudText>
+                <div class="d-flex">
+                    <MudIcon Icon="@IconsHelper.SFDocIcon(context)" Class="mr-1" />
+                    <MudText Inline Typo="Typo.subtitle2">@SignatureHelper.Create(context)</MudText>
+                </div>
                 <p />
                 <MudText Typo="Typo.caption">@context.Description</MudText>
             </ItemTemplate>
+            <NoItemsTemplate>
+                <MudText Typo="Typo.body1">No match found.</MudText>
+            </NoItemsTemplate>
         </MudAutocomplete>
         <MudDivider FlexItem="true" Vertical="true" Class="my-4 mx-4" />
         <MudTooltip Arrow Placement="Placement.Bottom" Text="Theme switching is not yet implemented either :)">
@@ -62,7 +74,7 @@
 
     private MudTheme _theme = new();
     private HttpClient _httpClient = default!;
-    private MudAutocomplete<SearchResult>? _searchField;
+    private MudAutocomplete<SFDocValue>? _searchField;
     private APITreeView? _apiTree;
 
     protected override async Task OnInitializedAsync()
@@ -71,10 +83,24 @@
         await base.OnInitializedAsync();
     }
 
-    protected async Task<IEnumerable<SearchResult>> Search(string? search, CancellationToken cancel)
+    protected async Task<IEnumerable<SFDocValue>> Search(string? search, CancellationToken cancel)
     {
         if (search == null || search.Length < 2) return [];
-        return await _httpClient.GetFromJsonAsync<IEnumerable<SearchResult>>($"search?term={search}", cancel) ?? [];
+        var result = Storage.Documentation.Find(value =>
+        {
+            if (value is SFParameter or SFReturnValue or SFTableField) return false;
+            return SignatureHelper.Create(value).Contains(search, StringComparison.InvariantCultureIgnoreCase);
+        });
+
+        return result;
+    }
+
+    protected void SearchItemSelected(SFDocValue? value)
+    {
+        if (value == null) return;
+
+        string uri = "/ref/" + value.Id();
+        Navigation.NavigateTo(uri);
     }
 
     protected void FocusSearch(HotkeyEventArgs args)

@@ -3,9 +3,9 @@ using SFDocGen.Model.Starfall;
 
 namespace SFDocGen.Model;
 
-public class SFDocTreeFinder
+public static class SFDocTreeFinder
 {
-    public static List<SFDocValue> Find(SFDocRoot root, Predicate<SFDocValue> filter)
+    public static List<SFDocValue> Find(this SFDocRoot root, Predicate<SFDocValue> filter)
     {
         SFDocTreeVisitor visitor = new(filter);
         root.Accept(visitor);

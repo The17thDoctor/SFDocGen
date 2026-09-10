@@ -1,16 +1,58 @@
 ﻿@page "/ref/library/{Name}"
+@using SFDocGen.Extensions
+@using SFDocGen.Services.Frontend
 
-<CustomPageTitle Title="@Value.Name" />
 
-<MudTooltip Placement="Placement.Right" Arrow Text="Library">
-    <div class="d-flex flex-row mud-secondary-text">
-        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.Class" Size="Size.Large" />
-        <MudText Typo="Typo.h4">@Value.Name</MudText>
-    </div>
-</MudTooltip>
+<SFDocValueView TValue="SFLibrary" Value="Value" ContentPlacement="ContentPlacement.Description">
+    <MudGrid Spacing="6" Justify="Justify.Center">
+        <MudItem Class="flex-1">
+            <MudPaper Elevation="3">
+                <MudStack Spacing="0">
+                    <MudText Align="Align.Center" Typo="Typo.h5" Class="py-1">FUNCTIONS</MudText>
+                    @{
+                        foreach (var function in Value.Functions.Values)
+                        {
+                            <MudButton Href="@("/ref/" + function.Id())" @key="function" StartIcon="@IconsHelper.SFDocIcon(function)" Class="rounded-0 justify-start">
+                                <MudText Typo="Typo.subtitle2">@SignatureHelper.Create(function)</MudText>
+                            </MudButton>
+                        }
+                    }
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+        <MudItem Class="flex-1">
+            <MudPaper Elevation="3">
+                <MudStack Spacing="0">
+                    <MudText Align="Align.Center" Typo="Typo.h5" Class="py-1">FIELDS</MudText>
+                    @{
+                        foreach (var field in Value.Fields.Values)
+                        {
+                            <MudButton Href="@("/ref/" + field.Id())" @key="field" StartIcon="@IconsHelper.SFDocIcon(field)" Class="rounded-0 justify-start">
+                                <MudText Typo="Typo.subtitle2">@SignatureHelper.Create(field)</MudText>
+                            </MudButton>
+                        }
+                    }
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+        <MudItem Class="flex-1">
+            <MudPaper Elevation="3" Class="rounded-lg">
+                <MudStack Spacing="0">
+                    <MudText Align="Align.Center" Typo="Typo.h5" Class="py-1">TABLES</MudText>
+                    @{
+                        foreach (var table in Value.Tables.Values)
+                        {
+                            <MudButton Href="@("/ref/" + table.Id())" @key="@table" StartIcon="@IconsHelper.SFDocIcon(table)" Class="rounded-0 justify-start">
+                                <MudText Typo="Typo.subtitle2">@SignatureHelper.Create(table)</MudText>
+                            </MudButton>
+                        }
+                    }
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</SFDocValueView>
 
-<MudText Typo="Typo.body1">@Value.Description</MudText>
-<MudDivider/>
 
 @code {
     [Parameter]

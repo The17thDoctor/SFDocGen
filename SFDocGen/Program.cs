@@ -49,7 +49,7 @@ public class Program
         builder.Services.AddSingleton<FetchService>();
         builder.Services.AddSingleton<ParserService>();
         builder.Services.AddSingleton<LuaGenerator>();
-        builder.Services.AddSingleton<CorrecterService>();
+        builder.Services.AddSingleton<CorrectionService>();
         builder.Services.AddHostedService<UpdateScheduler>();
 
         // Proxy support

@@ -19,9 +19,9 @@ public class ParserService
     private readonly JsonSerializerOptions _deserializerOptions;
 
     private readonly StorageManager _storage;
-    private readonly CorrecterService _correcterService;
+    private readonly CorrectionService _correcterService;
 
-    public ParserService(ILogger<ParserService> logger, CorrecterService correcterService, StorageManager storage)
+    public ParserService(ILogger<ParserService> logger, CorrectionService correcterService, StorageManager storage)
     {
         _logger = logger;
         _storage = storage;

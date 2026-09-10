@@ -33,11 +33,11 @@
     {
         if (Storage.Documentation.Classes.TryGetValue(typeName, out SFClass? @class))
         {
-            return @class.Id();
+            return "/ref/" + @class.Id();
         }
         else if (Storage.Documentation.Tables.TryGetValue(typeName, out SFTable? table))
         {
-            return table.Id();
+            return "/ref/" + table.Id();
         }
 
         return null;

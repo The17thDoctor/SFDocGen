@@ -1,8 +1,9 @@
 ﻿@page "/ref/hook/{Name}"
 @using SFDocGen.Blazor.Components
+@using SFDocGen.Services.Frontend
 
 
-<SFDocValueView TValue="SFHook" Value="@Value" Signature="@GetSignature()" />
+<SFDocValueView TValue="SFHook" Value="@Value" Signature="@SignatureHelper.Create(Value)" />
 
 
 @code {
@@ -20,14 +21,5 @@
             Navigation.NotFound();
             return;
         }
-    }
-
-    protected string GetSignature()
-    {
-        string signature = $"hook(\"{Value.Name}\", \"hookname\", function(";
-        signature += string.Join(", ", Value.Parameters.Select(p => p.Name));
-        signature += ") end)";
-
-        return signature;
     }
 }

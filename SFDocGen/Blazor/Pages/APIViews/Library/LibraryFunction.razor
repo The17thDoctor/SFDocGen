@@ -1,8 +1,9 @@
 ﻿@page "/ref/library/{LibraryName}/function/{FunctionName}"
 @using SFDocGen.Blazor.Components
+@using SFDocGen.Services.Frontend
 
 
-<SFDocValueView TValue="SFLibraryFunction" Value="Function" Signature="@GetSignature()" CustomName="@(LibraryName + "." + FunctionName + "()")" />
+<SFDocValueView TValue="SFLibraryFunction" Value="Function" Signature="@SignatureHelper.Create(Function, true, true)" CustomName="@SignatureHelper.Create(Function)" />
 
 
 @code {
@@ -28,11 +29,11 @@
         }
     }
 
-    private string GetSignature(bool includeParams = true)
+    private string GetFunctionName(bool includeParams)
     {
         string paramList = includeParams ? string.Join(", ", Function.Parameters.Select(p => p.Name)) : string.Empty;
 
-        if (Function.Parent.Name == "builtin") return $"function {Function.Name}({paramList})";
-        return $"{(includeParams ? "function " : string.Empty)}{Function.Parent.Name}.{Function.Name}({paramList})";
+        if (Function.Parent.Name == "builtin") return $"{Function.Name}({paramList})";
+        else return $"{Function.Parent.Name}.{Function.Name}({paramList})";
     }
 }

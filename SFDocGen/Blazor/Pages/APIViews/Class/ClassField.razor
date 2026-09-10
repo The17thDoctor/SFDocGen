@@ -1,39 +1,8 @@
 ﻿@page "/ref/class/{ClassName}/field/{FieldName}"
 @using SFDocGen.Blazor.Components
+@using SFDocGen.Services.Frontend
 
-<CustomPageTitle Title="@GetSignature()" />
-
-<MudTooltip Placement="Placement.Right" Arrow Text="Field">
-    <div class="d-flex flex-row mud-secondary-text">
-        <MudIcon Class="my-auto mr-1" Icon="@Icons.Material.Filled.ViewList" Size="Size.Large" />
-        <MudText Typo="Typo.h4">@GetSignature()</MudText>
-    </div>
-</MudTooltip>
-
-<MudDivider />
-
-<MudContainer Class="pt-4" MaxWidth="MaxWidth.False">
-    <CodeBlock @key="ClassName + '.' + FieldName" Language="CodeLanguage.Lua" Code="@GetSignature()" />
-
-    <MudContainer Class="pt-4" MaxWidth="MaxWidth.False">
-        <RealmText Value="@Field" />
-
-        
-        @foreach (string line in (Field.Description ?? string.Empty).Split("\n"))
-        {
-            <MudText Typo="Typo.body1">@line</MudText>
-        }
-
-        <br />
-
-        @if (Field.Usage != null)
-        {
-            <MudText Color="Color.Tertiary" Typo="Typo.h6">Usage</MudText>
-            <CodeBlock @key="ClassName + '.' + FieldName" Language="CodeLanguage.Lua" Code="@Field.Usage" />
-        }
-    </MudContainer>
-</MudContainer>
-
+<SFDocValueView TValue="SFClassField" Value="Field" CustomName="@SignatureHelper.Create(Field)" />
 
 @code {
     [Parameter]
@@ -61,10 +30,5 @@
             Navigation.NotFound();
             return;
         }
-    }
-
-    private string GetSignature()
-    {
-        return $"{Field.Parent.Name}.{Field.Name}";
     }
 }

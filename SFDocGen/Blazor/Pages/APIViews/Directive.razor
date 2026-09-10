@@ -1,8 +1,9 @@
 ﻿@page "/ref/directive/{Name}"
 @using SFDocGen.Blazor.Components
+@using SFDocGen.Services.Frontend
 
 
-<SFDocValueView TValue="SFDirective" Value="Value" Signature="@GetSignature()" />
+<SFDocValueView TValue="SFDirective" Value="Value" Signature="@SignatureHelper.Create(Value)" />
 
 
 @code {
@@ -20,19 +21,5 @@
             Navigation.NotFound();
             return;
         }
-    }
-
-    protected string GetSignature()
-    {
-        string signature = "--@";
-        signature += Value.Name;
-
-        if (Value.Parameters.Any())
-        {
-            signature += " ";
-            signature += string.Join(" ", Value.Parameters.Select(p => p.Name));
-        }
-
-        return signature;
     }
 }

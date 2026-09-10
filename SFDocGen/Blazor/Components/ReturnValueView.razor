@@ -46,11 +46,11 @@
     {
         if (Storage.Documentation.Classes.TryGetValue(typeName, out SFClass? @class))
         {
-            return @class.Id();
+            return "ref/" + @class.Id();
         }
         else if (Storage.Documentation.Tables.TryGetValue(typeName, out SFTable? table))
         {
-            return table.Id();
+            return "ref/" + table.Id();
         }
 
         return null;
@@ -60,13 +60,13 @@
     {
         if (Storage.Documentation.Classes.TryGetValue(name, out SFClass? @class))
         {
-            uri = @class.Id();
+            uri = "ref/" + @class.Id();
             return true;
         }
 
         if (Storage.Documentation.Tables.TryGetValue(name, out SFTable? table))
         {
-            uri = table.Id();
+            uri = "ref/" + table.Id();
             return true;
         }
 

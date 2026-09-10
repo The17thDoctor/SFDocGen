@@ -1,4 +1,5 @@
-﻿using SFDocGen.Model.Starfall;
+﻿using SFDocGen.Model.Abstraction;
+using SFDocGen.Model.Starfall;
 
 namespace SFDocGen.Extensions;
 
@@ -7,6 +8,27 @@ namespace SFDocGen.Extensions;
 /// </summary>
 public static class SFIdExtensions
 {
+    public static string? Id(this SFDocValue value)
+    {
+        return value switch
+        {
+            SFHook hook => hook.Id(),
+            SFDirective directive => directive.Id(),
+            SFTypeAlias alias => alias.Id(),
+            SFTable table => table.Id(),
+            SFTableField field => field.Id(),
+            SFClass @class => @class.Id(),
+            SFClassField field => field.Id(),
+            SFClassMethod method => method.Id(),
+            SFClassOperator @operator => @operator.Id(),
+            SFLibrary library => library.Id(),
+            SFLibraryField field => field.Id(),
+            SFLibraryFunction function => function.Id(),
+            SFLibraryTable table => table.Id(),
+            _ => throw new ArgumentException($"Unknown type: {value.GetType().Name}")
+        };
+    }
+
     public static string Id(this SFHook hook)
     {
         return $"hook/{hook.Name}";

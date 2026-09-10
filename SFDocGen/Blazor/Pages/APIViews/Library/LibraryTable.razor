@@ -1,8 +1,9 @@
 ﻿@page "/ref/library/{LibraryName}/table/{TableName}"
 @using SFDocGen.Blazor.Components
+@using SFDocGen.Services.Frontend
 
 
-<SFDocValueView TValue="SFLibraryTable" Value="Table" Signature="@GetSignature()" CustomName="@(LibraryName + "." + TableName)" />
+<SFDocValueView TValue="SFLibraryTable" Value="Table" Signature="@SignatureHelper.Create(Table, true)" CustomName="@SignatureHelper.Create(Table)" />
 
 
 @code {
@@ -35,7 +36,7 @@
 
     private string GetSignature()
     {
-        if (Table.Parent.Name == "builtin") return Table.Name ?? string.Empty;
-        return $"{Table.Parent.Name}.{Table.Name}";
+        if (Table.Parent.Name == "builtin") return $"{Table.Name} = {{}}";
+        return $"{Table.Parent.Name}.{Table.Name} = {{}}";
     }
 }

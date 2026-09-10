@@ -1,9 +1,10 @@
 ﻿@using SFDocGen.Extensions
+@using SFDocGen.Model.Abstraction
 @using SFDocGen.Services.Frontend
 
 <MudTreeView AutoExpand @ref="_treeView" T="string" Dense @bind-Items="TreeItems" SelectionMode="SelectionMode.SingleSelection" @bind-SelectedValue="ViewedElement">
     <ItemTemplate>
-        <MudTreeViewItem Icon="@context.Icon" Value="@context.Value" Text="@context.Text" @bind-Items="@context.Children" Expanded="@context.Expanded" />
+        <MudTreeViewItem @key="context" Icon="@context.Icon" Value="@context.Value" Text="@context.Text" @bind-Items="@context.Children" Expanded="@context.Expanded" />
     </ItemTemplate>
 </MudTreeView>
 
@@ -22,38 +23,30 @@
     protected bool ShouldNavigate { get; set; } = true;
 
     private MudTreeView<string>? _treeView;
-    private static readonly Dictionary<string, string> _operatorFormats = new()
-    {
-        { "mul", "{0} * {1}" },
-        { "div", "{0} / {1}" },
-        { "eq",  "{0} == {1}" },
-        { "add", "{0} + {1}" },
-        { "sub", "{0} - {1}" },
-        { "unm", "-{0}" }
-    };
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         Populate();
-    }
 
-    protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
-        Uri currentUri = new(Navigation.Uri);
+        Navigation.LocationChanged += (sender, args) =>
+        {
+            Uri currentUri = new(Navigation.Uri);
 
-        // Updates the currently selected element without
-        // triggering a navigation call.
-        ShouldNavigate = false;
-        ViewedElement = currentUri.AbsolutePath;
-        ShouldNavigate = true;
+            // Updates the currently selected element without
+            // triggering a navigation call.
+            ShouldNavigate = false;
+            ViewedElement = currentUri.AbsolutePath;
+            ShouldNavigate = true;
+
+            StateHasChanged();
+        };
     }
 
     protected void Navigate(string? uri)
     {
         if (string.IsNullOrEmpty(uri)) return;
-        Navigation.NavigateTo("ref/" + uri);
+        Navigation.NavigateTo(uri);
     }
 
     protected void Populate()
@@ -66,12 +59,7 @@
             Icon = IconsHelper.SFDocIcon(typeof(SFHook))
         };
 
-        hookHeader.Children = documentation.Hooks.Values.Select(hook => new TreeItemData<string>() {
-            Text = hook.Name,
-            Value = hook.Id(),
-            Icon = IconsHelper.RealmIcon(hook)
-        }).ToList();
-
+        hookHeader.Children = [.. documentation.Hooks.Values.Select(hook => CreateNode(hook))];
         TreeItems.Add(hookHeader);
 
 
@@ -101,12 +89,7 @@
             Icon = IconsHelper.SFDocIcon(typeof(SFTable))
         };
 
-        tableHeader.Children = documentation.Tables.Values.Select(table => new TreeItemData<string> {
-            Text = table.Name,
-            Value = table.Id(),
-            Icon = IconsHelper.SFDocIcon(table)
-        }).ToList();
-
+        tableHeader.Children = [.. documentation.Tables.Values.Select(table => CreateNode(table))];
         TreeItems.Add(tableHeader);
 
 
@@ -116,23 +99,13 @@
             Icon = IconsHelper.SFDocIcon(typeof(SFDirective))
         };
 
-        directiveHeader.Children = documentation.Directives.Values.Select(directive => new TreeItemData<string>() {
-            Text = directive.Name,
-            Value = directive.Id(),
-            Icon = IconsHelper.SFDocIcon(directive)
-        }).ToList();
-
+        directiveHeader.Children = [.. documentation.Directives.Values.Select(directive => CreateNode(directive))];
         TreeItems.Add(directiveHeader);
     }
 
     protected TreeItemData<string> PopulateClasses(SFClass @class)
     {
-        TreeItemData<string> node = new() {
-            Text = @class.Name,
-            Value = @class.Id(),
-            Icon = IconsHelper.SFDocIcon(@class)
-        };
-
+        TreeItemData<string> node = CreateNode(@class);
         List<TreeItemData<string>> nodeChildren = [];
 
         // Fields
@@ -144,12 +117,7 @@
                 Expanded = true
             };
 
-            fieldHeader.Children = @class.Fields.Values.Select(field => new TreeItemData<string>() {
-                Text = $"{@class.DocName ?? @class.Name}.{field.Name}",
-                Value = field.Id(),
-                Icon = IconsHelper.SFDocIcon(field) 
-            }).ToList();
-
+            fieldHeader.Children = [.. @class.Fields.Values.Select(field => CreateNode(field, SignatureHelper.Create(field)))];
             nodeChildren.Add(fieldHeader);
         }
 
@@ -162,12 +130,7 @@
                 Expanded = true
             };
 
-            methodHeader.Children = @class.Methods.Values.Select(method => new TreeItemData<string>() {
-                Text = $"{@class.DocName ?? @class.Name}:{method.Name}()",
-                Value = method.Id(),
-                Icon = IconsHelper.SFDocIcon(@method)
-            }).ToList();
-
+            methodHeader.Children = [.. @class.Methods.Values.Select(method => CreateNode(method, SignatureHelper.Create(method)))];
             nodeChildren.Add(methodHeader);
         }
 
@@ -180,12 +143,7 @@
                 Expanded = true
             };
 
-            operatorHeader.Children = @class.Operators.Values.Select(@operator => new TreeItemData<string>() {
-                Text = FormatOperator(@operator),
-                Value = @operator.Id(),
-                Icon = IconsHelper.SFDocIcon(@operator)
-            }).ToList();
-
+            operatorHeader.Children = [.. @class.Operators.Values.Select(@operator => CreateNode(@operator, SignatureHelper.Create(@operator)))];
             nodeChildren.Add(operatorHeader);
         }
 
@@ -195,16 +153,8 @@
 
     protected TreeItemData<string> PopulateLibraries(SFLibrary library)
     {
-        TreeItemData<string> node = new() {
-            Text = library.Name,
-            Value = library.Id(),
-            Icon = IconsHelper.SFDocIcon(library)
-        };
-
+        TreeItemData<string> node = CreateNode(library);
         List<TreeItemData<string>> nodeChildren = [];
-
-        // Special case for the builtin library to make documentation clearer.
-        string libraryPrefix = library.Name == "builtin" ? string.Empty : $"{library.DocName ?? library.Name}.";
 
         // Fields
         if (library.Fields.Any())
@@ -215,12 +165,7 @@
                 Expanded = true
             };
 
-            fieldHeader.Children = library.Fields.Values.Select(field => new TreeItemData<string>() {
-                Text = $"{libraryPrefix}{field.Name}",
-                Value = field.Id(),
-                Icon = IconsHelper.RealmIcon(field)
-            }).ToList();
-
+            fieldHeader.Children = [.. library.Fields.Values.Select(field => CreateNode(field, SignatureHelper.Create(field)))];
             nodeChildren.Add(fieldHeader);
         }
 
@@ -233,12 +178,7 @@
                 Expanded = true
             };
 
-            functionHeader.Children = library.Functions.Values.Select(function => new TreeItemData<string>() {
-                Text = $"{libraryPrefix}{function.Name}()",
-                Value = function.Id(),
-                Icon = IconsHelper.RealmIcon(function)
-            }).ToList();
-
+            functionHeader.Children = [.. library.Functions.Values.Select(function => CreateNode(function, SignatureHelper.Create(function)))];
             nodeChildren.Add(functionHeader);
         }
 
@@ -251,12 +191,7 @@
                 Expanded = true
             };
 
-            tableHeader.Children = library.Tables.Values.Select(table => new TreeItemData<string>() {
-                Text = $"{libraryPrefix}{table.Name}",
-                Value = table.Id(),
-                Icon = IconsHelper.RealmIcon(table)
-            }).ToList();
-
+            tableHeader.Children = [.. library.Tables.Values.Select(table => CreateNode(table, SignatureHelper.Create(table)))];
             nodeChildren.Add(tableHeader);
         }
 
@@ -264,22 +199,13 @@
         return node;
     }
 
-    private string FormatOperator(SFClassOperator @operator)
+    private TreeItemData<string> CreateNode(SFDocValue value, string? customName = null)
     {
-        string identifier = @operator.Name?.Split('_')[0] ?? string.Empty;
-
-        if (!_operatorFormats.TryGetValue(identifier, out string? format))
+        return new TreeItemData<string>()
         {
-            return @operator.Name ?? "UNKNOWN OPERATOR";
-        }
-
-        if (@operator.RightOperand != null)
-        {
-            return string.Format(format, @operator.LeftOperand, @operator.RightOperand);
-        }
-        else
-        {
-            return string.Format(format, @operator.LeftOperand);
-        }
+            Text = customName ?? value.Name,
+            Value = "/ref/" + value.Id(),
+            Icon = IconsHelper.SFDocIcon(value)
+        };
     }
 }

@@ -80,7 +80,7 @@
     @if (Value.Usage != null)
     {
         <MudText Color="Color.Tertiary" Typo="Typo.h5">Usage</MudText>
-        <CodeBlock Language="CodeLanguage.Lua" Code="@Value.Usage" />
+        <CodeBlock @key="Value" Language="CodeLanguage.Lua" Code="@Value.Usage" />
         <br/>
     }
 

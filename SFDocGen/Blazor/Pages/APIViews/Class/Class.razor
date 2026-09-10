@@ -1,4 +1,5 @@
 ﻿@page "/ref/class/{Name}"
+@using SFDocGen.Extensions
 @using SFDocGen.Services.Frontend
 
 
@@ -11,8 +12,8 @@
                     @{
                         foreach (var method in Value.Methods.Values)
                         {
-                            <MudButton @key="method" StartIcon="@IconsHelper.SFDocIcon(method)" Class="rounded-0 justify-start">
-                                <MudText Typo="Typo.subtitle2">@(Name + ":" + method.Name + "()")</MudText>
+                            <MudButton Href="@("/ref/" + method.Id())" @key="method" StartIcon="@IconsHelper.SFDocIcon(method)" Class="rounded-0 justify-start">
+                                <MudText Typo="Typo.subtitle2">@SignatureHelper.Create(method)</MudText>
                             </MudButton>
                         }
                     }
@@ -21,12 +22,32 @@
         </MudItem>
         <MudItem Class="flex-1">
             <MudPaper Elevation="3">
-                <MudText Align="Align.Center" Typo="Typo.h5" Class="py-1">FIELDS</MudText>
+                <MudStack Spacing="0">
+                    <MudText Align="Align.Center" Typo="Typo.h5" Class="py-1">FIELDS</MudText>
+                    @{
+                        foreach (var field in Value.Fields.Values)
+                        {
+                            <MudButton Href="@("/ref/" + field.Id())" @key="field" StartIcon="@IconsHelper.SFDocIcon(field)" Class="rounded-0 justify-start">
+                                <MudText Typo="Typo.subtitle2">@SignatureHelper.Create(field)</MudText>
+                            </MudButton>
+                        }
+                    }
+                </MudStack>
             </MudPaper>
         </MudItem>
         <MudItem Class="flex-1">
             <MudPaper Elevation="3" Class="rounded-lg">
-                <MudText Align="Align.Center" Typo="Typo.h5" Class="py-1">OPERATORS</MudText>
+                <MudStack Spacing="0">
+                    <MudText Align="Align.Center" Typo="Typo.h5" Class="py-1">OPERATORS</MudText>
+                    @{
+                        foreach (var op in Value.Operators.Values)
+                        {
+                            <MudButton Href="@("/ref/" + op.Id())" @key="@op" StartIcon="@IconsHelper.SFDocIcon(op)" Class="rounded-0 justify-start">
+                                <MudText Typo="Typo.subtitle2">@SignatureHelper.Create(op)</MudText>
+                            </MudButton>
+                        }
+                    }
+                </MudStack>
             </MudPaper>
         </MudItem>
     </MudGrid>
