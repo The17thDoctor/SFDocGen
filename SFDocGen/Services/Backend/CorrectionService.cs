@@ -9,90 +9,85 @@ public class CorrectionService(ConfigManager configs)
     public void ApplyCorrection(SFDocRoot documentation)
     {
         SFDocRoot corrections = configs.GetCorrections();
-        CorrecterExtensions.ApplyDict(documentation.Aliases, corrections.Aliases, CorrecterExtensions.ApplyCorrection);
+        CorrecterExtensions.ApplyDict(documentation.Aliases, corrections.Aliases, CorrecterExtensions.ApplyForAlias);
         CorrecterExtensions.ApplyDict(documentation.Hooks, corrections.Hooks, CorrecterExtensions.ApplyCorrection);
-        CorrecterExtensions.ApplyDict(documentation.Libraries, corrections.Libraries, CorrecterExtensions.ApplyCorrection);
-        CorrecterExtensions.ApplyDict(documentation.Classes, corrections.Classes, CorrecterExtensions.ApplyCorrection);
-        CorrecterExtensions.ApplyDict(documentation.Tables, corrections.Tables, CorrecterExtensions.ApplyCorrection);
+        CorrecterExtensions.ApplyDict(documentation.Libraries, corrections.Libraries, CorrecterExtensions.ApplyForLib);
+        CorrecterExtensions.ApplyDict(documentation.Classes, corrections.Classes, CorrecterExtensions.ApplyForClass);
+        CorrecterExtensions.ApplyDict(documentation.Tables, corrections.Tables, CorrecterExtensions.ApplyForTable);
     }
 }
 
 file static class CorrecterExtensions
 {
-    public static void ApplyCorrection(this SFTypeAlias alias, SFTypeAlias correction)
+    public static void ApplyForAlias(this SFTypeAlias alias, SFTypeAlias correction)
     {
-        alias.ApplyCorrection<SFTypeAlias>(correction);
+        alias.ApplyCorrection(correction);
         alias.Types = correction.Types;
     }
 
-    public static void ApplyCorrection(this SFLibrary library, SFLibrary correction)
+    public static void ApplyForLib(this SFLibrary library, SFLibrary correction)
     {
-        library.ApplyCorrection<SFLibrary>(correction);
-        ApplyDict(library.Functions, correction.Functions, ApplyCorrection);
-        ApplyDict(library.Fields, correction.Fields, ApplyCorrection);
+        library.ApplyCorrection(correction);
+        ApplyDict(library.Functions, correction.Functions, ApplyForFunction);
+        ApplyDict(library.Fields, correction.Fields, ApplyForLibField);
         ApplyDict(library.Tables, correction.Tables, ApplyCorrection);
     }
 
-    public static void ApplyCorrection(this SFClass @class, SFClass correction)
+    public static void ApplyForClass(this SFClass @class, SFClass correction)
     {
-        @class.ApplyCorrection<SFClass>(correction);
-        ApplyDict(@class.Methods, correction.Methods, ApplyCorrection);
-        ApplyDict(@class.Fields, correction.Fields, ApplyCorrection);
-        ApplyDict(@class.Operators, correction.Operators, ApplyCorrection);
+        @class.ApplyCorrection(correction);
+        ApplyDict(@class.Methods, correction.Methods, ApplyForFunction);
+        ApplyDict(@class.Fields, correction.Fields, ApplyForClassField);
+        ApplyDict(@class.Operators, correction.Operators, ApplyForClassOp);
     }
 
-    public static void ApplyCorrection(this SFTable table, SFTable correction)
+    public static void ApplyForTable(this SFTable table, SFTable correction)
     {
-        table.ApplyCorrection<SFTable>(correction);
-        ApplyDict(table.Fields, correction.Fields, ApplyCorrection);
+        table.ApplyCorrection(correction);
+        ApplyDict(table.Fields, correction.Fields, ApplyForTableField);
     }
 
-    public static void ApplyCorrection(this SFTableField field, SFTableField correction)
+    public static void ApplyForTableField(this SFTableField field, SFTableField correction)
     {
-        field.ApplyCorrection<SFTableField>(correction);
+        field.ApplyCorrection(correction);
         field.Type ??= correction.Type;
         field.DefaultValue ??= correction.DefaultValue;
     }
 
-    public static void ApplyCorrection(this SFClassField field, SFClassField correction)
+    public static void ApplyForClassField(this SFClassField field, SFClassField correction)
     {
-        field.ApplyCorrection<SFClassField>(correction);
+        field.ApplyCorrection(correction);
         field.Type ??= correction.Type;
     }
 
-    public static void ApplyCorrection(this SFClassOperator @operator, SFClassOperator correction)
+    public static void ApplyForClassOp(this SFClassOperator @operator, SFClassOperator correction)
     {
-        @operator.ApplyCorrection<SFClassOperator>(correction);
+        @operator.ApplyCorrection(correction);
         @operator.LeftOperand = correction.LeftOperand != string.Empty ? correction.LeftOperand : @operator.LeftOperand;
         @operator.RightOperand ??= correction.RightOperand;
     }
 
-    public static void ApplyCorrection(this SFLibraryField field, SFLibraryField correction)
+    public static void ApplyForLibField(this SFLibraryField field, SFLibraryField correction)
     {
         field.Value = correction.Value;
         field.Type = correction.Type;
     }
 
-    public static void ApplyCorrection(this SFLibraryTable table, SFLibraryTable correction)
+    public static void ApplyForFunction<T>(this SFFunction<T> function, SFFunction<T> correction) where T : SFDocValue
     {
-        table.ApplyCorrection<SFLibraryTable>(correction);
-    }
-
-    public static void ApplyCorrection<T>(this SFFunction<T> function, SFFunction<T> correction) where T : SFDocValue
-    {
-        function.ApplyCorrection<SFFunction<T>>(correction);
+        function.ApplyCorrection(correction);
         function.Overloads = correction.Overloads;
     }
     
-    public static void ApplyCorrection(this SFParameter param, SFParameter correction)
+    public static void ApplyForParam(this SFParameter param, SFParameter correction)
     {
-        param.ApplyCorrection<SFParameter>(correction);
+        param.ApplyCorrection(correction);
         param.Types = correction.Types.Count > 0 ? correction.Types : param.Types;
     }
 
-    public static void ApplyCorrection(this SFReturnValue ret, SFReturnValue correction)
+    public static void ApplyForRetValue(this SFReturnValue ret, SFReturnValue correction)
     {
-        ret.ApplyCorrection<SFReturnValue>(correction);
+        ret.ApplyCorrection(correction);
         ret.Types = correction.Types.Count > 0 ? correction.Types : ret.Types;
     }
 
@@ -123,7 +118,7 @@ file static class CorrecterExtensions
 
                 if (ret != null && corr != null)
                 {
-                    ret.ApplyCorrection(corr);
+                    ret.ApplyForRetValue(corr);
                 }
                 else if (ret == null)
                 {
@@ -141,7 +136,7 @@ file static class CorrecterExtensions
 
                 if (param != null && corr != null)
                 {
-                    param.ApplyCorrection(corr);
+                    param.ApplyForParam(corr);
                 }
                 else if (param == null)
                 {

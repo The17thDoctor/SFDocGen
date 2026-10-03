@@ -21,19 +21,13 @@ public class ConfigManager
 
     public SFDocRoot GetCorrections()
     {
+        JsonSerializerOptions options = new()
+        {
+            PreferredObjectCreationHandling = System.Text.Json.Serialization.JsonObjectCreationHandling.Populate
+        };
+
         if (!File.Exists(_correctionsPath)) return new();
-        SFDocRoot corrections = JsonSerializer.Deserialize<SFDocRoot>(File.ReadAllText(_correctionsPath))!;
-
-        // Json Deserialization doesnt bind children to parents, its ugly but it works :P
-        //foreach (var (Parent, Child) in corrections.Classes.Values.Where(l => l != null).SelectMany(l => l.Fields.Values, Couple)) SetParent(Parent, Child);
-        //foreach (var (Parent, Child) in corrections.Classes.Values.Where(l => l != null).SelectMany(l => l.Operators.Values, Couple)) SetParent(Parent, Child);
-        //foreach (var (Parent, Child) in corrections.Classes.Values.Where(l => l != null).SelectMany(l => l.Methods.Values, Couple)) SetParent(Parent, Child);
-
-        //foreach (var (Parent, Child) in corrections.Libraries.Values.Where(l => l != null).SelectMany(l => l.Functions.Values, Couple)) SetParent(Parent, Child);
-        //foreach (var (Parent, Child) in corrections.Libraries.Values.Where(l => l != null).SelectMany(l => l.Tables.Values, Couple)) SetParent(Parent, Child);
-        //foreach (var (Parent, Child) in corrections.Libraries.Values.Where(l => l != null).SelectMany(l => l.Fields.Values, Couple)) SetParent(Parent, Child);
-
-        //foreach (var (Parent, Child) in corrections.Tables.Values.Where(l => l != null).SelectMany(l => l.Fields.Values, Couple)) SetParent(Parent, Child);
+        SFDocRoot corrections = JsonSerializer.Deserialize<SFDocRoot>(File.ReadAllText(_correctionsPath), options)!;
 
         return corrections;
     }
